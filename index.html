@@ -199,7 +199,8 @@
     gap: 6px;
   }
   .task-btn.active .task-btn-name { color: var(--accent2); }
-  .task-btn-desc { font-size: 11px; color: var(--text3); line-height: 1.4; margin-bottom: 8px; }
+  .task-btn-desc { font-size: 11px; color: var(--text3); line-height: 1.4; margin-bottom: 6px; }
+  .task-btn-explain { font-size: 11px; color: var(--text2); line-height: 1.5; margin-bottom: 8px; padding: 6px 8px; background: rgba(255,255,255,0.03); border-radius: 5px; border-left: 2px solid var(--border2); }
   .task-btn-tokens {
     font-family: var(--mono);
     font-size: 10px;
@@ -253,6 +254,34 @@
   .task-btn.active .task-runs-val { color: var(--accent2); }
   .task-btn.agent-task.active .task-runs-val { color: var(--amber); }
   .task-runs-zero { opacity: 0.4; }
+
+  /* TASK VOLUME INPUTS */
+  .task-vol-row {
+    display: flex; align-items: center; gap: 6px;
+    margin: 8px 0 6px; flex-wrap: nowrap;
+  }
+  .task-vol-field { display: flex; flex-direction: column; gap: 2px; }
+  .task-vol-label { font-size: 9px; font-family: var(--mono); color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+  .task-vol-input {
+    width: 52px; background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 5px; padding: 4px 6px; font-size: 12px;
+    font-family: var(--mono); color: var(--text); outline: none;
+    text-align: center; transition: border-color 0.15s;
+  }
+  .task-btn.active .task-vol-input { border-color: rgba(108,99,255,0.3); background: rgba(108,99,255,0.06); }
+  .task-btn.agent-task.active .task-vol-input { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.06); }
+  .task-vol-input:focus { border-color: var(--accent); }
+  .task-vol-sep { font-size: 13px; color: var(--text3); padding: 0 1px; margin-top: 12px; }
+  .task-vol-result { margin-top: 12px; }
+
+  /* PRESET DESCRIPTION */
+  .preset-desc {
+    margin-top: 10px; padding: 10px 12px;
+    background: var(--accent-bg); border: 1px solid rgba(108,99,255,0.2);
+    border-radius: var(--radius); font-size: 12px; color: var(--text2);
+    line-height: 1.5; display: none;
+  }
+  .preset-desc.visible { display: block; }
 
   /* MODEL PILLS */
   .model-row { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -476,15 +505,16 @@
   /* FOOTER */
   footer {
     border-top: 1px solid var(--border);
-    padding: 1.5rem 2rem;
+    padding: 1.25rem 2rem;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 6px;
     max-width: 1100px;
     margin: 0 auto;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text3);
     font-family: var(--mono);
+    line-height: 1.6;
   }
   footer a { color: var(--text3); text-decoration: none; }
   footer a:hover { color: var(--text2); }
@@ -647,15 +677,17 @@
   .savings-panel-sub { font-size: 12px; color: var(--text3); }
   .savings-tools { padding: 0.85rem 1.25rem; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid var(--border); }
   .savings-tool-row { display: flex; align-items: center; gap: 8px; }
-  .savings-tool-name { font-size: 12px; color: var(--text2); width: 120px; flex-shrink: 0; }
+  .savings-tool-name { font-size: 12px; color: var(--text2); flex: 1; min-width: 0; }
+  .savings-tool-amount { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .savings-tool-symbol { font-size: 12px; color: var(--text3); font-family: var(--mono); }
   .savings-tool-input {
-    flex: 1; background: var(--bg3); border: 1px solid var(--border);
-    border-radius: 6px; padding: 6px 10px; font-size: 13px;
+    width: 70px; background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 8px; font-size: 13px;
     font-family: var(--mono); color: var(--text); outline: none;
     transition: border-color 0.15s; text-align: right;
   }
   .savings-tool-input:focus { border-color: var(--accent); }
-  .savings-tool-unit { font-size: 12px; color: var(--text3); width: 50px; }
+  .savings-tool-unit { font-size: 11px; color: var(--text3); white-space: nowrap; }
   .savings-custom-row {
     display: flex; gap: 8px; padding: 0.75rem 1.25rem;
     border-bottom: 1px solid var(--border); align-items: center;
@@ -896,6 +928,20 @@
     color: var(--text2);
   }
 
+  .disclaimer-banner {
+    margin-top: 1.25rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 11px;
+    color: var(--text3);
+    line-height: 1.6;
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: var(--mono);
+  }
+
   /* INDUSTRY PRESETS */
   .preset-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0; }
   .preset-btn {
@@ -972,6 +1018,39 @@
   .chart-bar-label { font-size: 9px; font-family: var(--mono); color: var(--text3); }
   .chart-bar-val { font-size: 9px; font-family: var(--mono); color: var(--text3); }
 
+  /* SMART CTA */
+  .smart-cta {
+    background: var(--bg2);
+    border: 1px solid rgba(108,99,255,0.3);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .smart-cta-text {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.5;
+    flex: 1;
+  }
+  .smart-cta button {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--sans);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+  }
+  .smart-cta button:hover { opacity: 0.85; }
+
   /* PDF BUTTON */
   .pdf-btn {
     width: 100%; background: var(--bg2); border: 1px solid var(--border);
@@ -984,10 +1063,74 @@
 
   @media print {
     nav, .action-row, .copy-confirm, .email-panel, .cta-banner, .pdf-btn,
-    .methodology-toggle, .chart-growth-row { display: none !important; }
-    body { background: white !important; color: black !important; }
+    .methodology-toggle, .chart-growth-row, .preset-row, .preset-desc,
+    .task-vol-row, .savings-panel, .roi-panel { display: none !important; }
+    body { background: white !important; color: #111 !important; }
     .app { grid-template-columns: 1fr !important; }
+    .task-btn { border: 1px solid #ddd !important; background: white !important; }
+    .task-btn:not(.active) { display: none !important; }
+    .task-btn-tokens { display: block !important; }
+    .task-btn-explain { border-left: 2px solid #ccc !important; background: #f9f9f9 !important; color: #444 !important; }
+    .metric-big-value, .metric-big-label, .metric-big-sub { color: #111 !important; }
+    .breakdown-panel, .task-breakdown-panel { border: 1px solid #ddd !important; }
+    .br-label, .br-val, .bt-label, .bt-val, .tbd-name, .tbd-runs, .tbd-cost { color: #111 !important; }
   }
+
+  /* UNLOCK GATE */
+  .unlock-wall {
+    position: relative;
+    margin-bottom: 0;
+  }
+  .unlock-wall .locked-content {
+    filter: blur(4px);
+    pointer-events: none;
+    user-select: none;
+    opacity: 0.5;
+  }
+  .unlock-wall.unlocked .locked-content {
+    filter: none;
+    pointer-events: auto;
+    user-select: auto;
+    opacity: 1;
+  }
+  .unlock-gate {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    background: rgba(12,12,14,0.55);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    text-align: center;
+    backdrop-filter: blur(2px);
+  }
+  .unlock-wall.unlocked .unlock-gate { display: none; }
+  .unlock-gate-icon { font-size: 22px; margin-bottom: 8px; }
+  .unlock-gate-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .unlock-gate-sub { font-size: 12px; color: var(--text2); margin-bottom: 14px; line-height: 1.5; }
+  .unlock-form { display: flex; gap: 6px; width: 100%; max-width: 320px; }
+  .unlock-input {
+    flex: 1; background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: 8px; padding: 9px 12px; font-size: 13px;
+    font-family: var(--sans); color: var(--text); outline: none;
+    transition: border-color 0.15s;
+  }
+  .unlock-input:focus { border-color: var(--accent); }
+  .unlock-input::placeholder { color: var(--text3); }
+  .unlock-submit {
+    background: var(--accent); color: #fff; border: none;
+    border-radius: 8px; padding: 9px 16px; font-size: 13px;
+    font-weight: 500; font-family: var(--sans); cursor: pointer;
+    white-space: nowrap; transition: opacity 0.15s;
+  }
+  .unlock-submit:hover { opacity: 0.85; }
+  .unlock-submit:disabled { opacity: 0.5; cursor: default; }
+  .unlock-feedback { font-size: 11px; font-family: var(--mono); margin-top: 8px; min-height: 16px; }
+  .unlock-feedback.err { color: #f87171; }
+  .unlock-already { font-size: 11px; color: var(--green); font-family: var(--mono); margin-top: 6px; }
 
   /* CURRENCY SELECTOR */
   .currency-row { display: flex; gap: 6px; }
@@ -1056,12 +1199,13 @@
   .roi-sub-val { font-size: 14px; font-weight: 500; font-family: var(--mono); color: var(--text2); }
 
   /* SHARE + RESET */
-  .action-row { display: flex; gap: 8px; }
+  .action-row { display: flex; gap: 8px; justify-content: flex-end; }
   .action-btn {
-    flex: 1; background: var(--bg2); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 10px; font-size: 12px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 7px 14px; font-size: 12px;
     font-family: var(--mono); color: var(--text2); cursor: pointer;
-    transition: all 0.12s; display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: all 0.12s; display: flex; align-items: center; gap: 6px;
+    white-space: nowrap;
   }
   .action-btn:hover { border-color: var(--border2); color: var(--text); }
   .action-btn.share { border-color: rgba(108,99,255,0.3); color: var(--accent2); }
@@ -1076,9 +1220,9 @@
 <nav>
   <div class="nav-logo">BÜCHEMEIER <span>CONSULTING</span></div>
   <div class="currency-row">
-    <button class="currency-btn active" onclick="setCurrency('USD','$')">USD</button>
+    <button class="currency-btn" onclick="setCurrency('USD','$')">USD</button>
     <button class="currency-btn" onclick="setCurrency('EUR','€')">EUR</button>
-    <button class="currency-btn" onclick="setCurrency('NOK','kr')">NOK</button>
+    <button class="currency-btn active" onclick="setCurrency('NOK','kr')">NOK</button>
   </div>
   <button class="nav-cta" onclick="document.getElementById('cta-section').scrollIntoView({behavior:'smooth'})">Book a session →</button>
 </nav>
@@ -1095,16 +1239,21 @@
     <div class="panel">
       <div class="panel-title">Start with an industry preset</div>
       <div class="preset-row">
-        <button class="preset-btn" onclick="applyPreset('finance')">Finance & Legal</button>
-        <button class="preset-btn" onclick="applyPreset('hr')">HR & Recruitment</button>
-        <button class="preset-btn" onclick="applyPreset('tech')">Tech & Engineering</button>
-        <button class="preset-btn" onclick="applyPreset('cs')">Customer Service</button>
-        <button class="preset-btn" onclick="applyPreset('sales')">Sales & Marketing</button>
+        <button class="preset-btn" onclick="applyPreset('finance',event)">Finance & Legal</button>
+        <button class="preset-btn" onclick="applyPreset('hr',event)">HR & Recruitment</button>
+        <button class="preset-btn" onclick="applyPreset('tech',event)">Tech & Engineering</button>
+        <button class="preset-btn" onclick="applyPreset('cs',event)">Customer Service</button>
+        <button class="preset-btn" onclick="applyPreset('sales',event)">Sales & Marketing</button>
+        <button class="preset-btn" onclick="applyPreset('industry',event)">Industry & Energy</button>
+        <button class="preset-btn" onclick="applyPreset('public',event)">Public Sector</button>
+        <button class="preset-btn" onclick="applyPreset('health',event)">Health & Care</button>
       </div>
+      <div class="preset-desc" id="preset-desc"></div>
     </div>
 
     <div class="panel">
       <div class="panel-title">Select tasks & set daily volume</div>
+      <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.5;">Enter the number of employees using AI for each task and how many times per day. The calculator works out daily volume automatically.</p>
       <div class="task-grid" id="task-grid"></div>
     </div>
 
@@ -1191,7 +1340,7 @@
   </div>
 
     <div class="action-row">
-      <button class="action-btn share" onclick="shareURL()">↗ Share estimate</button>
+      <button class="action-btn share" id="share-btn" onclick="shareURL()">↗ Share estimate</button>
       <button class="action-btn reset" onclick="resetAll()">↺ Reset all</button>
     </div>
     <div class="copy-confirm" id="copy-confirm"></div>
@@ -1257,8 +1406,8 @@
         </div>
         <div class="roi-input-row">
           <span class="roi-input-label">Avg. hourly rate</span>
-          <input class="roi-input" id="roi-rate" type="number" min="1" value="75" oninput="updateROI()">
-          <span class="roi-unit" id="roi-rate-unit">$/hour</span>
+          <input class="roi-input" id="roi-rate" type="number" min="1" value="650" oninput="updateROI()">
+          <span class="roi-unit" id="roi-rate-unit">kr/hour</span>
         </div>
         <div class="roi-input-row">
           <span class="roi-input-label">Time saved per person</span>
@@ -1277,29 +1426,35 @@
       <div class="savings-tools">
         <div class="savings-tool-row">
           <span class="savings-tool-name">GitHub Copilot</span>
-          <input class="savings-tool-input" id="cost-copilot" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
-          <span class="savings-tool-unit">/user/mo</span>
+          <div class="savings-tool-amount">
+            <input class="savings-tool-input" id="cost-copilot" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
+            <span class="savings-tool-unit">per user / mo</span>
+          </div>
         </div>
         <div class="savings-tool-row">
           <span class="savings-tool-name">ChatGPT Team</span>
-          <input class="savings-tool-input" id="cost-chatgpt" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
-          <span class="savings-tool-unit">/user/mo</span>
+          <div class="savings-tool-amount">
+            <input class="savings-tool-input" id="cost-chatgpt" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
+            <span class="savings-tool-unit">per user / mo</span>
+          </div>
         </div>
         <div class="savings-tool-row">
           <span class="savings-tool-name">Microsoft Copilot</span>
-          <input class="savings-tool-input" id="cost-mscopilot" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
-          <span class="savings-tool-unit">/user/mo</span>
-        </div>
-        <div class="savings-tool-row">
-          <span class="savings-tool-name">No. of users</span>
-          <input class="savings-tool-input" id="cost-users" type="number" min="1" value="10" placeholder="10" oninput="updateSavings()">
-          <span class="savings-tool-unit">users</span>
+          <div class="savings-tool-amount">
+            <input class="savings-tool-input" id="cost-mscopilot" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
+            <span class="savings-tool-unit">per user / mo</span>
+          </div>
         </div>
       </div>
+      <div style="padding: 10px 1.25rem; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.02);">
+        <span style="font-size:12px;color:var(--text2);flex:1;">How many users have these tools?</span>
+        <input class="savings-tool-input" id="cost-users" type="number" min="1" value="10" placeholder="10" oninput="updateSavings()">
+        <span style="font-size:11px;color:var(--text3);white-space:nowrap;">users</span>
+      </div>
       <div class="savings-custom-row">
-        <span class="savings-custom-label">Other / custom AI spend</span>
+        <span class="savings-custom-label">Other AI spend</span>
         <input class="savings-custom-input" id="cost-custom" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
-        <span style="font-size:12px;color:var(--text3);width:30px">/mo</span>
+        <span style="font-size:12px;color:var(--text3);white-space:nowrap">per month</span>
       </div>
       <div class="savings-result" id="savings-result">
         <div style="font-size:12px;color:var(--text3);text-align:center;padding:4px 0;">Enter your current costs above to see potential savings.</div>
@@ -1333,6 +1488,11 @@
       <div class="email-feedback" id="email-feedback"></div>
     </div>
 
+    <div class="smart-cta" id="smart-cta" style="display:none;">
+      <div class="smart-cta-text" id="smart-cta-text"></div>
+      <button onclick="openModal()">Let's talk →</button>
+    </div>
+
     <div class="cta-banner" id="cta-section">
       <p>Ready to run this in production? We'll help you architect the right solution for your scale.</p>
       <button onclick="openModal()">Book a free 30-minute session →</button>
@@ -1344,7 +1504,8 @@
 
 <footer>
   <span>© 2026 Büchemeier Consulting · <a href="https://www.linkedin.com/in/oystein-buchemeier/" target="_blank">LinkedIn</a></span>
-  <span>Prices last updated: May 2026 · Estimates based on standard API pricing, actual costs may vary</span>
+  <span>Exchange rates updated live on each page load · <span id="rates-updated">Loading…</span> · Model prices reviewed monthly, last updated May 2026</span>
+  <span>For simulation purposes only. Not financial advice. Büchemeier Consulting accepts no responsibility for inaccuracies.</span>
 </footer>
 
 <!-- CONTACT MODAL -->
@@ -1391,28 +1552,86 @@
 
 <script>
 const TASKS = [
-  { id: 'summarise',  name: 'Summarise a document',       desc: 'Reports, contracts, meeting notes',         inTok: 8000,  outTok: 600  },
-  { id: 'draft',      name: 'Write a first draft',         desc: 'Proposals, reports, presentations',         inTok: 600,   outTok: 1200 },
-  { id: 'email',      name: 'Draft an email or message',   desc: 'Internal or external communication',        inTok: 400,   outTok: 350  },
-  { id: 'answer',     name: 'Answer a question',           desc: 'From internal docs, policies, FAQs',        inTok: 4000,  outTok: 500  },
-  { id: 'invoice',    name: 'Process a form or invoice',   desc: 'Extract and structure incoming documents',  inTok: 3000,  outTok: 400  },
-  { id: 'feedback',   name: 'Analyse customer feedback',   desc: 'Reviews, support tickets, surveys',         inTok: 2000,  outTok: 600  },
-  { id: 'translate',  name: 'Translate content',           desc: 'Documents or messages to another language', inTok: 3000,  outTok: 2800 },
-  { id: 'screen',     name: 'Screen or compare',           desc: 'CVs, supplier offers, product options',     inTok: 5000,  outTok: 700  },
-  { id: 'agent-simple',  name: 'AI agent — simple task',     desc: '2–4 steps: read, look up, respond. E.g. check CRM and reply to customer', inTok: 18000, outTok: 2400 },
-  { id: 'agent-complex', name: 'AI agent — complex workflow', desc: '6–10 steps: analyse, cross-check, draft, review. E.g. contract risk analysis + response draft', inTok: 80000, outTok: 8000 },
-  { id: 'code',       name: 'Generate or review code',     desc: 'Write, analyse or fix code',                inTok: 5000,  outTok: 1200 },
-  { id: 'sql',        name: 'SQL / data query',            desc: 'Natural language to SQL queries',           inTok: 800,   outTok: 400  },
-  { id: 'rag',        name: 'RAG / knowledge base Q&A',   desc: 'Answer over a large knowledge base',        inTok: 6000,  outTok: 700  },
-  { id: 'apidoc',     name: 'API documentation',           desc: 'Generate docs from code or OpenAPI spec',   inTok: 4000,  outTok: 2000 },
+  { id: 'summarise',
+    name: 'Summarise a document',
+    desc: 'Reports, contracts, meeting notes',
+    explain: 'Upload a report, contract or meeting notes and get a concise summary. Useful when you need the key points without reading everything.',
+    inTok: 8000, outTok: 600 },
+  { id: 'draft',
+    name: 'Write a first draft',
+    desc: 'Proposals, reports, presentations',
+    explain: 'Generate a first version of a report, proposal or presentation based on a brief. You review and refine, AI does the heavy lifting.',
+    inTok: 600, outTok: 1200 },
+  { id: 'email',
+    name: 'Draft an email or message',
+    desc: 'Internal or external communication',
+    explain: 'Turn a few bullet points into a professional email or message. Works for internal communication, client follow-ups and formal letters.',
+    inTok: 400, outTok: 350 },
+  { id: 'answer',
+    name: 'Answer a question',
+    desc: 'From internal docs, policies, FAQs',
+    explain: 'Ask questions about your own documents, policies or knowledge base and get instant answers. Like a search engine that actually understands context.',
+    inTok: 4000, outTok: 500 },
+  { id: 'invoice',
+    name: 'Process a document or form',
+    desc: 'Invoices, applications, structured forms',
+    explain: 'Extract structured data from invoices, applications or forms automatically. Eliminates manual data entry.',
+    inTok: 3000, outTok: 400 },
+  { id: 'feedback',
+    name: 'Analyse and categorise responses',
+    desc: 'Surveys, reviews, tickets, candidate responses',
+    explain: 'Find patterns across large volumes of surveys, reviews, support tickets or candidate responses. See what people are actually saying.',
+    inTok: 2000, outTok: 600 },
+  { id: 'translate',
+    name: 'Translate content',
+    desc: 'Documents or messages to another language',
+    explain: 'Translate documents or messages to another language while preserving tone and formatting.',
+    inTok: 3000, outTok: 2800 },
+  { id: 'screen',
+    name: 'Screen or compare',
+    desc: 'CVs, supplier offers, product options',
+    explain: 'Compare multiple CVs, supplier offers or options against a set of criteria. Get a ranked shortlist in seconds.',
+    inTok: 5000, outTok: 700 },
+  { id: 'agent-simple',
+    name: 'AI agent — simple task',
+    desc: '2–4 steps: read, look up, respond',
+    explain: 'An AI that completes a multi-step task on your behalf — for example: read an incoming email, look up the customer in your CRM, and draft a reply.',
+    inTok: 18000, outTok: 2400 },
+  { id: 'agent-complex',
+    name: 'AI agent — complex workflow',
+    desc: '6–10 steps: analyse, cross-check, draft, review',
+    explain: 'An AI that handles an entire workflow autonomously — for example: analyse a contract, check it against company policy, flag risks and draft a response.',
+    inTok: 80000, outTok: 8000 },
+  { id: 'code',
+    name: 'Generate or review code',
+    desc: 'Write, analyse or fix code',
+    explain: 'Write new code from a description, review existing code for bugs or improvements, or explain what a piece of code does.',
+    inTok: 5000, outTok: 1200 },
+  { id: 'sql',
+    name: 'SQL / data query',
+    desc: 'Natural language to SQL queries',
+    explain: 'Describe what data you need in plain English and get a ready-to-run SQL query. No SQL expertise required.',
+    inTok: 800, outTok: 400 },
+  { id: 'rag',
+    name: 'RAG / knowledge base Q&A',
+    desc: 'Answer over a large knowledge base',
+    explain: 'Connect AI to a large document library or database and let it answer questions by retrieving the most relevant content first.',
+    inTok: 6000, outTok: 700 },
+  { id: 'apidoc',
+    name: 'API documentation',
+    desc: 'Generate docs from code or OpenAPI spec',
+    explain: 'Automatically generate technical documentation from your codebase or API specification. Keeps docs in sync with your code.',
+    inTok: 4000, outTok: 2000 },
 ];
 
 const MODELS = [
-  { id: 'haiku', name: 'Haiku', full: 'Claude Haiku 3.5', inP: 0.80, outP: 4.00, note: '$0.80 / $4.00 per 1M tokens', badge: 'Fast' },
-  { id: 'sonnet', name: 'Sonnet', full: 'Claude Sonnet 4', inP: 3.00, outP: 15.00, note: '$3.00 / $15.00 per 1M tokens', badge: 'Balanced' },
-  { id: 'opus', name: 'Opus', full: 'Claude Opus 4', inP: 15.00, outP: 75.00, note: '$15.00 / $75.00 per 1M tokens', badge: 'Powerful' },
-  { id: 'gpt4o', name: 'GPT-4o', full: 'OpenAI GPT-4o', inP: 5.00, outP: 15.00, note: '$5.00 / $15.00 per 1M tokens', badge: null },
-  { id: 'mini', name: 'GPT-4o mini', full: 'OpenAI GPT-4o mini', inP: 0.15, outP: 0.60, note: '$0.15 / $0.60 per 1M tokens', badge: 'Cheapest' },
+  { id: 'haiku',    name: 'Haiku',          full: 'Claude Haiku 3.5',        inP: 0.80,  outP: 4.00,  note: '$0.80 / $4.00 per 1M tokens',    badge: 'Fast' },
+  { id: 'sonnet',   name: 'Sonnet',          full: 'Claude Sonnet 4',         inP: 3.00,  outP: 15.00, note: '$3.00 / $15.00 per 1M tokens',   badge: 'Balanced' },
+  { id: 'opus',     name: 'Opus',            full: 'Claude Opus 4',           inP: 15.00, outP: 75.00, note: '$15.00 / $75.00 per 1M tokens',  badge: 'Powerful' },
+  { id: 'gpt4o',    name: 'GPT-4o',          full: 'OpenAI GPT-4o',           inP: 5.00,  outP: 15.00, note: '$5.00 / $15.00 per 1M tokens',   badge: null },
+  { id: 'mini',     name: 'GPT-4o mini',     full: 'OpenAI GPT-4o mini',      inP: 0.15,  outP: 0.60,  note: '$0.15 / $0.60 per 1M tokens',    badge: null },
+  { id: 'g-flash',  name: 'Gemini Flash',    full: 'Google Gemini 2.0 Flash', inP: 0.10,  outP: 0.40,  note: '$0.10 / $0.40 per 1M tokens',    badge: 'Cheapest' },
+  { id: 'g-pro',    name: 'Gemini Pro',      full: 'Google Gemini 2.5 Pro',   inP: 1.25,  outP: 10.00, note: '$1.25 / $10.00 per 1M tokens',   badge: null },
 ];
 
 const CTX_DESCRIPTIONS = [
@@ -1428,8 +1647,12 @@ function getCtxMeta(val) {
 
 let sel = { model: 'sonnet', ctx: 1.0, days: 22, batch: false, cache: false };
 const taskRuns = {};
-TASKS.forEach(t => taskRuns[t.id] = 0);
-taskRuns['summarise'] = 50;
+const taskVol  = {};
+TASKS.forEach(t => {
+  taskRuns[t.id] = 0;
+  taskVol[t.id]  = { employees: 0, usesPerDay: 1 };
+});
+taskRuns['summarise'] = 0;
 
 function fmt(n) {
   if (n >= 1e6) return (n/1e6).toFixed(2) + 'M';
@@ -1455,24 +1678,127 @@ function calcCost(task, model, ctx, batch, cache) {
   return { inTok, outTok, inCost, outCost, runCost: inCost + outCost };
 }
 
-let currency = { code: 'USD', symbol: '$', rate: 1.0 };
+let currency = { code: 'NOK', symbol: 'kr', rate: 10.8 };
+function updateSmartCTA(monthlyCost, activeTasks) {
+  const el   = document.getElementById('smart-cta');
+  const text = document.getElementById('smart-cta-text');
+  if (!el) return;
+
+  const hasAgents   = activeTasks > 0 && TASKS.filter(t => t.id.startsWith('agent') && (taskRuns[t.id]||0) > 0).length > 0;
+  const highVolume  = monthlyCost * currency.rate > 50000;
+  const manyTasks   = activeTasks >= 4;
+
+  let msg = null;
+  if (hasAgents) {
+    msg = 'Your setup includes multi-step AI agents. Getting the architecture right can reduce costs by 40–60% — and prevent hard-to-fix mistakes down the line.';
+  } else if (highVolume) {
+    msg = `At ${cx(monthlyCost)}/month, optimising your prompts, caching strategy and model selection could save you significantly. Worth a conversation.`;
+  } else if (manyTasks) {
+    msg = 'You\'re running AI across multiple workflows. A unified architecture will be more reliable and cheaper than building each one separately.';
+  }
+
+  if (msg) {
+    text.textContent = msg;
+    el.style.display = 'flex';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+let CURRENCY_RATES = { USD: 1.0, EUR: 0.92, NOK: 10.8 };
+
+async function fetchExchangeRates() {
+  try {
+    const res = await fetch('https://open.er-api.com/v6/latest/USD');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.result !== 'success') return;
+    CURRENCY_RATES = { USD: 1.0, EUR: data.rates.EUR, NOK: data.rates.NOK };
+    currency.rate = CURRENCY_RATES[currency.code];
+    update(); updateCompare(); updateROI(); updateSavings();
+    const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    const el = document.getElementById('rates-updated');
+    if (el) el.textContent = today;
+  } catch (e) {
+    const el = document.getElementById('rates-updated');
+    if (el) el.textContent = 'rates not available';
+  }
+}
 const INDUSTRY_PRESETS = {
-  finance: { name: 'Finance & Legal', tasks: { summarise: 200, invoice: 300, screen: 50, answer: 100, 'agent-simple': 20 } },
-  hr:      { name: 'HR & Recruitment', tasks: { screen: 150, email: 200, draft: 50, answer: 80, feedback: 60 } },
-  tech:    { name: 'Tech & Engineering', tasks: { code: 100, sql: 80, apidoc: 30, 'agent-simple': 40, rag: 60 } },
-  cs:      { name: 'Customer Service', tasks: { answer: 500, email: 300, feedback: 100, summarise: 50, translate: 80 } },
-  sales:   { name: 'Sales & Marketing', tasks: { email: 400, draft: 100, feedback: 150, screen: 60, translate: 50 } },
+  finance: {
+    name: 'Finance & Legal',
+    desc: 'Typical for finance and law firms: automating contract review, invoice processing and document screening. Pre-filled for a mid-size company with around 50 employees.',
+    tasks: { summarise: 200, invoice: 300, screen: 50, answer: 100, 'agent-simple': 20 },
+    vol:   { summarise: {e:20,u:2}, invoice: {e:30,u:2}, screen: {e:10,u:1}, answer: {e:50,u:2}, 'agent-simple': {e:10,u:2} },
+  },
+  hr: {
+    name: 'HR & Recruitment',
+    desc: 'Common in HR departments: CV screening, drafting job descriptions and employment contracts, translating documents across markets.',
+    tasks: { screen: 150, email: 200, draft: 50, answer: 80, feedback: 60 },
+    vol:   { screen: {e:5,u:5}, email: {e:10,u:4}, draft: {e:5,u:2}, answer: {e:20,u:4}, feedback: {e:10,u:2} },
+  },
+  tech: {
+    name: 'Tech & Engineering',
+    desc: 'Typical for tech companies and consultancies: code review, SQL generation, documentation and technical agents for CI/CD and data pipelines.',
+    tasks: { code: 100, sql: 80, apidoc: 30, 'agent-simple': 40, rag: 60 },
+    vol:   { code: {e:20,u:1}, sql: {e:15,u:1}, apidoc: {e:5,u:1}, 'agent-simple': {e:10,u:1}, rag: {e:20,u:1} },
+  },
+  cs: {
+    name: 'Customer Service',
+    desc: 'For companies with high volumes of customer enquiries: automated email and chat responses, sentiment analysis of feedback and summarising case documentation.',
+    tasks: { answer: 500, email: 300, feedback: 100, summarise: 50, translate: 80 },
+    vol:   { answer: {e:20,u:5}, email: {e:15,u:4}, feedback: {e:10,u:2}, summarise: {e:5,u:2}, translate: {e:8,u:2} },
+  },
+  sales: {
+    name: 'Sales & Marketing',
+    desc: 'For sales teams and marketing departments: personalised email drafts, customer feedback analysis, translation of materials across markets and screening of supplier offers.',
+    tasks: { email: 400, draft: 100, feedback: 150, screen: 60, translate: 50 },
+    vol:   { email: {e:20,u:4}, draft: {e:10,u:2}, feedback: {e:15,u:2}, screen: {e:6,u:2}, translate: {e:5,u:2} },
+  },
+  industry: {
+    name: 'Industry & Energy',
+    desc: 'For oil & gas, renewables, maritime, construction and process industries: HSE documentation, technical specifications, tender documents, compliance reporting and maintenance logs.',
+    tasks: { summarise: 150, draft: 100, invoice: 200, screen: 80, answer: 120, 'agent-simple': 30 },
+    vol:   { summarise: {e:15,u:2}, draft: {e:10,u:2}, invoice: {e:20,u:2}, screen: {e:8,u:2}, answer: {e:30,u:2}, 'agent-simple': {e:10,u:1} },
+  },
+  public: {
+    name: 'Public Sector',
+    desc: 'For municipalities, agencies and directorates: case processing, citizen communication, policy documentation, meeting minutes and regulatory reporting.',
+    tasks: { summarise: 200, draft: 150, answer: 300, email: 200, translate: 60 },
+    vol:   { summarise: {e:20,u:2}, draft: {e:15,u:2}, answer: {e:50,u:2}, email: {e:20,u:2}, translate: {e:10,u:1} },
+  },
+  health: {
+    name: 'Health & Care',
+    desc: 'For hospitals, clinics and health trusts: clinical documentation summaries, patient communication drafts, medical record processing and compliance with health regulations.',
+    tasks: { summarise: 300, draft: 100, answer: 200, email: 150, invoice: 100 },
+    vol:   { summarise: {e:30,u:2}, draft: {e:10,u:2}, answer: {e:40,u:2}, email: {e:15,u:2}, invoice: {e:10,u:2} },
+  },
 };
 
 let activePreset = null;
 
-function applyPreset(id) {
+function applyPreset(id, e) {
   activePreset = id;
   document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
-  TASKS.forEach(t => taskRuns[t.id] = 0);
+  if (e && e.target) e.target.classList.add('active');
   const preset = INDUSTRY_PRESETS[id];
-  Object.entries(preset.tasks).forEach(([tid, runs]) => { if (taskRuns.hasOwnProperty(tid)) taskRuns[tid] = runs; });
+
+  TASKS.forEach(t => {
+    taskRuns[t.id] = 0;
+    taskVol[t.id]  = { employees: 0, usesPerDay: 1 };
+  });
+
+  Object.entries(preset.tasks).forEach(([tid, runs]) => {
+    if (!taskRuns.hasOwnProperty(tid)) return;
+    taskRuns[tid] = runs;
+    const v = preset.vol[tid] || { e: 10, u: 1 };
+    taskVol[tid] = { employees: v.e, usesPerDay: v.u };
+  });
+
+  const descEl = document.getElementById('preset-desc');
+  descEl.textContent = preset.desc;
+  descEl.classList.add('visible');
+
   renderTasks();
   update();
   updateCompare();
@@ -1495,7 +1821,7 @@ function updateRecommendedModel() {
     reason = 'Your task mix includes complex multi-step workflows and large documents that benefit from Sonnet\'s stronger reasoning. Haiku may miss nuance at this complexity level.';
   } else if (avgInTok < 1500 && agentPct === 0) {
     recId  = 'haiku';
-    reason = 'Your tasks are mostly short, high-volume operations — email, Q&A, simple extraction. Haiku handles these well at a fraction of the cost.';
+    reason = 'Your tasks are mostly short, high-volume operations — email drafting, Q&A and document processing. Haiku handles these well at a fraction of the cost.';
   } else {
     recId  = 'sonnet';
     reason = 'Your task mix is balanced. Sonnet gives you the best quality-to-cost ratio for this combination of document and operational tasks.';
@@ -1530,16 +1856,16 @@ const TASK_METHODOLOGY = {
   draft:          { basis: '~600 in / 1 200 out', note: 'Brief input, full document output' },
   email:          { basis: '~400 in / 350 out',   note: 'Short context, professional reply' },
   answer:         { basis: '~4 000 input tokens', note: 'Retrieved context + question' },
-  invoice:        { basis: '~3 000 input tokens', note: 'Structured document + extraction schema' },
-  feedback:       { basis: '~2 000 in / 600 out', note: 'Batch of reviews + categorisation output' },
+  invoice:        { basis: '~3 000 input tokens', note: 'Document or form + extraction instructions' },
+  feedback:       { basis: '~2 000 in / 600 out', note: 'Batch of responses + pattern analysis output' },
   translate:      { basis: '~3 000 in / 2 800 out', note: 'Input and output tokens roughly equal' },
   screen:         { basis: '~5 000 input tokens', note: 'Multiple documents compared against criteria' },
   'agent-simple': { basis: '~18 000 tokens total', note: '3–4 LLM calls × ~4 500 tokens each' },
   'agent-complex':{ basis: '~80 000 tokens total', note: '8–10 LLM calls × ~8 000 tokens each' },
   code:           { basis: '~5 000 in / 1 200 out', note: 'Code file + instructions, diff output' },
   sql:            { basis: '~800 in / 400 out',   note: 'Schema + question, SQL query output' },
-  rag:            { basis: '~6 000 input tokens', note: 'Retrieved chunks + query context' },
-  apidoc:         { basis: '~4 000 in / 2 000 out', note: 'Code/spec input, documentation output' },
+  rag:            { basis: '~6 000 input tokens', note: 'Retrieved document chunks + query context' },
+  apidoc:         { basis: '~4 000 in / 2 000 out', note: 'Code or spec input, documentation output' },
 };
 
 function renderMethodology() {
@@ -1554,18 +1880,27 @@ function renderMethodology() {
 }
 
 function updateChart() {
-  const monthly  = totalMonthly();
+  const monthly   = totalMonthly();
   const growthPct = parseFloat(document.getElementById('growth-rate').value) / 100;
-  const months   = ['Now','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'];
-  const values   = months.map((_, i) => monthly * Math.pow(1 + growthPct, i));
-  const maxVal   = Math.max(...values, 0.01);
+  const el        = document.getElementById('chart-bars');
 
-  document.getElementById('chart-bars').innerHTML = values.map((v, i) => `
-    <div class="chart-bar-wrap">
-      <div class="chart-bar-val">${v >= 1000 ? cx(v).replace(/\.\d+/, '') : cx(v)}</div>
+  if (monthly === 0) {
+    el.innerHTML = `<div style="width:100%;text-align:center;font-size:12px;color:var(--text3);padding:2rem 0;font-family:var(--mono);">Add tasks above to see the projection.</div>`;
+    return;
+  }
+
+  const months = ['Now','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'];
+  const values = months.map((_, i) => monthly * Math.pow(1 + growthPct, i));
+  const maxVal = Math.max(...values, 0.01);
+
+  el.innerHTML = values.map((v, i) => {
+    const label = v >= 10000 ? cx(v).replace(/\.\d+/, '') : v >= 100 ? cx(v).replace(/\.\d+/, '') : cx(v);
+    return `<div class="chart-bar-wrap">
+      <div class="chart-bar-val">${label}</div>
       <div class="chart-bar${i === 0 ? ' current' : ''}" style="height:${Math.max(Math.round(v/maxVal*80), 3)}px"></div>
       <div class="chart-bar-label">${months[i]}</div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 
@@ -1684,7 +2019,13 @@ function loadFromURL() {
 }
 
 function resetAll() {
-  TASKS.forEach(t => { taskRuns[t.id] = 0; });
+  TASKS.forEach(t => {
+    taskRuns[t.id] = 0;
+    taskVol[t.id]  = { employees: 0, usesPerDay: 1 };
+  });
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  const descEl = document.getElementById('preset-desc');
+  if (descEl) { descEl.textContent = ''; descEl.classList.remove('visible'); }
   renderTasks();
   update();
   updateCompare();
@@ -1708,17 +2049,29 @@ function renderTasks() {
       </div>`;
     }
     const runs    = taskRuns[t.id] || 0;
+    const vol     = taskVol[t.id];
     const isAgent = t.id.startsWith('agent');
     const isActive = runs > 0;
-    const maxRuns  = isAgent ? 200 : 2000;
-    const step     = isAgent ? 1 : 10;
     html += `<div class="task-btn${isActive ? ' active' : ''}${isAgent ? ' agent-task' : ''}">
       <div class="task-btn-name">${t.name}${isAgent ? `<span class="agent-badge">multi-step</span>` : ''}</div>
       <div class="task-btn-desc">${t.desc}</div>
-      <div class="task-slider-row">
-        <input type="range" min="0" max="${maxRuns}" step="${step}" value="${runs}"
-          oninput="setTaskRuns('${t.id}', this.value)">
-        <span class="task-runs-val" id="rv-${t.id}">${runs === 0 ? 'off' : runs + '/day'}</span>
+      <div class="task-btn-explain">${t.explain}</div>
+      <div class="task-vol-row">
+        <div class="task-vol-field">
+          <label class="task-vol-label">Employees</label>
+          <input class="task-vol-input" type="number" min="0" value="${vol.employees}"
+            oninput="setTaskVol('${t.id}','employees',this.value)">
+        </div>
+        <div class="task-vol-sep">×</div>
+        <div class="task-vol-field">
+          <label class="task-vol-label">Times/day</label>
+          <input class="task-vol-input" type="number" min="0" step="0.5" value="${vol.usesPerDay}"
+            oninput="setTaskVol('${t.id}','usesPerDay',this.value)">
+        </div>
+        <div class="task-vol-sep">=</div>
+        <div class="task-vol-result">
+          <span class="task-runs-val" id="rv-${t.id}">${runs === 0 ? 'off' : runs + '/day'}</span>
+        </div>
       </div>
       <div class="task-btn-tokens">~${fmt(t.inTok)} in · ~${fmt(t.outTok)} out per run</div>
     </div>`;
@@ -1726,13 +2079,16 @@ function renderTasks() {
   grid.innerHTML = html;
 }
 
-function setTaskRuns(id, val) {
-  taskRuns[id] = parseInt(val);
-  const runs = taskRuns[id];
+function setTaskVol(id, field, val) {
+  taskVol[id][field] = parseFloat(val) || 0;
+  const runs = Math.round(taskVol[id].employees * taskVol[id].usesPerDay);
+  taskRuns[id] = runs;
   const valEl = document.getElementById('rv-' + id);
-  const card  = valEl.closest('.task-btn');
-  card.classList.toggle('active', runs > 0);
-  valEl.textContent = runs === 0 ? 'off' : runs + '/day';
+  if (valEl) {
+    const card = valEl.closest('.task-btn');
+    card.classList.toggle('active', runs > 0);
+    valEl.textContent = runs === 0 ? 'off' : runs + '/day';
+  }
   update();
   updateCompare();
 }
@@ -1848,6 +2204,7 @@ function update() {
   updateROI();
   updateRecommendedModel();
   updateChart();
+  updateSmartCTA(monthlyCost, activeTasks);
 }
 
 function updateCompare() {
@@ -1916,15 +2273,16 @@ update();
 updateCompare();
 updateROI();
 updateChart();
+fetchExchangeRates();
 
 // ── EmailJS config ──────────────────────────────────────────────
-// Replace these three values after creating a free EmailJS account:
-// 1. Go to https://www.emailjs.com → Account → API Keys → copy Public Key
-// 2. Create a service (Gmail/Outlook) → copy Service ID
-// 3. Create an email template → copy Template ID
-//    Template variables available: {{to_email}}, {{task}}, {{model}},
-//    {{runs_per_day}}, {{working_days}}, {{monthly_cost}}, {{daily_cost}},
-//    {{cost_per_run}}, {{input_tokens}}, {{output_tokens}}
+// Template variables available for both templates:
+// {{to_email}}, {{task}}, {{model}}, {{runs_per_day}}, {{working_days}},
+// {{monthly_cost}}, {{daily_cost}}, {{cost_per_run}},
+// {{input_tokens}}, {{output_tokens}},
+// {{batch_enabled}}, {{cache_enabled}},
+// {{current_spend}}, {{potential_saving}}
+// Contact template also has: {{name}}, {{company}}, {{from_email}}, {{message}}
 const EMAILJS_PUBLIC_KEY  = 'w-kY387QsqMVyl64T';
 const EMAILJS_SERVICE_ID  = 'service_m5irvcv';
 const EMAILJS_TEMPLATE_ID = 'template_w2p05wi';
