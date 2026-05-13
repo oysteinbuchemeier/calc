@@ -12,7 +12,7 @@
 :root{
   --bg:#0c0c0e;--bg2:#131316;--bg3:#1a1a1f;
   --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.18);
-  --text:#f0eff4;--text2:#c4c3cc;--text3:#8f8e99;
+  --text:#f0eff4;--text2:#c4c3cc;--text3:#a8a7b4;
   --accent:#6c63ff;--accent2:#c4c0ff;--accent-bg:rgba(108,99,255,0.15);
   --green:#2dd4a0;--amber:#f59e0b;
   --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
@@ -23,17 +23,44 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 2rem
 .nav-logo{font-family:var(--mono);font-size:14px;color:var(--text)}
 .nav-logo span{color:var(--accent2)}
 .currency-row{display:flex;gap:6px}
-.currency-btn{font-family:var(--mono);font-size:11px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;color:var(--text3);transition:all 0.12s}
+.currency-btn{font-family:var(--mono);font-size:13px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;color:var(--text3);transition:all 0.12s}
 .currency-btn:hover{color:var(--text);border-color:var(--border2)}
 .currency-btn.active{border-color:var(--accent);color:var(--accent2);background:var(--accent-bg)}
 .nav-cta{font-size:13px;background:var(--accent);color:#fff;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;font-family:var(--sans);font-weight:500;transition:opacity 0.15s}
 .nav-cta:hover{opacity:0.85}
 .hero{text-align:center;padding:2.5rem 2rem 0}
-.hero-eyebrow{font-family:var(--mono);font-size:11px;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.75rem}
+.hero-eyebrow{font-family:var(--mono);font-size:13px;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.75rem}
 .hero h1{font-size:clamp(24px,4vw,38px);font-weight:300;letter-spacing:-0.03em;margin-bottom:0.5rem;line-height:1.15}
 .hero h1 strong{font-weight:500;color:#fff}
 .hero p{font-size:15px;color:var(--text2);max-width:480px;margin:0 auto}
-.steps-wrap{max-width:680px;margin:1.5rem auto 0;padding:0 2rem}
+.hero-pov{display:inline-block;margin-top:1.25rem;padding:8px 18px;background:rgba(108,99,255,0.1);border:1px solid rgba(108,99,255,0.25);border-radius:20px;font-size:13px;color:var(--accent2);font-style:italic;letter-spacing:0.01em}
+.cost-drivers-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.cost-drivers-toggle{width:100%;background:none;border:none;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer;color:var(--text2);font-size:13px;font-weight:500;font-family:var(--sans);text-align:left}
+.cost-drivers-toggle:hover{color:var(--text)}
+.cost-drivers-toggle-icon{font-size:16px;color:var(--text3);transition:transform 0.2s}
+.cost-drivers-toggle.open .cost-drivers-toggle-icon{transform:rotate(180deg)}
+.cost-drivers-body{display:none;padding:0 1.25rem 1.25rem}
+.cost-drivers-body.open{display:block}
+.cost-driver-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.cost-driver-row:last-child{border-bottom:none}
+.cost-driver-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.cost-driver-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px}
+.cost-driver-desc{font-size:13px;color:var(--text3);line-height:1.5}
+.complexity-warning{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:var(--radius-lg);padding:1rem 1.25rem;display:none}
+.complexity-warning.visible{display:block}
+.complexity-warning-title{font-size:12px;font-weight:500;color:var(--amber);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.complexity-warning-text{font-size:12px;color:var(--text2);line-height:1.6}
+.complexity-warning-list{margin-top:8px;display:flex;flex-direction:column;gap:4px}
+.complexity-warning-item{font-size:13px;color:var(--text2);font-family:var(--mono);padding:4px 0;border-bottom:1px solid rgba(245,158,11,0.1)}
+.complexity-warning-item:last-child{border-bottom:none}
+.iceberg-viz{padding:1rem 1.25rem;border-top:1px solid var(--border)}
+.iceberg-title{font-size:13px;font-family:var(--mono);color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px}
+.iceberg-layers{display:flex;flex-direction:column;gap:3px}
+.iceberg-layer{border-radius:6px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;font-size:13px;position:relative}
+.iceberg-layer-left{display:flex;align-items:center;gap:8px}
+.iceberg-layer-name{font-weight:500}
+.iceberg-layer-tag{font-size:12px;font-family:var(--mono);padding:2px 6px;border-radius:3px;opacity:0.8}
+.iceberg-layer-note{font-size:12px;font-family:var(--mono);opacity:0.85}
 .steps{display:flex;align-items:center}
 .step-item{display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 16px;border-radius:var(--radius);transition:background 0.15s;flex:1}
 .step-item:hover{background:var(--bg2)}
@@ -71,22 +98,22 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 2rem
 .task-btn-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;display:flex;align-items:center;gap:6px}
 .task-btn.active .task-btn-name{color:var(--accent2)}
 .task-btn.agent-task.active .task-btn-name{color:var(--amber)}
-.task-btn-desc{font-size:11px;color:var(--text3);line-height:1.4;margin-bottom:5px}
-.task-btn-explain{font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:8px;padding:5px 8px;background:rgba(255,255,255,0.03);border-radius:5px;border-left:2px solid var(--border2)}
-.agent-badge{font-size:9px;font-family:var(--mono);background:rgba(245,158,11,0.15);color:var(--amber);padding:2px 6px;border-radius:4px}
+.task-btn-desc{font-size:13px;color:var(--text3);line-height:1.4;margin-bottom:5px}
+.task-btn-explain{font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:8px;padding:5px 8px;background:rgba(255,255,255,0.03);border-radius:5px;border-left:2px solid var(--border2)}
+.agent-badge{font-size:12px;font-family:var(--mono);background:rgba(245,158,11,0.15);color:var(--amber);padding:2px 6px;border-radius:4px}
 .task-vol-row{display:flex;align-items:center;gap:6px;margin:6px 0 5px}
 .task-vol-field{display:flex;flex-direction:column;gap:2px}
-.task-vol-label{font-size:9px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:0.06em}
+.task-vol-label{font-size:12px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:0.06em}
 .task-vol-input{width:52px;background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:4px 6px;font-size:12px;font-family:var(--mono);color:var(--text);outline:none;text-align:center;transition:border-color 0.15s}
 .task-btn.active .task-vol-input{border-color:rgba(108,99,255,0.3);background:rgba(108,99,255,0.06)}
 .task-btn.agent-task.active .task-vol-input{border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.06)}
 .task-vol-input:focus{border-color:var(--accent)}
 .task-vol-sep{font-size:13px;color:var(--text3);margin-top:12px}
 .task-vol-result{margin-top:12px}
-.task-runs-val{font-family:var(--mono);font-size:11px;color:var(--text3)}
+.task-runs-val{font-family:var(--mono);font-size:13px;color:var(--text3)}
 .task-btn.active .task-runs-val{color:var(--accent2)}
 .task-btn.agent-task.active .task-runs-val{color:var(--amber)}
-.task-btn-tokens{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.task-btn-tokens{font-family:var(--mono);font-size:12px;color:var(--text3)}
 .slider-block{margin-bottom:14px}
 .slider-block:last-child{margin-bottom:0}
 .slider-top{display:flex;justify-content:space-between;margin-bottom:8px}
@@ -98,31 +125,31 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .model-pill{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-size:12px;font-family:var(--mono);cursor:pointer;color:var(--text2);transition:all 0.12s;display:flex;align-items:center;gap:6px}
 .model-pill:hover{border-color:var(--border2);color:var(--text)}
 .model-pill.active{border-color:var(--accent);background:var(--accent-bg);color:var(--accent2)}
-.pill-badge{font-size:9px;background:rgba(108,99,255,0.2);color:var(--accent2);padding:1px 6px;border-radius:4px}
+.pill-badge{font-size:12px;background:rgba(108,99,255,0.2);color:var(--accent2);padding:1px 6px;border-radius:4px}
 .model-pill:not(.active) .pill-badge{background:rgba(255,255,255,0.06);color:var(--text3)}
 .rec-model-panel{background:var(--bg2);border:1px solid rgba(45,212,160,0.25);border-radius:var(--radius-lg);padding:1rem 1.25rem;display:none}
 .rec-model-panel.visible{display:block}
-.rec-model-label{font-size:10px;font-family:var(--mono);color:var(--green);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
+.rec-model-label{font-size:12px;font-family:var(--mono);color:var(--green);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
 .rec-model-name{font-size:15px;font-weight:500;color:var(--text);margin-bottom:4px}
 .rec-model-reason{font-size:12px;color:var(--text2);line-height:1.5}
-.rec-model-saving{font-size:11px;font-family:var(--mono);color:var(--green);margin-top:6px}
+.rec-model-saving{font-size:13px;font-family:var(--mono);color:var(--green);margin-top:6px}
 .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--border);cursor:pointer}
 .toggle-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px;display:flex;align-items:center;gap:8px}
-.toggle-badge{font-size:10px;font-family:var(--mono);background:rgba(45,212,160,0.15);color:var(--green);padding:2px 7px;border-radius:4px;font-weight:400}
-.toggle-desc{font-size:11px;color:var(--text3);line-height:1.4}
+.toggle-badge{font-size:12px;font-family:var(--mono);background:rgba(45,212,160,0.15);color:var(--green);padding:2px 7px;border-radius:4px;font-weight:400}
+.toggle-desc{font-size:13px;color:var(--text3);line-height:1.4}
 .toggle-switch{width:36px;height:20px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;flex-shrink:0;position:relative;transition:background 0.2s}
 .toggle-switch.on{background:var(--green);border-color:var(--green)}
 .toggle-knob{width:14px;height:14px;background:var(--text3);border-radius:50%;position:absolute;top:2px;left:2px;transition:left 0.2s,background 0.2s}
 .toggle-switch.on .toggle-knob{left:18px;background:#0c0c0e}
 .compare-row{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:start;margin-bottom:14px}
 .compare-col{display:flex;flex-direction:column}
-.compare-select{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-family:var(--mono);color:var(--text);outline:none;cursor:pointer}
+.compare-select{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:14px;font-family:var(--mono);color:var(--text);outline:none;cursor:pointer}
 .compare-select:focus{border-color:var(--accent)}
 .compare-result{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .cmp-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px}
-.cmp-card-name{font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:4px}
+.cmp-card-name{font-size:13px;color:var(--text3);font-family:var(--mono);margin-bottom:4px}
 .cmp-card-val{font-size:18px;font-weight:500;font-family:var(--mono);color:var(--text)}
-.cmp-card-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.cmp-card-sub{font-size:13px;color:var(--text3);margin-top:2px}
 .cmp-card.cheaper{border-color:var(--green)}
 .cmp-card.cheaper .cmp-card-val{color:var(--green)}
 .cmp-saving{grid-column:1/-1;background:rgba(45,212,160,0.08);border:1px solid rgba(45,212,160,0.2);border-radius:var(--radius);padding:8px 12px;font-size:12px;font-family:var(--mono);color:var(--green);text-align:center}
@@ -136,24 +163,24 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .methodology-task-row{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
 .methodology-task-row:last-child{border-bottom:none}
 .meth-name{color:var(--text2);flex:1}
-.meth-detail{font-family:var(--mono);font-size:11px;color:var(--text3);text-align:right;line-height:1.6}
+.meth-detail{font-family:var(--mono);font-size:13px;color:var(--text3);text-align:right;line-height:1.6}
 .right-col{display:flex;flex-direction:column;gap:1rem;position:sticky;top:80px}
-.section-label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px}
+.section-label{font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px}
 .metric-big{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem}
-.metric-big-label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
+.metric-big-label{font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
 .metric-big-value{font-size:34px;font-weight:300;letter-spacing:-0.03em;color:var(--green);line-height:1;margin-bottom:4px}
 .metric-big-sub{font-size:12px;color:var(--text3)}
 .metric-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .metric-small{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.1rem}
-.metric-small-label{font-size:11px;color:var(--text3);margin-bottom:4px}
+.metric-small-label{font-size:13px;color:var(--text3);margin-bottom:4px}
 .metric-small-value{font-family:var(--mono);font-size:17px;font-weight:500;color:var(--text);letter-spacing:-0.02em}
 .task-breakdown-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
-.task-breakdown-header{padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase}
+.task-breakdown-header{padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase}
 .task-breakdown-empty{padding:1rem 1.25rem;font-size:12px;color:var(--text3);text-align:center}
 .tbd-row{display:grid;grid-template-columns:1fr auto auto;gap:6px 10px;padding:8px 1.25rem;border-bottom:1px solid var(--border);font-size:12px;align-items:center}
 .tbd-row:last-child{border-bottom:none}
 .tbd-name{color:var(--text2)}
-.tbd-runs{font-family:var(--mono);font-size:11px;color:var(--text3)}
+.tbd-runs{font-family:var(--mono);font-size:13px;color:var(--text3)}
 .tbd-cost{font-family:var(--mono);font-weight:500;color:var(--text);text-align:right}
 .tbd-bar-wrap{grid-column:1/-1;height:3px;background:var(--bg3);border-radius:2px;margin-top:-2px}
 .tbd-bar-fill{height:100%;border-radius:2px;background:var(--accent);transition:width 0.3s}
@@ -165,14 +192,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .tbar-fill{height:100%;border-radius:3px;transition:width 0.35s ease}
 .tbar-val{min-width:52px;text-align:right;font-size:12px;color:var(--text3)}
 .breakdown-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
-.breakdown-header{padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase}
+.breakdown-header{padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase}
 .breakdown-row{display:flex;justify-content:space-between;padding:9px 1.25rem;border-bottom:1px solid var(--border);font-size:12px}
 .br-label{color:var(--text2)}
 .br-val{font-family:var(--mono);color:var(--text);font-weight:500}
 .breakdown-total{display:flex;justify-content:space-between;padding:12px 1.25rem;border-top:1px solid var(--border2);background:var(--accent-bg)}
 .bt-label{font-size:13px;font-weight:500;color:var(--accent2)}
 .bt-val{font-family:var(--mono);font-size:16px;font-weight:500;color:var(--accent2)}
-.iceberg-note{padding:10px 1.25rem;border-top:1px solid var(--border);background:rgba(255,255,255,0.02);font-size:11px;color:var(--text3);line-height:1.6;font-family:var(--mono)}
+.iceberg-note{padding:10px 1.25rem;border-top:1px solid var(--border);background:rgba(255,255,255,0.02);font-size:13px;color:var(--text3);line-height:1.6;font-family:var(--mono)}
 .iceberg-note strong{color:var(--text2)}
 .roi-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
 .roi-panel-header{padding:1rem 1.25rem 0.75rem;border-bottom:1px solid var(--border)}
@@ -182,7 +209,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .roi-inputs{padding:0.85rem 1.25rem;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--border)}
 .roi-input-row{display:flex;align-items:center;gap:8px}
 .roi-input-label{font-size:12px;color:var(--text2);flex:1}
-.roi-input{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:13px;font-family:var(--mono);color:var(--text);outline:none;width:90px;text-align:right;transition:border-color 0.15s}
+.roi-input{background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:14px;font-family:var(--mono);color:var(--text);outline:none;width:90px;text-align:right;transition:border-color 0.15s}
 .roi-input:focus{border-color:var(--accent)}
 .roi-unit{font-size:12px;color:var(--text3);width:55px}
 .roi-result{padding:1rem 1.25rem}
@@ -191,7 +218,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .roi-highlight-val{font-size:20px;font-weight:500;font-family:var(--mono);color:var(--amber)}
 .roi-sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .roi-sub-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px}
-.roi-sub-label{font-size:11px;color:var(--text3);margin-bottom:2px}
+.roi-sub-label{font-size:13px;color:var(--text3);margin-bottom:2px}
 .roi-sub-val{font-size:14px;font-weight:500;font-family:var(--mono);color:var(--text2)}
 .savings-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
 .savings-panel-header{padding:1rem 1.25rem 0.75rem;border-bottom:1px solid var(--border)}
@@ -202,24 +229,24 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .savings-tool-row{display:flex;align-items:center;gap:8px}
 .savings-tool-name{font-size:12px;color:var(--text2);flex:1}
 .savings-tool-amount{display:flex;align-items:center;gap:4px;flex-shrink:0}
-.savings-tool-input{width:70px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;font-family:var(--mono);color:var(--text);outline:none;text-align:right;transition:border-color 0.15s}
+.savings-tool-input{width:80px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:14px;font-family:var(--mono);color:var(--text);outline:none;text-align:right;transition:border-color 0.15s}
 .savings-tool-input:focus{border-color:var(--accent)}
-.savings-tool-unit{font-size:11px;color:var(--text3);white-space:nowrap}
+.savings-tool-unit{font-size:13px;color:var(--text3);white-space:nowrap}
 .savings-custom-row{display:flex;gap:8px;padding:0.75rem 1.25rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);align-items:center}
 .savings-custom-label{font-size:12px;color:var(--text2);flex:1}
-.savings-custom-input{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:13px;font-family:var(--mono);color:var(--text);outline:none;width:80px;text-align:right;transition:border-color 0.15s}
+.savings-custom-input{background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:14px;font-family:var(--mono);color:var(--text);outline:none;width:80px;text-align:right;transition:border-color 0.15s}
 .savings-custom-input:focus{border-color:var(--accent)}
 .savings-result{padding:1rem 1.25rem}
 .savings-vs-row{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:10px;gap:6px}
 .savings-vs-item{text-align:center;flex:1}
-.savings-vs-label{font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:4px}
+.savings-vs-label{font-size:13px;color:var(--text3);font-family:var(--mono);margin-bottom:4px}
 .savings-vs-val{font-size:17px;font-weight:500;font-family:var(--mono)}
 .savings-vs-val.current{color:#f87171}
 .savings-vs-val.optimised{color:var(--accent2)}
 .savings-vs-sep{color:var(--text3);font-size:16px;padding-bottom:2px}
 .savings-highlight{background:rgba(45,212,160,0.08);border:1px solid rgba(45,212,160,0.25);border-radius:var(--radius);padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
 .savings-highlight-left .savings-highlight-label{font-size:13px;color:var(--green);font-weight:500}
-.savings-highlight-left .savings-highlight-sub{font-size:11px;color:rgba(45,212,160,0.6);margin-top:2px}
+.savings-highlight-left .savings-highlight-sub{font-size:13px;color:rgba(45,212,160,0.6);margin-top:2px}
 .savings-highlight-val{font-size:22px;font-weight:500;font-family:var(--mono);color:var(--green)}
 .savings-negative{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:var(--radius);padding:10px 14px;font-size:12px;color:#f87171;font-family:var(--mono);text-align:center}
 .chart-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem}
@@ -228,13 +255,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .chart-panel-sub{font-size:12px;color:var(--text3);margin-bottom:14px}
 .chart-growth-row{display:flex;gap:8px;margin-bottom:12px;align-items:center}
 .chart-growth-label{font-size:12px;color:var(--text2);flex:1}
-.chart-growth-select{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:12px;font-family:var(--mono);color:var(--text);outline:none}
+.chart-growth-select{background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;font-size:13px;font-family:var(--mono);color:var(--text);outline:none}
 .chart-bars{display:flex;align-items:flex-end;gap:4px;height:100px}
 .chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
 .chart-bar{width:100%;border-radius:3px 3px 0 0;background:var(--accent);opacity:0.7;transition:height 0.4s ease;min-height:3px}
 .chart-bar.current{opacity:1;background:var(--green)}
-.chart-bar-label{font-size:9px;font-family:var(--mono);color:var(--text3)}
-.chart-bar-val{font-size:9px;font-family:var(--mono);color:var(--text3)}
+.chart-bar-label{font-size:12px;font-family:var(--mono);color:var(--text3)}
+.chart-bar-val{font-size:12px;font-family:var(--mono);color:var(--text3)}
 .readiness-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
 .readiness-header{padding:1rem 1.25rem 0.75rem;border-bottom:1px solid var(--border)}
 .readiness-title{font-size:13px;font-weight:500;color:var(--text2);display:flex;align-items:center;gap:8px;margin-bottom:3px}
@@ -254,17 +281,30 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .smart-cta-text{font-size:13px;color:var(--text2);line-height:1.5;flex:1}
 .smart-cta button{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;white-space:nowrap;transition:opacity 0.15s;flex-shrink:0}
 .smart-cta button:hover{opacity:0.85}
+.conclusion-panel{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);overflow:hidden}
+.conclusion-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);background:rgba(108,99,255,0.06)}
+.conclusion-eyebrow{font-family:var(--mono);font-size:12px;color:var(--accent2);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px}
+.conclusion-summary{font-size:16px;font-weight:400;color:var(--text);line-height:1.5;letter-spacing:-0.01em}
+.conclusion-body{padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--border)}
+.conclusion-item{display:flex;align-items:flex-start;gap:10px}
+.conclusion-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:7px}
+.conclusion-item-text{font-size:13px;color:var(--text2);line-height:1.6}
+.conclusion-item-text strong{color:var(--text);font-weight:500}
+.conclusion-cta{padding:1.1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background 0.15s;gap:12px}
+.conclusion-cta:hover{background:rgba(108,99,255,0.08)}
+.conclusion-cta-text{font-size:13px;color:var(--accent2);font-weight:500;line-height:1.5}
+.conclusion-cta-arrow{font-size:18px;color:var(--accent);flex-shrink:0}
 .cta-banner{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;text-align:center}
 .cta-banner p{font-size:12px;color:var(--text2);margin-bottom:0.75rem;line-height:1.5}
 .cta-banner button{width:100%;background:var(--accent);color:#fff;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;transition:opacity 0.15s}
 .cta-banner button:hover{opacity:0.85}
-.cta-sub{font-size:11px;color:var(--text3);margin-top:8px;margin-bottom:0}
+.cta-sub{font-size:13px;color:var(--text3);margin-top:8px;margin-bottom:0}
 .email-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem}
 .email-panel-title{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;gap:8px}
 .email-panel-title::before{content:'';width:3px;height:13px;background:var(--green);border-radius:2px;display:inline-block}
 .email-panel-sub{font-size:12px;color:var(--text3);margin-bottom:12px}
 .email-row{display:flex;gap:8px}
-.email-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 14px;font-size:13px;font-family:var(--mono);color:var(--text);outline:none;transition:border-color 0.15s}
+.email-input{flex:1;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:9px 14px;font-size:14px;font-family:var(--mono);color:var(--text);outline:none;transition:border-color 0.15s}
 .email-input::placeholder{color:var(--text3)}
 .email-input:focus{border-color:var(--accent)}
 .email-send-btn{background:var(--green);color:#0c0c0e;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;white-space:nowrap;transition:opacity 0.15s}
@@ -279,7 +319,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .action-btn.share:hover{background:var(--accent-bg)}
 .action-btn.reset{border-color:rgba(248,113,113,0.2);color:#f87171}
 .action-btn.reset:hover{background:rgba(248,113,113,0.08)}
-.copy-confirm{font-size:11px;color:var(--green);font-family:var(--mono);text-align:right;min-height:16px}
+.copy-confirm{font-size:13px;color:var(--green);font-family:var(--mono);text-align:right;min-height:16px}
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 .pdf-btn{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:11px;font-size:13px;font-family:var(--sans);color:var(--text2);cursor:pointer;transition:all 0.12s;display:flex;align-items:center;justify-content:center;gap:8px}
@@ -289,14 +329,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);width:100%;max-width:460px;padding:2rem;position:relative}
 .modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;line-height:1;padding:4px}
 .modal-close:hover{color:var(--text)}
-.modal-eyebrow{font-family:var(--mono);font-size:10px;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px}
+.modal-eyebrow{font-family:var(--mono);font-size:12px;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px}
 .modal h2{font-size:20px;font-weight:300;letter-spacing:-0.02em;color:var(--text);margin-bottom:6px}
 .modal h2 strong{font-weight:500}
 .modal-sub{font-size:13px;color:var(--text2);margin-bottom:1.5rem;line-height:1.5}
 .modal-estimate-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:1.25rem;font-family:var(--mono);font-size:12px;color:var(--text2);line-height:1.8}
 .modal-estimate-box .est-val{color:var(--accent2)}
 .form-field{margin-bottom:12px}
-.form-label{font-size:11px;font-family:var(--mono);color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:6px}
+.form-label{font-size:13px;font-family:var(--mono);color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:6px}
 .form-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:14px;font-family:var(--sans);color:var(--text);outline:none;transition:border-color 0.15s}
 .form-input::placeholder{color:var(--text3)}
 .form-input:focus{border-color:var(--accent)}
@@ -312,7 +352,7 @@ textarea.form-input{resize:vertical;min-height:80px;line-height:1.5}
 .modal-success-icon{font-size:36px;margin-bottom:12px}
 .modal-success h3{font-size:18px;font-weight:400;color:var(--text);margin-bottom:6px}
 .modal-success p{font-size:13px;color:var(--text2)}
-footer{border-top:1px solid var(--border);padding:1.25rem 2rem;display:flex;flex-direction:column;gap:6px;max-width:1100px;margin:0 auto;font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.6}
+footer{border-top:1px solid var(--border);padding:1.25rem 2rem;display:flex;flex-direction:column;gap:6px;max-width:1100px;margin:0 auto;font-size:13px;color:var(--text3);font-family:var(--mono);line-height:1.6}
 footer a{color:var(--text3);text-decoration:none}
 footer a:hover{color:var(--text2)}
 @media print{
@@ -335,13 +375,14 @@ footer a:hover{color:var(--text2)}
     <button class="currency-btn" onclick="setCurrency('EUR','€')">EUR</button>
     <button class="currency-btn active" onclick="setCurrency('NOK','kr')">NOK</button>
   </div>
-  <button class="nav-cta" onclick="openModal()">Start a conversation →</button>
+  <button class="nav-cta" onclick="openModal()">Book a free 30-minute session →</button>
 </nav>
 
 <div class="hero">
   <div class="hero-eyebrow">AI Operating Cost Estimator</div>
   <h1>What does AI actually cost<br><strong>your organisation?</strong></h1>
   <p>Translate AI from abstract hype to operational economics. Configure your use case and get a cost breakdown across models, workflows and scale.</p>
+  <div class="hero-pov">Most AI cost problems are architecture problems, not model pricing problems.</div>
 </div>
 
 <div class="steps-wrap">
@@ -395,10 +436,10 @@ footer a:hover{color:var(--text2)}
             <span class="slider-value" id="sv-ctx">Medium</span>
           </div>
           <input type="range" id="sl-ctx" min="0.5" max="6" step="0.5" value="1">
-          <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px;font-family:var(--mono);color:var(--text3);">
+          <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:12px;font-family:var(--mono);color:var(--text3);">
             <span>Short</span><span>Medium</span><span>Long</span><span>Very long</span>
           </div>
-          <div id="ctx-desc" style="margin-top:8px;font-size:11px;color:var(--text3);line-height:1.5;font-family:var(--mono);"></div>
+          <div id="ctx-desc" style="margin-top:8px;font-size:13px;color:var(--text3);line-height:1.5;font-family:var(--mono);"></div>
         </div>
         <div class="slider-block">
           <div class="slider-top">
@@ -447,7 +488,7 @@ footer a:hover{color:var(--text2)}
             <input type="range" id="sl-cache" min="0" max="95" step="5" value="0" oninput="setCacheLevel(this.value)" style="flex:1;">
             <span style="font-family:var(--mono);font-size:12px;color:var(--accent2);min-width:80px;text-align:right;" id="cache-saving-label">0% static</span>
           </div>
-          <div style="margin-top:6px;font-size:11px;color:var(--text3);font-family:var(--mono);" id="cache-desc-text">Drag right to model how much of your input context is reused across requests.</div>
+          <div style="margin-top:6px;font-size:13px;color:var(--text3);font-family:var(--mono);" id="cache-desc-text">Drag right to model how much of your input context is reused across requests.</div>
         </div>
       </div>
       <div class="panel">
@@ -465,6 +506,45 @@ footer a:hover{color:var(--text2)}
         </div>
         <div class="compare-result" id="compare-result"></div>
       </div>
+      <div class="cost-drivers-panel">
+        <button class="cost-drivers-toggle" id="cost-drivers-toggle" onclick="toggleCostDrivers()">
+          <span>What actually drives your AI costs</span>
+          <span class="cost-drivers-toggle-icon">▾</span>
+        </button>
+        <div class="cost-drivers-body" id="cost-drivers-body">
+          <div class="cost-driver-row">
+            <div class="cost-driver-icon">📄</div>
+            <div><div class="cost-driver-name">Context size</div><div class="cost-driver-desc">The single biggest lever. Doubling the amount of text you send per request doubles your input cost. This is why RAG architectures and caching strategies matter so much.</div></div>
+          </div>
+          <div class="cost-driver-row">
+            <div class="cost-driver-icon">🤖</div>
+            <div><div class="cost-driver-name">Agent depth &amp; orchestration</div><div class="cost-driver-desc">Each step in a multi-step agent is a separate API call. A 6-step workflow is 6× the token cost of a single call — plus context accumulates across steps.</div></div>
+          </div>
+          <div class="cost-driver-row">
+            <div class="cost-driver-icon">🔄</div>
+            <div><div class="cost-driver-name">Retrieval strategy</div><div class="cost-driver-desc">Full-document retrieval vs. chunk-based RAG can change your input cost by 10–50×. How you fetch context matters as much as what model you use.</div></div>
+          </div>
+          <div class="cost-driver-row">
+            <div class="cost-driver-icon">📝</div>
+            <div><div class="cost-driver-name">Output length</div><div class="cost-driver-desc">Output tokens cost 4–5× more per token than input tokens on most models. Tasks that generate long documents hit this hard — drafting and documentation especially.</div></div>
+          </div>
+          <div class="cost-driver-row">
+            <div class="cost-driver-icon">⚡</div>
+            <div><div class="cost-driver-name">Workflow volume &amp; frequency</div><div class="cost-driver-desc">Cost scales linearly with volume. 500 runs/day is 10× the cost of 50/day — but also 10× the productivity gain. The ratio matters more than the absolute number.</div></div>
+          </div>
+          <div class="cost-driver-row">
+            <div class="cost-driver-icon">🧠</div>
+            <div><div class="cost-driver-name">Model selection per task</div><div class="cost-driver-desc">Most enterprise deployments use 2–3 models. Haiku for classification and routing, Sonnet for reasoning and drafting, Opus for high-stakes decisions. Routing correctly reduces cost 40–70%.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="complexity-warning" id="complexity-warning">
+        <div class="complexity-warning-title">⚠ Orchestration complexity introduced</div>
+        <div class="complexity-warning-text">This setup goes beyond a simple API integration. Before committing to production, your architecture should address:</div>
+        <div class="complexity-warning-list" id="complexity-warning-list"></div>
+      </div>
+
       <div class="methodology-panel">
         <button class="methodology-toggle" id="meth-toggle" onclick="toggleMethodology()">
           <span>How we calculate these estimates</span>
@@ -504,6 +584,11 @@ footer a:hover{color:var(--text2)}
             <input class="roi-input" id="roi-minutes" type="number" min="1" value="45" oninput="updateROI()">
             <span class="roi-unit">min/day</span>
           </div>
+          <div class="roi-input-row">
+            <span class="roi-input-label">Review &amp; QA time per person</span>
+            <input class="roi-input" id="roi-review" type="number" min="0" value="10" oninput="updateROI()">
+            <span class="roi-unit">min/day</span>
+          </div>
         </div>
         <div class="roi-result" id="roi-result"></div>
       </div>
@@ -535,11 +620,25 @@ footer a:hover{color:var(--text2)}
               <span class="savings-tool-unit">per user / mo</span>
             </div>
           </div>
+          <div class="savings-tool-row">
+            <span class="savings-tool-name">Google Gemini for Workspace</span>
+            <div class="savings-tool-amount">
+              <input class="savings-tool-input" id="cost-gemini" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
+              <span class="savings-tool-unit">per user / mo</span>
+            </div>
+          </div>
+          <div class="savings-tool-row">
+            <span class="savings-tool-name">Notion AI</span>
+            <div class="savings-tool-amount">
+              <input class="savings-tool-input" id="cost-notion" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
+              <span class="savings-tool-unit">per user / mo</span>
+            </div>
+          </div>
         </div>
         <div style="padding:10px 1.25rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.02);">
           <span style="font-size:12px;color:var(--text2);flex:1;">How many users have these tools?</span>
           <input class="savings-tool-input" id="cost-users" type="number" min="1" value="10" placeholder="10" oninput="updateSavings()">
-          <span style="font-size:11px;color:var(--text3);white-space:nowrap;">users</span>
+          <span style="font-size:13px;color:var(--text3);white-space:nowrap;">users</span>
         </div>
         <div class="savings-custom-row">
           <span class="savings-custom-label">Other AI spend</span>
@@ -568,7 +667,19 @@ footer a:hover{color:var(--text2)}
 
       <div class="smart-cta" id="smart-cta" style="display:none;">
         <div class="smart-cta-text" id="smart-cta-text"></div>
-        <button onclick="openModal()">Let's talk →</button>
+        <button onclick="openModal()">Book a free 30-minute session →</button>
+      </div>
+
+      <div class="conclusion-panel" id="conclusion-panel">
+        <div class="conclusion-header">
+          <div class="conclusion-eyebrow">Your estimate — what it means</div>
+          <div class="conclusion-summary" id="conclusion-summary">Configure your tasks in step 1 to see your personalised assessment.</div>
+        </div>
+        <div class="conclusion-body" id="conclusion-body"></div>
+        <div class="conclusion-cta" onclick="openModal()" id="conclusion-cta" style="display:none;">
+          <div class="conclusion-cta-text" id="conclusion-cta-text"></div>
+          <span class="conclusion-cta-arrow">→</span>
+        </div>
       </div>
 
       <div class="step-nav">
@@ -633,7 +744,35 @@ footer a:hover{color:var(--text2)}
         <span class="bt-label">Monthly total</span>
         <span class="bt-val" id="b-total">—</span>
       </div>
-      <div class="iceberg-note"><strong>Inference costs only.</strong> Production deployments also carry vector database hosting, cloud infrastructure, integration, testing and maintenance — typically 2–5× the inference cost in year one.</div>
+      <div class="iceberg-viz">
+        <div class="iceberg-title">Total cost of ownership — not just inference</div>
+        <div class="iceberg-layers">
+          <div class="iceberg-layer" style="background:rgba(108,99,255,0.15);color:var(--accent2)">
+            <div class="iceberg-layer-left"><span class="iceberg-layer-name">Inference</span><span class="iceberg-layer-tag" style="background:var(--accent-bg);color:var(--accent2)">this calculator</span></div>
+            <span class="iceberg-layer-note">what you see above</span>
+          </div>
+          <div class="iceberg-layer" style="background:rgba(255,255,255,0.04);color:var(--text2)">
+            <div class="iceberg-layer-left"><span class="iceberg-layer-name">Vector DB &amp; retrieval</span></div>
+            <span class="iceberg-layer-note">+10–30% for RAG setups</span>
+          </div>
+          <div class="iceberg-layer" style="background:rgba(255,255,255,0.03);color:var(--text2)">
+            <div class="iceberg-layer-left"><span class="iceberg-layer-name">Observability &amp; monitoring</span></div>
+            <span class="iceberg-layer-note">logging, evals, tracing</span>
+          </div>
+          <div class="iceberg-layer" style="background:rgba(255,255,255,0.02);color:var(--text3)">
+            <div class="iceberg-layer-left"><span class="iceberg-layer-name">Security &amp; guardrails</span></div>
+            <span class="iceberg-layer-note">PII filtering, content checks</span>
+          </div>
+          <div class="iceberg-layer" style="background:rgba(255,255,255,0.02);color:var(--text3)">
+            <div class="iceberg-layer-left"><span class="iceberg-layer-name">Cloud infrastructure</span></div>
+            <span class="iceberg-layer-note">compute, storage, networking</span>
+          </div>
+          <div class="iceberg-layer" style="background:rgba(248,113,113,0.06);color:#f87171">
+            <div class="iceberg-layer-left"><span class="iceberg-layer-name">Integration &amp; maintenance</span><span class="iceberg-layer-tag" style="background:rgba(248,113,113,0.15);color:#f87171">largest variable</span></div>
+            <span class="iceberg-layer-note">typically 2–5× inference in yr 1</span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="readiness-panel" id="readiness-panel">
@@ -659,9 +798,9 @@ footer a:hover{color:var(--text2)}
     </div>
 
     <div class="cta-banner">
-      <p>The numbers are a starting point. The real question is how you design AI operations that scale without accumulating technical and organisational debt.</p>
-      <button onclick="openModal()">Start an architecture conversation →</button>
-      <p class="cta-sub">30 minutes. No pitch deck. Real questions.</p>
+      <p>The numbers are a starting point. The real question is whether your AI investment will deliver — and what it takes to get there without accumulating technical and financial risk.</p>
+      <button onclick="openModal()">Book a free 30-minute session →</button>
+      <p class="cta-sub">No commitment. No pitch deck. Real questions.</p>
     </div>
   </div>
 </div>
@@ -677,9 +816,9 @@ footer a:hover{color:var(--text2)}
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">×</button>
     <div id="modal-form-wrap">
-      <div class="modal-eyebrow">Architecture conversation</div>
-      <h2>From estimate to <strong>operating model</strong></h2>
-      <p class="modal-sub">Share your context and we'll come prepared to talk architecture, cost governance and what a scalable AI operating model looks like for your organisation.</p>
+      <div class="modal-eyebrow">Free 30-minute session</div>
+      <h2>Let's talk about <strong>your AI investment</strong></h2>
+      <p class="modal-sub">Tell us about your setup and we'll come prepared with a real assessment — costs, risks and what a production deployment looks like for your organisation.</p>
       <div class="modal-estimate-box" id="modal-estimate-box"></div>
       <div class="form-row">
         <div class="form-field">
@@ -722,6 +861,7 @@ function goToStep(n) {
     else if (i<n) tab.classList.add('done');
     document.getElementById('step-num-'+i).textContent = i<n ? '✓' : i;
   });
+  if (n===3) { updateConclusion(); updateROI(); updateSavings(); updateChart(); }
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
@@ -884,6 +1024,94 @@ function updateRecommendedModel() {
   panel.classList.add('visible');
 }
 
+function updateConclusion() {
+  const panel = document.getElementById('conclusion-panel');
+  const summaryEl = document.getElementById('conclusion-summary');
+  const bodyEl = document.getElementById('conclusion-body');
+  const ctaEl = document.getElementById('conclusion-cta-text');
+  const ctaWrap = document.getElementById('conclusion-cta');
+  if (!panel || !summaryEl || !bodyEl || !ctaEl) return;
+
+  const active = TASKS.filter(t => (taskRuns[t.id]||0) > 0);
+  if (!active.length) {
+    summaryEl.textContent = 'Configure your tasks in step 1 to see your personalised assessment.';
+    bodyEl.innerHTML = '';
+    if (ctaWrap) ctaWrap.style.display = 'none';
+    return;
+  }
+
+  const monthly = totalMonthly();
+  const monthlyLocal = monthly * currency.rate;
+  const hasAgents = active.filter(t => t.id.startsWith('agent')).length > 0;
+  const hasRAG = (taskRuns['rag']||0) > 0;
+  const model = MODELS.find(m => m.id === sel.model);
+
+  // Dynamic summary sentence
+  let summary;
+  if (monthlyLocal < 5000) {
+    summary = `At ${cx(monthly)}/month, this is a low-cost pilot configuration. The economics are favourable — the main question is whether the architecture will scale when you're ready to expand.`;
+  } else if (monthlyLocal < 50000) {
+    summary = `At ${cx(monthly)}/month across ${active.length} workflow${active.length>1?'s':''}, this is a meaningful operational commitment. How you design the architecture now will determine what it costs at 10× this volume.`;
+  } else {
+    summary = `At ${cx(monthly)}/month, you're at a scale where architecture decisions have direct financial consequences. Model routing, caching and prompt design are not optimisations — they're cost governance.`;
+  }
+  summaryEl.textContent = summary;
+
+  // Contextual insight bullets
+  const items = [];
+  items.push({color:'var(--accent2)', text:`<strong>Inference cost: ${cx(monthly)}/month</strong> on ${model.full}. This is the visible part only — production deployments typically run 2–5× this in total infrastructure cost in year one.`});
+  if (hasAgents) items.push({color:'var(--amber)', text:`<strong>Agent workflows require design decisions before deployment</strong> — orchestration, error handling, human oversight gates and observability are not optional at production scale.`});
+  if (hasRAG) items.push({color:'var(--accent2)', text:`<strong>RAG is an architectural pattern, not a feature</strong> — embedding strategy, chunking, re-ranking and vector DB infrastructure all affect both cost and answer quality.`});
+  if (sel.cachePct >= 40) {
+    const saving = Math.round(sel.cachePct * 0.9);
+    items.push({color:'var(--green)', text:`<strong>Prompt caching at ${sel.cachePct}% saves ~${saving}% on input costs</strong> — factor this into any comparison with off-the-shelf tools.`});
+  }
+  if (active.length >= 4) items.push({color:'var(--green)', text:`<strong>Running ${active.length} workflows is an operating model decision</strong> — a shared architecture reduces total cost significantly compared to building each one independently.`});
+  items.push({color:'var(--text3)', text:`<strong>This estimate does not include</strong> review and QA time, integration development, change management, or the organisational capacity needed to absorb AI into existing workflows.`});
+
+  bodyEl.innerHTML = items.map(item =>
+    `<div class="conclusion-item"><div class="conclusion-dot" style="background:${item.color}"></div><div class="conclusion-item-text">${item.text}</div></div>`
+  ).join('');
+
+  // CTA
+  if (ctaWrap) ctaWrap.style.display = 'flex';
+  if (hasAgents) ctaEl.textContent = 'Your setup includes agent workflows — let\'s talk about what production-ready looks like for your organisation.';
+  else if (monthlyLocal > 30000) ctaEl.textContent = `At ${cx(monthly)}/month, the decisions you make now will compound. Let's talk about your AI investment.`;
+  else ctaEl.textContent = 'Ready to move from estimate to investment decision? Book a free 30-minute session.';
+}
+
+function toggleCostDrivers() {
+  const btn=document.getElementById('cost-drivers-toggle');
+  const body=document.getElementById('cost-drivers-body');
+  btn.classList.toggle('open'); body.classList.toggle('open');
+}
+
+function updateComplexityWarning() {
+  const el=document.getElementById('complexity-warning');
+  const list=document.getElementById('complexity-warning-list');
+  if(!el||!list) return;
+  const active=TASKS.filter(t=>(taskRuns[t.id]||0)>0);
+  const hasAgents=active.filter(t=>t.id.startsWith('agent')).length>0;
+  const hasRAG=taskRuns['rag']>0;
+  const hasMany=active.length>=5;
+  const highVol=active.reduce((s,t)=>s+(taskRuns[t.id]||0),0)>300;
+  const items=[];
+  if(hasAgents){
+    items.push('Orchestration layer — how do agents hand off, retry, and fail gracefully?');
+    items.push('Human-in-the-loop gates — which decisions require approval before execution?');
+    items.push('Observability — every agent step needs logging and tracing for debugging');
+  }
+  if(hasRAG){
+    items.push('Retrieval quality — embedding strategy, chunking and re-ranking affect answer accuracy significantly');
+    items.push('Vector DB infrastructure — hosting, indexing and query latency at scale');
+  }
+  if(hasMany) items.push('Shared architecture — 5+ workflows benefit from a unified prompt layer and shared context management');
+  if(highVol) items.push('Rate limits & throughput — at this volume, standard API tiers may require Enterprise agreements or provisioned capacity');
+  if(!items.length){el.classList.remove('visible');return;}
+  list.innerHTML=items.map(i=>`<div class="complexity-warning-item">→ ${i}</div>`).join('');
+  el.classList.add('visible');
+}
+
 function toggleMethodology() {
   const btn=document.getElementById('meth-toggle'),body=document.getElementById('meth-body');
   btn.classList.toggle('open'); body.classList.toggle('open');
@@ -910,7 +1138,7 @@ const TASK_METHODOLOGY = {
 function renderMethodology() {
   document.getElementById('meth-task-list').innerHTML=TASKS.map(t=>{
     const m=TASK_METHODOLOGY[t.id]||{basis:'—',note:'—'};
-    return `<div class="methodology-task-row"><span class="meth-name">${t.name}</span><span class="meth-detail">${m.basis}<br><span style="color:var(--text3);font-size:10px">${m.note}</span></span></div>`;
+    return `<div class="methodology-task-row"><span class="meth-name">${t.name}</span><span class="meth-detail">${m.basis}<br><span style="color:var(--text3);font-size:12px">${m.note}</span></span></div>`;
   }).join('');
 }
 
@@ -976,31 +1204,38 @@ function updateROI() {
   const emp=parseFloat(document.getElementById('roi-employees').value)||0;
   const rate=parseFloat(document.getElementById('roi-rate').value)||0;
   const min=parseFloat(document.getElementById('roi-minutes').value)||0;
+  const review=parseFloat(document.getElementById('roi-review').value)||0;
   const el=document.getElementById('roi-result');
   if(!emp||!rate||!min){el.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:8px 0;">Fill in the fields above.</div>';return;}
-  const monthSave=(min/60)*rate*emp/currency.rate*sel.days;
+  const netMin=Math.max(0,min-review);
+  const monthSave=(netMin/60)*rate*emp/currency.rate*sel.days;
+  const grossSave=(min/60)*rate*emp/currency.rate*sel.days;
   const annSave=monthSave*12;
   const aiCost=totalMonthly();
   const ratio=aiCost>0?Math.round(monthSave/aiCost*100):0;
+  const reviewPct=min>0?Math.round(review/min*100):0;
   el.innerHTML=`
     <div class="roi-highlight">
-      <div class="roi-highlight-label">Potential freed capacity / month</div>
+      <div class="roi-highlight-label">Net freed capacity / month</div>
       <div class="roi-highlight-val">${cx(monthSave)}</div>
     </div>
     <div class="roi-sub-grid">
       <div class="roi-sub-card"><div class="roi-sub-label">Annual capacity</div><div class="roi-sub-val">${cx(annSave)}</div></div>
       <div class="roi-sub-card"><div class="roi-sub-label">Capacity vs AI cost</div><div class="roi-sub-val" style="color:${ratio>=100?'var(--green)':'var(--text2)'}">${ratio}%</div></div>
     </div>
-    <div style="margin-top:10px;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;font-size:11px;color:var(--text3);line-height:1.6;font-family:var(--mono);">Reflects salary value of time freed up. Actual return depends on integration costs, process change and organisational adoption.</div>`;
+    ${review>0?`<div style="margin-top:8px;padding:7px 10px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:6px;font-size:13px;color:var(--text3);font-family:var(--mono);">Review &amp; QA absorbs ${reviewPct}% of gross saving (${cx(grossSave-monthSave)}/mo) — human-in-the-loop cost included above</div>`:''}
+    <div style="margin-top:8px;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;font-size:13px;color:var(--text3);line-height:1.6;font-family:var(--mono);">Reflects salary value of time freed up. Actual return also depends on integration costs, process change and organisational adoption.</div>`;
 }
 
 function updateSavings() {
   const cop=parseFloat(document.getElementById('cost-copilot').value)||0;
   const gpt=parseFloat(document.getElementById('cost-chatgpt').value)||0;
   const ms=parseFloat(document.getElementById('cost-mscopilot').value)||0;
+  const gem=parseFloat(document.getElementById('cost-gemini').value)||0;
+  const not=parseFloat(document.getElementById('cost-notion').value)||0;
   const usr=parseFloat(document.getElementById('cost-users').value)||1;
   const cust=parseFloat(document.getElementById('cost-custom').value)||0;
-  const total=(cop+gpt+ms)*usr+cust;
+  const total=(cop+gpt+ms+gem+not)*usr+cust;
   const opt=totalMonthly();
   const el=document.getElementById('savings-result');
   if(total===0){el.innerHTML=`<div style="font-size:12px;color:var(--text3);text-align:center;padding:4px 0;">Enter your current costs above to see potential savings.</div>`;return;}
@@ -1047,6 +1282,8 @@ function update() {
   updateChart();
   updateSmartCTA(monthly,active);
   updateReadiness();
+  updateComplexityWarning();
+  updateConclusion();
 }
 
 function updateCompare() {
@@ -1077,8 +1314,8 @@ function toggleOpt(key) {
 function renderTasks() {
   let html='';
   TASKS.forEach(t=>{
-    if(t.id==='agent-simple') html+=`<div style="grid-column:1/-1;margin:6px 0 2px;display:flex;align-items:center;gap:10px;"><span style="font-size:10px;font-family:var(--mono);color:var(--amber);white-space:nowrap;">AI agents — multi-step workflows</span><div style="flex:1;height:1px;background:var(--border);"></div></div>`;
-    if(t.id==='code') html+=`<div style="grid-column:1/-1;margin:6px 0 2px;display:flex;align-items:center;gap:10px;"><span style="font-size:10px;font-family:var(--mono);color:var(--text3);white-space:nowrap;">Technical tasks</span><div style="flex:1;height:1px;background:var(--border);"></div></div>`;
+    if(t.id==='agent-simple') html+=`<div style="grid-column:1/-1;margin:6px 0 2px;display:flex;align-items:center;gap:10px;"><span style="font-size:12px;font-family:var(--mono);color:var(--amber);white-space:nowrap;">AI agents — multi-step workflows</span><div style="flex:1;height:1px;background:var(--border);"></div></div>`;
+    if(t.id==='code') html+=`<div style="grid-column:1/-1;margin:6px 0 2px;display:flex;align-items:center;gap:10px;"><span style="font-size:12px;font-family:var(--mono);color:var(--text3);white-space:nowrap;">Technical tasks</span><div style="flex:1;height:1px;background:var(--border);"></div></div>`;
     const runs=taskRuns[t.id]||0, vol=taskVol[t.id], isAgent=t.id.startsWith('agent');
     html+=`<div class="task-btn${runs>0?' active':''}${isAgent?' agent-task':''}">
       <div class="task-btn-name">${t.name}${isAgent?`<span class="agent-badge">multi-step</span>`:''}</div>
@@ -1195,9 +1432,11 @@ function buildEstimateParams(toEmail) {
   const cop=parseFloat(document.getElementById('cost-copilot').value)||0;
   const gpt=parseFloat(document.getElementById('cost-chatgpt').value)||0;
   const ms=parseFloat(document.getElementById('cost-mscopilot').value)||0;
+  const gem=parseFloat(document.getElementById('cost-gemini').value)||0;
+  const not=parseFloat(document.getElementById('cost-notion').value)||0;
   const usr=parseFloat(document.getElementById('cost-users').value)||1;
   const cust=parseFloat(document.getElementById('cost-custom').value)||0;
-  const curr=(cop+gpt+ms)*usr+cust;
+  const curr=(cop+gpt+ms+gem+not)*usr+cust;
   const saving=curr>0?curr-monthly:null;
   return {
     to_email:toEmail,
