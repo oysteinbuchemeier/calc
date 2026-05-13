@@ -12,7 +12,7 @@
 :root{
   --bg:#0c0c0e;--bg2:#131316;--bg3:#1a1a1f;
   --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.18);
-  --text:#f0eff4;--text2:#c4c3cc;--text3:#a8a7b4;
+  --text:#f0eff4;--text2:#c4c3cc;--text3:#b8b7c4;
   --accent:#6c63ff;--accent2:#c4c0ff;--accent-bg:rgba(108,99,255,0.15);
   --green:#2dd4a0;--amber:#f59e0b;
   --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
@@ -54,7 +54,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 2rem
 .complexity-warning-item{font-size:13px;color:var(--text2);font-family:var(--mono);padding:4px 0;border-bottom:1px solid rgba(245,158,11,0.1)}
 .complexity-warning-item:last-child{border-bottom:none}
 .iceberg-viz{padding:1.25rem 1.5rem;border-top:1px solid var(--border)}
-.iceberg-title{font-size:12px;font-family:var(--mono);color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:12px}
+.iceberg-title{font-size:12px;font-family:var(--sans);font-weight:600;color:var(--text3);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:12px}
 .iceberg-layers{display:flex;flex-direction:column;gap:5px}
 .iceberg-layer{border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px;font-size:13px}
 .iceberg-layer-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -107,7 +107,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 2rem
 .agent-badge{font-size:12px;font-family:var(--mono);background:rgba(245,158,11,0.15);color:var(--amber);padding:2px 6px;border-radius:4px}
 .task-vol-row{display:flex;align-items:center;gap:6px;margin:6px 0 5px}
 .task-vol-field{display:flex;flex-direction:column;gap:2px}
-.task-vol-label{font-size:12px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:0.06em}
+.task-vol-label{font-size:11px;font-family:var(--sans);color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;font-weight:500}
 .task-vol-input{width:52px;background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:4px 6px;font-size:12px;font-family:var(--mono);color:var(--text);outline:none;text-align:center;transition:border-color 0.15s}
 .task-btn.active .task-vol-input{border-color:rgba(108,99,255,0.3);background:rgba(108,99,255,0.06)}
 .task-btn.agent-task.active .task-vol-input{border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.06)}
@@ -133,7 +133,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .model-pill:not(.active) .pill-badge{background:rgba(255,255,255,0.06);color:var(--text3)}
 .rec-model-panel{background:var(--bg2);border:1px solid rgba(45,212,160,0.25);border-radius:var(--radius-lg);padding:1rem 1.25rem;display:none}
 .rec-model-panel.visible{display:block}
-.rec-model-label{font-size:12px;font-family:var(--mono);color:var(--green);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
+.rec-model-label{font-size:12px;font-family:var(--sans);font-weight:600;color:var(--green);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:6px}
 .rec-model-name{font-size:15px;font-weight:500;color:var(--text);margin-bottom:4px}
 .rec-model-reason{font-size:12px;color:var(--text2);line-height:1.5}
 .rec-model-saving{font-size:13px;font-family:var(--mono);color:var(--green);margin-top:6px}
@@ -168,9 +168,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .methodology-task-row:last-child{border-bottom:none}
 .meth-name{color:var(--text2);flex:1}
 .meth-detail{font-family:var(--mono);font-size:13px;color:var(--text3);text-align:right;line-height:1.6}
-.section-label{font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px}
+.section-label{font-family:var(--sans);font-size:11px;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:12px}
 .metric-big{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem}
-.metric-big-label{font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
+.metric-big-label{font-family:var(--sans);font-size:12px;font-weight:600;color:var(--text3);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:6px}
 .metric-big-value{font-size:34px;font-weight:300;letter-spacing:-0.03em;color:var(--green);line-height:1;margin-bottom:4px}
 .metric-big-sub{font-size:12px;color:var(--text3)}
 .metric-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -178,7 +178,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .metric-small-label{font-size:13px;color:var(--text3);margin-bottom:4px}
 .metric-small-value{font-family:var(--mono);font-size:17px;font-weight:500;color:var(--text);letter-spacing:-0.02em}
 .task-breakdown-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
-.task-breakdown-header{padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase}
+.task-breakdown-header{padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);font-family:var(--sans);font-size:12px;font-weight:600;color:var(--text3);letter-spacing:0.04em;text-transform:uppercase}
 .task-breakdown-empty{padding:1rem 1.25rem;font-size:12px;color:var(--text3);text-align:center}
 .tbd-row{display:grid;grid-template-columns:1fr auto auto;gap:6px 10px;padding:8px 1.25rem;border-bottom:1px solid var(--border);font-size:12px;align-items:center}
 .tbd-row:last-child{border-bottom:none}
@@ -195,7 +195,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .tbar-fill{height:100%;border-radius:3px;transition:width 0.35s ease}
 .tbar-val{min-width:52px;text-align:right;font-size:12px;color:var(--text3)}
 .breakdown-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
-.breakdown-header{padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase}
+.breakdown-header{padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);font-family:var(--sans);font-size:12px;font-weight:600;color:var(--text3);letter-spacing:0.04em;text-transform:uppercase}
 .breakdown-row{display:flex;justify-content:space-between;padding:9px 1.25rem;border-bottom:1px solid var(--border);font-size:12px}
 .br-label{color:var(--text2)}
 .br-val{font-family:var(--mono);color:var(--text);font-weight:500}
@@ -493,6 +493,7 @@ footer a:hover{color:var(--text2)}
     <div class="step-panel active" id="step-1">
       <div class="panel">
         <div class="panel-title">Start with an industry preset</div>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:12px;line-height:1.5;">Select a starting point based on your industry. These are <strong style="color:var(--text2)">illustrative defaults only</strong> — adjust the task volumes to match your actual usage before drawing conclusions.</p>
         <div class="preset-row">
           <button class="preset-btn" onclick="applyPreset('finance',event)">Finance &amp; Legal</button>
           <button class="preset-btn" onclick="applyPreset('hr',event)">HR &amp; Recruitment</button>
@@ -507,7 +508,7 @@ footer a:hover{color:var(--text2)}
       </div>
       <div class="panel">
         <div class="panel-title">Select tasks &amp; set daily volume</div>
-        <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.5;">Enter the number of employees using AI for each task and how many times per day. The calculator works out daily volume automatically.</p>
+        <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.5;">Enter the number of employees using AI for each task and how many times per day. The calculator works out daily volume automatically. <strong style="color:var(--text2)">One "run" = one AI request</strong> — e.g. one document summarised, one email drafted, one question answered.</p>
         <div class="task-grid" id="task-grid"></div>
       </div>
       <div class="panel">
@@ -543,6 +544,7 @@ footer a:hover{color:var(--text2)}
         <div class="panel-title">Model</div>
         <div class="model-row" id="model-row"></div>
         <div id="model-desc" style="font-size:12px;color:var(--text3);margin-top:10px;font-family:var(--mono);"></div>
+        <div style="margin-top:8px;padding:8px 10px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:6px;font-size:12px;color:var(--text3);font-family:var(--mono);">⚠ Model prices change frequently. We review monthly — last updated May 2026. Verify current pricing at provider documentation before budgeting.</div>
       </div>
       <div class="rec-model-panel" id="rec-model-panel">
         <div class="rec-model-label">⚡ Recommended for your tasks</div>
@@ -659,7 +661,7 @@ footer a:hover{color:var(--text2)}
           <div class="roi-input-row">
             <span class="roi-input-label">Avg. hourly rate</span>
             <input class="roi-input" id="roi-rate" type="number" min="1" value="650" oninput="updateROI()">
-            <span class="roi-unit" id="roi-rate-unit">kr/hour</span>
+            <span class="roi-unit" id="roi-rate-unit">kr / hr</span>
           </div>
           <div class="roi-input-row">
             <span class="roi-input-label">Time saved per person</span>
@@ -1032,7 +1034,7 @@ function setCurrency(code, symbol) {
   currency={code, symbol, rate:CURRENCY_RATES[code]};
   document.querySelectorAll('.currency-btn').forEach(b=>b.classList.toggle('active', b.textContent===code));
   const ru = document.getElementById('roi-rate-unit');
-  if(ru) ru.textContent=symbol+'/hour';
+  if(ru) ru.textContent=symbol+' / hr';
   update(); updateCompare(); updateROI(); updateSavings();
 }
 
@@ -1098,7 +1100,8 @@ function applyPreset(id,e) {
     taskVol[tid]={employees:v.e,usesPerDay:v.u};
   });
   const d=document.getElementById('preset-desc');
-  d.textContent=p.desc; d.classList.add('visible');
+  d.innerHTML=`${p.desc} <span style="color:var(--amber);font-size:12px;font-family:var(--mono);">↓ Illustrative defaults — adjust volumes below to match your organisation.</span>`;
+  d.classList.add('visible');
   renderTasks(); update(); updateCompare(); updateRecommendedModel();
 }
 
@@ -1401,7 +1404,11 @@ function updateCompare() {
 
 function pick(type,val) {
   sel[type]=val;
-  if(type==='model') renderModels();
+  if(type==='model'){
+    renderModels();
+    const sA=document.getElementById('cmp-a');
+    if(sA) sA.value=val;
+  }
   update(); updateCompare();
 }
 
@@ -1418,8 +1425,9 @@ function renderTasks() {
     if(t.id==='code') html+=`<div style="grid-column:1/-1;margin:6px 0 2px;display:flex;align-items:center;gap:10px;"><span style="font-size:12px;font-family:var(--mono);color:var(--text3);white-space:nowrap;">Technical tasks</span><div style="flex:1;height:1px;background:var(--border);"></div></div>`;
     const runs=taskRuns[t.id]||0, vol=taskVol[t.id], isAgent=t.id.startsWith('agent');
     const isTech=['code','sql','rag','apidoc'].includes(t.id);
+    const isPreset = activePreset && INDUSTRY_PRESETS[activePreset] && INDUSTRY_PRESETS[activePreset].tasks[t.id] > 0;
     html+=`<div class="task-btn${runs>0?' active':''}${isAgent?' agent-task':''}">
-      <div class="task-btn-name">${t.name}${isAgent?`<span class="agent-badge">multi-step</span>`:''}</div>
+      <div class="task-btn-name">${t.name}${isAgent?`<span class="agent-badge">multi-step</span>`:''}${isPreset&&runs>0?`<span style="font-size:10px;font-family:var(--mono);color:var(--amber);margin-left:auto;font-weight:400;">preset</span>`:''}</div>
       <div class="task-btn-desc">${t.desc}</div>
       <div class="task-btn-explain">${t.explain}</div>
       <div class="task-vol-row">
@@ -1439,6 +1447,8 @@ function setTaskVol(id,field,val) {
   taskVol[id][field]=parseFloat(val)||0;
   const runs=Math.round(taskVol[id].employees*taskVol[id].usesPerDay);
   taskRuns[id]=runs;
+  activePreset=null;
+  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
   const v=document.getElementById('rv-'+id);
   const isAgent=id.startsWith('agent');
   if(v){v.closest('.task-btn').classList.toggle('active',runs>0);v.textContent=runs===0?'off':runs+(isAgent?' triggers/day':'/day');}
@@ -1506,14 +1516,18 @@ document.getElementById('sl-days').addEventListener('input',e=>{
 });
 
 const sA=document.getElementById('cmp-a'),sB=document.getElementById('cmp-b');
-MODELS.forEach((m,i)=>{
-  sA.innerHTML+=`<option value="${m.id}"${i===0?' selected':''}>${m.full}</option>`;
-  sB.innerHTML+=`<option value="${m.id}"${i===1?' selected':''}>${m.full}</option>`;
+MODELS.forEach(m=>{
+  sA.innerHTML+=`<option value="${m.id}">${m.full}</option>`;
+  sB.innerHTML+=`<option value="${m.id}">${m.full}</option>`;
 });
+// Default: current model vs cheapest
+sA.value = sel.model;
+sB.value = 'g-flash';
 
 loadFromURL();
 renderTasks();
 renderModels();
+document.getElementById('roi-rate-unit').textContent = currency.symbol + ' / hr';
 update();
 updateCompare();
 updateROI();
