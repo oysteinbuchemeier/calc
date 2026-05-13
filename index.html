@@ -3,1216 +3,390 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Cost Calculator — Enterprise Token Estimator</title>
+<title>AI Operating Cost Estimator — Büchemeier Consulting</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0c0c0e; --bg2: #131316; --bg3: #1a1a1f;
+  --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.18);
+  --text: #f0eff4; --text2: #c4c3cc; --text3: #8f8e99;
+  --accent: #6c63ff; --accent2: #c4c0ff; --accent-bg: rgba(108,99,255,0.15);
+  --green: #2dd4a0; --amber: #f59e0b;
+  --mono: 'DM Mono', monospace; --sans: 'DM Sans', sans-serif;
+  --radius: 10px; --radius-lg: 16px;
+}
+body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.6; }
 
-  :root {
-    --bg: #0c0c0e;
-    --bg2: #131316;
-    --bg3: #1a1a1f;
-    --border: rgba(255,255,255,0.1);
-    --border2: rgba(255,255,255,0.18);
-    --text: #f0eff4;
-    --text2: #c4c3cc;
-    --text3: #8f8e99;
-    --accent: #6c63ff;
-    --accent2: #c4c0ff;
-    --accent-bg: rgba(108,99,255,0.15);
-    --green: #2dd4a0;
-    --green-bg: rgba(45,212,160,0.08);
-    --amber: #f59e0b;
-    --mono: 'DM Mono', monospace;
-    --sans: 'DM Sans', sans-serif;
-    --radius: 10px;
-    --radius-lg: 16px;
-  }
+/* NAV */
+nav { display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 60px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(12,12,14,0.92); backdrop-filter: blur(12px); z-index: 10; }
+.nav-logo { font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--text); }
+.nav-logo span { color: var(--accent2); }
+.currency-row { display: flex; gap: 6px; }
+.currency-btn { font-family: var(--mono); font-size: 11px; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; cursor: pointer; color: var(--text3); transition: all 0.12s; }
+.currency-btn:hover { color: var(--text); border-color: var(--border2); }
+.currency-btn.active { border-color: var(--accent); color: var(--accent2); background: var(--accent-bg); }
+.nav-cta { font-size: 13px; background: var(--accent); color: #fff; border: none; padding: 8px 20px; border-radius: 8px; cursor: pointer; font-family: var(--sans); font-weight: 500; transition: opacity 0.15s; }
+.nav-cta:hover { opacity: 0.85; }
 
-  body {
-    font-family: var(--sans);
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 15px;
-    line-height: 1.6;
-  }
+/* HERO */
+.hero { text-align: center; padding: 2.5rem 2rem 0; }
+.hero-eyebrow { font-family: var(--mono); font-size: 11px; color: var(--accent2); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.75rem; }
+.hero h1 { font-size: clamp(24px, 4vw, 38px); font-weight: 300; letter-spacing: -0.03em; margin-bottom: 0.5rem; line-height: 1.15; }
+.hero h1 strong { font-weight: 500; color: #fff; }
+.hero p { font-size: 15px; color: var(--text2); max-width: 460px; margin: 0 auto; }
 
-  /* NAV */
-  nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 2rem;
-    height: 60px;
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    background: rgba(12,12,14,0.92);
-    backdrop-filter: blur(12px);
-    z-index: 10;
-  }
-  .nav-logo {
-    font-family: var(--mono);
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text);
-    letter-spacing: -0.01em;
-  }
-  .nav-logo span { color: var(--accent2); }
-  .nav-badge {
-    font-size: 11px;
-    font-family: var(--mono);
-    background: var(--accent-bg);
-    color: var(--accent2);
-    border: 1px solid rgba(108,99,255,0.25);
-    padding: 3px 10px;
-    border-radius: 20px;
-  }
-  .nav-cta {
-    font-size: 13px;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    padding: 8px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: var(--sans);
-    font-weight: 500;
-    transition: opacity 0.15s;
-  }
-  .nav-cta:hover { opacity: 0.85; }
+/* STEP INDICATOR */
+.steps-wrap { max-width: 680px; margin: 1.5rem auto 0; padding: 0 2rem; }
+.steps { display: flex; align-items: center; }
+.step-item { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px 16px; border-radius: var(--radius); transition: background 0.15s; flex: 1; }
+.step-item:hover { background: var(--bg2); }
+.step-num { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12px; color: var(--text3); flex-shrink: 0; transition: all 0.2s; }
+.step-item.active .step-num { background: var(--accent); border-color: var(--accent); color: #fff; }
+.step-item.done .step-num { background: var(--green); border-color: var(--green); color: #0c0c0e; font-size: 14px; }
+.step-label { font-size: 13px; color: var(--text3); }
+.step-item.active .step-label { color: var(--text); font-weight: 500; }
+.step-item.done .step-label { color: var(--text2); }
+.step-connector { flex: 0 0 1px; height: 1px; background: var(--border); }
 
-  /* HERO */
-  .hero {
-    text-align: center;
-    padding: 3.5rem 2rem 2.5rem;
-    border-bottom: 1px solid var(--border);
-  }
-  .hero-eyebrow {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--accent2);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 1rem;
-  }
-  .hero h1 {
-    font-size: clamp(28px, 5vw, 44px);
-    font-weight: 300;
-    letter-spacing: -0.03em;
-    color: var(--text);
-    margin-bottom: 0.75rem;
-    line-height: 1.15;
-  }
-  .hero h1 strong { font-weight: 500; color: #fff; }
-  .hero p {
-    font-size: 16px;
-    color: var(--text2);
-    max-width: 480px;
-    margin: 0 auto;
-    line-height: 1.6;
-  }
+/* LAYOUT */
+.app { display: grid; grid-template-columns: 1fr 320px; gap: 2rem; max-width: 1100px; margin: 0 auto; padding: 1.5rem 2rem 3rem; align-items: start; }
+@media (max-width: 768px) { .app { grid-template-columns: 1fr; } }
 
-  /* MAIN LAYOUT */
-  .app {
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 0;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 2rem;
-    gap: 2rem;
-  }
-  @media (max-width: 768px) {
-    .app { grid-template-columns: 1fr; }
-  }
+/* STEP PANELS */
+.step-panel { display: none; flex-direction: column; gap: 1.25rem; }
+.step-panel.active { display: flex; }
 
-  .left-col { display: flex; flex-direction: column; gap: 1.5rem; }
-  .right-col { display: flex; flex-direction: column; gap: 1rem; }
+/* PANEL */
+.panel { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; }
+.panel-title { font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+.panel-title::before { content: ''; width: 3px; height: 13px; background: var(--accent); border-radius: 2px; display: inline-block; }
 
-  /* SECTION LABELS */
-  .section-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text3);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-  }
+/* STEP NAV */
+.step-nav { display: flex; justify-content: space-between; align-items: center; }
+.step-nav-btn { background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius); padding: 10px 20px; font-size: 13px; font-family: var(--sans); color: var(--text2); cursor: pointer; transition: all 0.12s; }
+.step-nav-btn:hover { border-color: var(--accent); color: var(--accent2); }
+.step-nav-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.step-nav-btn.primary:hover { opacity: 0.85; }
 
-  /* PANELS */
-  .panel {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 1.25rem 1.5rem;
-  }
-  .panel-title {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text2);
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .panel-title::before {
-    content: '';
-    width: 3px;
-    height: 13px;
-    background: var(--accent);
-    border-radius: 2px;
-    display: inline-block;
-  }
+/* PRESETS */
+.preset-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.preset-btn { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 7px 14px; font-size: 12px; cursor: pointer; color: var(--text2); transition: all 0.12s; font-family: var(--sans); }
+.preset-btn:hover { border-color: var(--border2); color: var(--text); }
+.preset-btn.active { border-color: var(--accent); background: var(--accent-bg); color: var(--accent2); }
+.preset-desc { margin-top: 10px; padding: 10px 12px; background: var(--accent-bg); border: 1px solid rgba(108,99,255,0.2); border-radius: var(--radius); font-size: 12px; color: var(--text2); line-height: 1.5; display: none; }
+.preset-desc.visible { display: block; }
 
-  /* TASK GRID */
-  .task-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-  .task-btn {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px 14px;
-    cursor: default;
-    text-align: left;
-    transition: border-color 0.15s, background 0.15s;
-    color: var(--text);
-  }
-  .task-btn:hover { border-color: var(--border2); }
-  .task-btn.active {
-    border-color: var(--accent);
-    background: var(--accent-bg);
-  }
-  .task-btn-name {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text);
-    margin-bottom: 3px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .task-btn.active .task-btn-name { color: var(--accent2); }
-  .task-btn-desc { font-size: 11px; color: var(--text3); line-height: 1.4; margin-bottom: 6px; }
-  .task-btn-explain { font-size: 11px; color: var(--text2); line-height: 1.5; margin-bottom: 8px; padding: 6px 8px; background: rgba(255,255,255,0.03); border-radius: 5px; border-left: 2px solid var(--border2); }
-  .task-btn-tokens {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text3);
-    margin-top: 4px;
-  }
-  .task-btn.active .task-btn-tokens { color: rgba(108,99,255,0.6); }
-  .task-slider-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 6px;
-  }
-  .task-slider-row input[type=range] {
-    flex: 1;
-    height: 3px;
-    -webkit-appearance: none;
-    background: var(--bg2);
-    border-radius: 2px;
-    outline: none;
-    border: none;
-  }
-  .task-btn.active .task-slider-row input[type=range] {
-    background: rgba(108,99,255,0.2);
-  }
-  .task-btn.agent-task.active .task-slider-row input[type=range] {
-    background: rgba(245,158,11,0.2);
-  }
-  .task-slider-row input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 13px;
-    height: 13px;
-    border-radius: 50%;
-    background: var(--text3);
-    cursor: pointer;
-    border: none;
-  }
-  .task-btn.active .task-slider-row input[type=range]::-webkit-slider-thumb {
-    background: var(--accent2);
-  }
-  .task-btn.agent-task.active .task-slider-row input[type=range]::-webkit-slider-thumb {
-    background: var(--amber);
-  }
-  .task-runs-val {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text3);
-    min-width: 52px;
-    text-align: right;
-  }
-  .task-btn.active .task-runs-val { color: var(--accent2); }
-  .task-btn.agent-task.active .task-runs-val { color: var(--amber); }
-  .task-runs-zero { opacity: 0.4; }
+/* TASK GRID */
+.task-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.task-btn { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; text-align: left; transition: border-color 0.15s, background 0.15s; color: var(--text); }
+.task-btn:hover { border-color: var(--border2); }
+.task-btn.active { border-color: var(--accent); background: var(--accent-bg); }
+.task-btn.agent-task { border-color: rgba(245,158,11,0.25); }
+.task-btn.agent-task.active { border-color: var(--amber); background: rgba(245,158,11,0.08); }
+.task-btn-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
+.task-btn.active .task-btn-name { color: var(--accent2); }
+.task-btn.agent-task.active .task-btn-name { color: var(--amber); }
+.task-btn-desc { font-size: 11px; color: var(--text3); line-height: 1.4; margin-bottom: 5px; }
+.task-btn-explain { font-size: 11px; color: var(--text2); line-height: 1.5; margin-bottom: 8px; padding: 5px 8px; background: rgba(255,255,255,0.03); border-radius: 5px; border-left: 2px solid var(--border2); }
+.agent-badge { font-size: 9px; font-family: var(--mono); background: rgba(245,158,11,0.15); color: var(--amber); padding: 2px 6px; border-radius: 4px; }
+.task-vol-row { display: flex; align-items: center; gap: 6px; margin: 6px 0 5px; }
+.task-vol-field { display: flex; flex-direction: column; gap: 2px; }
+.task-vol-label { font-size: 9px; font-family: var(--mono); color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+.task-vol-input { width: 52px; background: var(--bg2); border: 1px solid var(--border); border-radius: 5px; padding: 4px 6px; font-size: 12px; font-family: var(--mono); color: var(--text); outline: none; text-align: center; transition: border-color 0.15s; }
+.task-btn.active .task-vol-input { border-color: rgba(108,99,255,0.3); background: rgba(108,99,255,0.06); }
+.task-btn.agent-task.active .task-vol-input { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.06); }
+.task-vol-input:focus { border-color: var(--accent); }
+.task-vol-sep { font-size: 13px; color: var(--text3); margin-top: 12px; }
+.task-vol-result { margin-top: 12px; }
+.task-runs-val { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+.task-btn.active .task-runs-val { color: var(--accent2); }
+.task-btn.agent-task.active .task-runs-val { color: var(--amber); }
+.task-btn-tokens { font-family: var(--mono); font-size: 10px; color: var(--text3); }
 
-  /* TASK VOLUME INPUTS */
-  .task-vol-row {
-    display: flex; align-items: center; gap: 6px;
-    margin: 8px 0 6px; flex-wrap: nowrap;
-  }
-  .task-vol-field { display: flex; flex-direction: column; gap: 2px; }
-  .task-vol-label { font-size: 9px; font-family: var(--mono); color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
-  .task-vol-input {
-    width: 52px; background: var(--bg2); border: 1px solid var(--border);
-    border-radius: 5px; padding: 4px 6px; font-size: 12px;
-    font-family: var(--mono); color: var(--text); outline: none;
-    text-align: center; transition: border-color 0.15s;
-  }
-  .task-btn.active .task-vol-input { border-color: rgba(108,99,255,0.3); background: rgba(108,99,255,0.06); }
-  .task-btn.agent-task.active .task-vol-input { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.06); }
-  .task-vol-input:focus { border-color: var(--accent); }
-  .task-vol-sep { font-size: 13px; color: var(--text3); padding: 0 1px; margin-top: 12px; }
-  .task-vol-result { margin-top: 12px; }
+/* SLIDERS */
+.slider-block { margin-bottom: 14px; }
+.slider-block:last-child { margin-bottom: 0; }
+.slider-top { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.slider-name { font-size: 13px; color: var(--text2); }
+.slider-value { font-family: var(--mono); font-size: 13px; color: var(--accent2); font-weight: 500; }
+input[type=range] { -webkit-appearance: none; width: 100%; height: 3px; background: var(--bg3); border-radius: 2px; outline: none; border: 1px solid var(--border); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid var(--bg); }
 
-  /* PRESET DESCRIPTION */
-  .preset-desc {
-    margin-top: 10px; padding: 10px 12px;
-    background: var(--accent-bg); border: 1px solid rgba(108,99,255,0.2);
-    border-radius: var(--radius); font-size: 12px; color: var(--text2);
-    line-height: 1.5; display: none;
-  }
-  .preset-desc.visible { display: block; }
+/* MODEL */
+.model-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.model-pill { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 7px 14px; font-size: 12px; font-family: var(--mono); cursor: pointer; color: var(--text2); transition: all 0.12s; display: flex; align-items: center; gap: 6px; }
+.model-pill:hover { border-color: var(--border2); color: var(--text); }
+.model-pill.active { border-color: var(--accent); background: var(--accent-bg); color: var(--accent2); }
+.pill-badge { font-size: 9px; background: rgba(108,99,255,0.2); color: var(--accent2); padding: 1px 6px; border-radius: 4px; }
+.model-pill:not(.active) .pill-badge { background: rgba(255,255,255,0.06); color: var(--text3); }
 
-  /* MODEL PILLS */
-  .model-row { display: flex; flex-wrap: wrap; gap: 6px; }
-  .model-pill {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 7px 14px;
-    font-size: 12px;
-    font-family: var(--mono);
-    cursor: pointer;
-    color: var(--text2);
-    transition: all 0.12s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .model-pill:hover { border-color: var(--border2); color: var(--text); }
-  .model-pill.active {
-    border-color: var(--accent);
-    background: var(--accent-bg);
-    color: var(--accent2);
-  }
-  .pill-badge {
-    font-size: 9px;
-    background: rgba(108,99,255,0.2);
-    color: var(--accent2);
-    padding: 1px 6px;
-    border-radius: 4px;
-  }
-  .model-pill:not(.active) .pill-badge {
-    background: rgba(255,255,255,0.06);
-    color: var(--text3);
-  }
+/* REC MODEL */
+.rec-model-panel { background: var(--bg2); border: 1px solid rgba(45,212,160,0.25); border-radius: var(--radius-lg); padding: 1rem 1.25rem; display: none; }
+.rec-model-panel.visible { display: block; }
+.rec-model-label { font-size: 10px; font-family: var(--mono); color: var(--green); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+.rec-model-name { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+.rec-model-reason { font-size: 12px; color: var(--text2); line-height: 1.5; }
+.rec-model-saving { font-size: 11px; font-family: var(--mono); color: var(--green); margin-top: 6px; }
 
-  /* SLIDERS */
-  .slider-block { margin-bottom: 14px; }
-  .slider-block:last-child { margin-bottom: 0; }
-  .slider-top {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-  }
-  .slider-name { font-size: 13px; color: var(--text2); }
-  .slider-value {
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--accent2);
-    font-weight: 500;
-  }
-  input[type=range] {
-    -webkit-appearance: none;
-    width: 100%;
-    height: 3px;
-    background: var(--bg3);
-    border-radius: 2px;
-    outline: none;
-    border: 1px solid var(--border);
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--accent);
-    cursor: pointer;
-    border: 2px solid var(--bg);
-  }
+/* TOGGLES */
+.toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--border); cursor: pointer; }
+.toggle-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 3px; display: flex; align-items: center; gap: 8px; }
+.toggle-badge { font-size: 10px; font-family: var(--mono); background: rgba(45,212,160,0.15); color: var(--green); padding: 2px 7px; border-radius: 4px; font-weight: 400; }
+.toggle-desc { font-size: 11px; color: var(--text3); line-height: 1.4; }
+.toggle-switch { width: 36px; height: 20px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 10px; flex-shrink: 0; position: relative; transition: background 0.2s; }
+.toggle-switch.on { background: var(--green); border-color: var(--green); }
+.toggle-knob { width: 14px; height: 14px; background: var(--text3); border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: left 0.2s, background 0.2s; }
+.toggle-switch.on .toggle-knob { left: 18px; background: #0c0c0e; }
 
-  /* METRICS — right column */
-  .metric-big {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 1.25rem 1.5rem;
-  }
-  .metric-big-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text3);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-  .metric-big-value {
-    font-size: 36px;
-    font-weight: 300;
-    letter-spacing: -0.03em;
-    color: var(--green);
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-  .metric-big-sub { font-size: 12px; color: var(--text3); }
+/* COMPARE */
+.compare-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: start; margin-bottom: 14px; }
+.compare-col { display: flex; flex-direction: column; }
+.compare-select { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: var(--mono); color: var(--text); outline: none; cursor: pointer; }
+.compare-select:focus { border-color: var(--accent); }
+.compare-result { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cmp-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; }
+.cmp-card-name { font-size: 11px; color: var(--text3); font-family: var(--mono); margin-bottom: 4px; }
+.cmp-card-val { font-size: 18px; font-weight: 500; font-family: var(--mono); color: var(--text); }
+.cmp-card-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.cmp-card.cheaper { border-color: var(--green); }
+.cmp-card.cheaper .cmp-card-val { color: var(--green); }
+.cmp-saving { grid-column: 1/-1; background: rgba(45,212,160,0.08); border: 1px solid rgba(45,212,160,0.2); border-radius: var(--radius); padding: 8px 12px; font-size: 12px; font-family: var(--mono); color: var(--green); text-align: center; }
 
-  .metric-grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  .metric-small {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem 1.1rem;
-  }
-  .metric-small-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
-  .metric-small-value {
-    font-family: var(--mono);
-    font-size: 18px;
-    font-weight: 500;
-    color: var(--text);
-    letter-spacing: -0.02em;
-  }
+/* METHODOLOGY */
+.methodology-panel { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.methodology-toggle { width: 100%; background: none; border: none; padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; color: var(--text2); font-size: 13px; font-weight: 500; font-family: var(--sans); text-align: left; }
+.methodology-toggle:hover { color: var(--text); }
+.methodology-toggle-icon { font-size: 16px; color: var(--text3); transition: transform 0.2s; }
+.methodology-toggle.open .methodology-toggle-icon { transform: rotate(180deg); }
+.methodology-body { display: none; padding: 0 1.25rem 1.25rem; }
+.methodology-body.open { display: block; }
+.methodology-task-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+.methodology-task-row:last-child { border-bottom: none; }
+.meth-name { color: var(--text2); flex: 1; }
+.meth-detail { font-family: var(--mono); font-size: 11px; color: var(--text3); text-align: right; line-height: 1.6; }
 
-  /* BREAKDOWN */
-  .breakdown-panel {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-  }
-  .breakdown-header {
-    padding: 0.85rem 1.25rem;
-    border-bottom: 1px solid var(--border);
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text3);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .breakdown-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 9px 1.25rem;
-    border-bottom: 1px solid var(--border);
-    font-size: 12px;
-  }
-  .breakdown-row:last-child { border-bottom: none; }
-  .br-label { color: var(--text2); }
-  .br-val { font-family: var(--mono); color: var(--text); font-weight: 500; }
-  .breakdown-total {
-    display: flex;
-    justify-content: space-between;
-    padding: 12px 1.25rem;
-    border-top: 1px solid var(--border2);
-    background: var(--accent-bg);
-  }
-  .bt-label { font-size: 13px; font-weight: 500; color: var(--accent2); }
-  .bt-val {
-    font-family: var(--mono);
-    font-size: 16px;
-    font-weight: 500;
-    color: var(--accent2);
-  }
+/* RIGHT COLUMN */
+.right-col { display: flex; flex-direction: column; gap: 1rem; position: sticky; top: 80px; }
+.section-label { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+.metric-big { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; }
+.metric-big-label { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+.metric-big-value { font-size: 34px; font-weight: 300; letter-spacing: -0.03em; color: var(--green); line-height: 1; margin-bottom: 4px; }
+.metric-big-sub { font-size: 12px; color: var(--text3); }
+.metric-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.metric-small { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.1rem; }
+.metric-small-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+.metric-small-value { font-family: var(--mono); font-size: 17px; font-weight: 500; color: var(--text); letter-spacing: -0.02em; }
+.task-breakdown-panel { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.task-breakdown-header { padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; }
+.task-breakdown-empty { padding: 1rem 1.25rem; font-size: 12px; color: var(--text3); text-align: center; }
+.tbd-row { display: grid; grid-template-columns: 1fr auto auto; gap: 6px 10px; padding: 8px 1.25rem; border-bottom: 1px solid var(--border); font-size: 12px; align-items: center; }
+.tbd-row:last-child { border-bottom: none; }
+.tbd-name { color: var(--text2); }
+.tbd-runs { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+.tbd-cost { font-family: var(--mono); font-weight: 500; color: var(--text); text-align: right; }
+.tbd-bar-wrap { grid-column: 1/-1; height: 3px; background: var(--bg3); border-radius: 2px; margin-top: -2px; }
+.tbd-bar-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.3s; }
+.token-bar-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; }
+.tbar-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 12px; }
+.tbar-row:last-child { margin-bottom: 0; }
+.tbar-label { min-width: 54px; color: var(--text2); }
+.tbar-track { flex: 1; height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; margin: 0 10px; }
+.tbar-fill { height: 100%; border-radius: 3px; transition: width 0.35s ease; }
+.tbar-val { min-width: 52px; text-align: right; font-size: 12px; color: var(--text3); }
+.breakdown-panel { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.breakdown-header { padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; }
+.breakdown-row { display: flex; justify-content: space-between; padding: 9px 1.25rem; border-bottom: 1px solid var(--border); font-size: 12px; }
+.breakdown-row:last-child { border-bottom: none; }
+.br-label { color: var(--text2); }
+.br-val { font-family: var(--mono); color: var(--text); font-weight: 500; }
+.breakdown-total { display: flex; justify-content: space-between; padding: 12px 1.25rem; border-top: 1px solid var(--border2); background: var(--accent-bg); }
+.bt-label { font-size: 13px; font-weight: 500; color: var(--accent2); }
+.bt-val { font-family: var(--mono); font-size: 16px; font-weight: 500; color: var(--accent2); }
 
-  /* TOKEN BAR */
-  .token-bar-wrap {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 1.25rem 1.5rem;
-  }
-  .tbar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .tbar-row:last-child { margin-bottom: 0; }
-  .tbar-label { font-size: 12px; color: var(--text2); width: 54px; }
-  .tbar-track {
-    flex: 1;
-    height: 5px;
-    background: var(--bg3);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-  .tbar-fill {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 0.35s ease;
-  }
-  .tbar-val {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text3);
-    width: 44px;
-    text-align: right;
-  }
+/* ROI */
+.roi-panel { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.roi-panel-header { padding: 1rem 1.25rem 0.75rem; border-bottom: 1px solid var(--border); }
+.roi-panel-title { font-size: 13px; font-weight: 500; color: var(--text2); display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+.roi-panel-title::before { content: ''; width: 3px; height: 13px; background: var(--amber); border-radius: 2px; display: inline-block; }
+.roi-panel-sub { font-size: 12px; color: var(--text3); }
+.roi-inputs { padding: 0.85rem 1.25rem; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid var(--border); }
+.roi-input-row { display: flex; align-items: center; gap: 8px; }
+.roi-input-label { font-size: 12px; color: var(--text2); flex: 1; }
+.roi-input { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 13px; font-family: var(--mono); color: var(--text); outline: none; width: 90px; text-align: right; transition: border-color 0.15s; }
+.roi-input:focus { border-color: var(--accent); }
+.roi-unit { font-size: 12px; color: var(--text3); width: 55px; }
+.roi-result { padding: 1rem 1.25rem; }
+.roi-highlight { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+.roi-highlight-label { font-size: 12px; color: var(--amber); font-weight: 500; }
+.roi-highlight-val { font-size: 20px; font-weight: 500; font-family: var(--mono); color: var(--amber); }
+.roi-sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.roi-sub-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 10px; }
+.roi-sub-label { font-size: 11px; color: var(--text3); margin-bottom: 2px; }
+.roi-sub-val { font-size: 14px; font-weight: 500; font-family: var(--mono); color: var(--text2); }
 
-  /* CTA BANNER */
-  .cta-banner {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 1.25rem 1.5rem;
-    text-align: center;
-  }
-  .cta-banner p {
-    font-size: 12px;
-    color: var(--text2);
-    margin-bottom: 0.75rem;
-    line-height: 1.5;
-  }
-  .cta-banner button {
-    width: 100%;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    padding: 10px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    font-family: var(--sans);
-    cursor: pointer;
-    transition: opacity 0.15s;
-  }
-  .cta-banner button:hover { opacity: 0.85; }
-  .cta-banner .cta-sub {
-    font-size: 11px;
-    color: var(--text3);
-    margin-top: 8px;
-    margin-bottom: 0;
-  }
+/* SAVINGS */
+.savings-panel { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.savings-panel-header { padding: 1rem 1.25rem 0.75rem; border-bottom: 1px solid var(--border); }
+.savings-panel-title { font-size: 13px; font-weight: 500; color: var(--text2); display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+.savings-panel-title::before { content: ''; width: 3px; height: 13px; background: var(--amber); border-radius: 2px; display: inline-block; }
+.savings-panel-sub { font-size: 12px; color: var(--text3); }
+.savings-tools { padding: 0.85rem 1.25rem; display: flex; flex-direction: column; gap: 8px; }
+.savings-tool-row { display: flex; align-items: center; gap: 8px; }
+.savings-tool-name { font-size: 12px; color: var(--text2); flex: 1; min-width: 0; }
+.savings-tool-amount { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.savings-tool-input { width: 70px; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-size: 13px; font-family: var(--mono); color: var(--text); outline: none; transition: border-color 0.15s; text-align: right; }
+.savings-tool-input:focus { border-color: var(--accent); }
+.savings-tool-unit { font-size: 11px; color: var(--text3); white-space: nowrap; }
+.savings-custom-row { display: flex; gap: 8px; padding: 0.75rem 1.25rem; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); align-items: center; }
+.savings-custom-label { font-size: 12px; color: var(--text2); flex: 1; }
+.savings-custom-input { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 13px; font-family: var(--mono); color: var(--text); outline: none; width: 80px; text-align: right; transition: border-color 0.15s; }
+.savings-custom-input:focus { border-color: var(--accent); }
+.savings-result { padding: 1rem 1.25rem; }
+.savings-vs-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; gap: 6px; }
+.savings-vs-item { text-align: center; flex: 1; }
+.savings-vs-label { font-size: 11px; color: var(--text3); font-family: var(--mono); margin-bottom: 4px; }
+.savings-vs-val { font-size: 17px; font-weight: 500; font-family: var(--mono); }
+.savings-vs-val.current { color: #f87171; }
+.savings-vs-val.optimised { color: var(--accent2); }
+.savings-vs-sep { color: var(--text3); font-size: 16px; padding-bottom: 2px; }
+.savings-highlight { background: rgba(45,212,160,0.08); border: 1px solid rgba(45,212,160,0.25); border-radius: var(--radius); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; }
+.savings-highlight-left .savings-highlight-label { font-size: 13px; color: var(--green); font-weight: 500; }
+.savings-highlight-left .savings-highlight-sub { font-size: 11px; color: rgba(45,212,160,0.6); margin-top: 2px; }
+.savings-highlight-val { font-size: 22px; font-weight: 500; font-family: var(--mono); color: var(--green); }
+.savings-negative { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.2); border-radius: var(--radius); padding: 10px 14px; font-size: 12px; color: #f87171; font-family: var(--mono); text-align: center; }
 
-  /* FOOTER */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 1.25rem 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    max-width: 1100px;
-    margin: 0 auto;
-    font-size: 11px;
-    color: var(--text3);
-    font-family: var(--mono);
-    line-height: 1.6;
-  }
-  footer a { color: var(--text3); text-decoration: none; }
-  footer a:hover { color: var(--text2); }
+/* CHART */
+.chart-panel { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; }
+.chart-panel-title { font-size: 13px; font-weight: 500; color: var(--text2); display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.chart-panel-title::before { content: ''; width: 3px; height: 13px; background: var(--accent); border-radius: 2px; display: inline-block; }
+.chart-panel-sub { font-size: 12px; color: var(--text3); margin-bottom: 14px; }
+.chart-growth-row { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
+.chart-growth-label { font-size: 12px; color: var(--text2); flex: 1; }
+.chart-growth-select { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 12px; font-family: var(--mono); color: var(--text); outline: none; }
+.chart-bars { display: flex; align-items: flex-end; gap: 4px; height: 100px; }
+.chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.chart-bar { width: 100%; border-radius: 3px 3px 0 0; background: var(--accent); opacity: 0.7; transition: height 0.4s ease; min-height: 3px; }
+.chart-bar.current { opacity: 1; background: var(--green); }
+.chart-bar-label { font-size: 9px; font-family: var(--mono); color: var(--text3); }
+.chart-bar-val { font-size: 9px; font-family: var(--mono); color: var(--text3); }
 
-  /* ANIMATED TICK */
-  .live-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--green);
-    display: inline-block;
-    margin-right: 6px;
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
+/* SMART CTA */
+.smart-cta { background: var(--bg2); border: 1px solid rgba(108,99,255,0.3); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.smart-cta-text { font-size: 13px; color: var(--text2); line-height: 1.5; flex: 1; }
+.smart-cta button { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-size: 13px; font-weight: 500; font-family: var(--sans); cursor: pointer; white-space: nowrap; transition: opacity 0.15s; flex-shrink: 0; }
+.smart-cta button:hover { opacity: 0.85; }
 
-  .savings-note {
-    font-size: 11px;
-    color: var(--green);
-    margin-top: 6px;
-    font-family: var(--mono);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
+/* CTA BANNER */
+.cta-banner { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; text-align: center; }
+.cta-banner p { font-size: 12px; color: var(--text2); margin-bottom: 0.75rem; line-height: 1.5; }
+.cta-banner button { width: 100%; background: var(--accent); color: #fff; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 500; font-family: var(--sans); cursor: pointer; transition: opacity 0.15s; }
+.cta-banner button:hover { opacity: 0.85; }
+.cta-banner .cta-sub { font-size: 11px; color: var(--text3); margin-top: 8px; margin-bottom: 0; }
 
-  /* TOGGLES */
-  .toggle-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding-bottom: 14px;
-    margin-bottom: 14px;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-  }
-  .toggle-name {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text);
-    margin-bottom: 3px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .toggle-badge {
-    font-size: 10px;
-    font-family: var(--mono);
-    background: rgba(45,212,160,0.15);
-    color: var(--green);
-    padding: 2px 7px;
-    border-radius: 4px;
-    font-weight: 400;
-  }
-  .toggle-desc { font-size: 11px; color: var(--text3); line-height: 1.4; }
-  .toggle-switch {
-    width: 36px;
-    height: 20px;
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    border-radius: 10px;
-    flex-shrink: 0;
-    position: relative;
-    transition: background 0.2s;
-  }
-  .toggle-switch.on { background: var(--green); border-color: var(--green); }
-  .toggle-knob {
-    width: 14px;
-    height: 14px;
-    background: var(--text3);
-    border-radius: 50%;
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    transition: left 0.2s, background 0.2s;
-  }
-  .toggle-switch.on .toggle-knob { left: 18px; background: #0c0c0e; }
+/* EMAIL */
+.email-panel { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; }
+.email-panel-title { font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.email-panel-title::before { content: ''; width: 3px; height: 13px; background: var(--green); border-radius: 2px; display: inline-block; }
+.email-panel-sub { font-size: 12px; color: var(--text3); margin-bottom: 12px; }
+.email-row { display: flex; gap: 8px; }
+.email-input { flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 9px 14px; font-size: 13px; font-family: var(--mono); color: var(--text); outline: none; transition: border-color 0.15s; }
+.email-input::placeholder { color: var(--text3); }
+.email-input:focus { border-color: var(--accent); }
+.email-send-btn { background: var(--green); color: #0c0c0e; border: none; border-radius: 8px; padding: 9px 16px; font-size: 13px; font-weight: 500; font-family: var(--sans); cursor: pointer; white-space: nowrap; transition: opacity 0.15s; }
+.email-send-btn:hover { opacity: 0.85; }
+.email-send-btn:disabled { opacity: 0.5; cursor: default; }
+.email-feedback { font-size: 12px; font-family: var(--mono); margin-top: 8px; min-height: 18px; }
+.email-feedback.ok { color: var(--green); }
+.email-feedback.err { color: #f87171; }
 
-  /* COMPARE */
-  .compare-row {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 10px;
-    align-items: start;
-    margin-bottom: 14px;
-  }
-  .compare-col { display: flex; flex-direction: column; }
-  .compare-select {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-size: 13px;
-    font-family: var(--mono);
-    color: var(--text);
-    outline: none;
-    cursor: pointer;
-  }
-  .compare-select:focus { border-color: var(--accent); }
-  .compare-result {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  .cmp-card {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 10px 12px;
-  }
-  .cmp-card-name { font-size: 11px; color: var(--text3); font-family: var(--mono); margin-bottom: 4px; }
-  .cmp-card-val { font-size: 18px; font-weight: 500; font-family: var(--mono); color: var(--text); }
-  .cmp-card-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
-  .cmp-card.cheaper { border-color: var(--green); }
-  .cmp-card.cheaper .cmp-card-val { color: var(--green); }
-  .cmp-saving {
-    grid-column: 1 / -1;
-    background: rgba(45,212,160,0.08);
-    border: 1px solid rgba(45,212,160,0.2);
-    border-radius: var(--radius);
-    padding: 8px 12px;
-    font-size: 12px;
-    font-family: var(--mono);
-    color: var(--green);
-    text-align: center;
-  }
-  .task-btn.agent-task { border-color: rgba(245,158,11,0.25); }
-  .task-btn.agent-task:hover { border-color: rgba(245,158,11,0.5); }
-  .task-btn.agent-task.active { border-color: var(--amber); background: rgba(245,158,11,0.08); }
-  .task-btn.agent-task.active .task-btn-name { color: var(--amber); }
-  .task-btn.agent-task.active .task-btn-tokens { color: rgba(245,158,11,0.6); }
-  .agent-badge {
-    font-size: 9px;
-    font-family: var(--mono);
-    background: rgba(245,158,11,0.15);
-    color: var(--amber);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-weight: 400;
-    margin-left: 4px;
-  }
-  .savings-panel {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-  }
-  .savings-panel-header { padding: 1rem 1.25rem 0.75rem; border-bottom: 1px solid var(--border); }
-  .savings-panel-title {
-    font-size: 13px; font-weight: 500; color: var(--text2);
-    display: flex; align-items: center; gap: 8px; margin-bottom: 3px;
-  }
-  .savings-panel-title::before {
-    content: ''; width: 3px; height: 13px;
-    background: var(--amber); border-radius: 2px; display: inline-block;
-  }
-  .savings-panel-sub { font-size: 12px; color: var(--text3); }
-  .savings-tools { padding: 0.85rem 1.25rem; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid var(--border); }
-  .savings-tool-row { display: flex; align-items: center; gap: 8px; }
-  .savings-tool-name { font-size: 12px; color: var(--text2); flex: 1; min-width: 0; }
-  .savings-tool-amount { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
-  .savings-tool-symbol { font-size: 12px; color: var(--text3); font-family: var(--mono); }
-  .savings-tool-input {
-    width: 70px; background: var(--bg3); border: 1px solid var(--border);
-    border-radius: 6px; padding: 6px 8px; font-size: 13px;
-    font-family: var(--mono); color: var(--text); outline: none;
-    transition: border-color 0.15s; text-align: right;
-  }
-  .savings-tool-input:focus { border-color: var(--accent); }
-  .savings-tool-unit { font-size: 11px; color: var(--text3); white-space: nowrap; }
-  .savings-custom-row {
-    display: flex; gap: 8px; padding: 0.75rem 1.25rem;
-    border-bottom: 1px solid var(--border); align-items: center;
-  }
-  .savings-custom-label { font-size: 12px; color: var(--text2); flex: 1; }
-  .savings-custom-input {
-    background: var(--bg3); border: 1px solid var(--border);
-    border-radius: 6px; padding: 6px 10px; font-size: 13px;
-    font-family: var(--mono); color: var(--text); outline: none;
-    width: 110px; text-align: right; transition: border-color 0.15s;
-  }
-  .savings-custom-input:focus { border-color: var(--accent); }
-  .savings-result { padding: 1rem 1.25rem; }
-  .savings-vs-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; gap: 6px; }
-  .savings-vs-item { text-align: center; flex: 1; }
-  .savings-vs-label { font-size: 11px; color: var(--text3); font-family: var(--mono); margin-bottom: 4px; }
-  .savings-vs-val { font-size: 17px; font-weight: 500; font-family: var(--mono); }
-  .savings-vs-val.current { color: #f87171; }
-  .savings-vs-val.optimised { color: var(--accent2); }
-  .savings-vs-sep { color: var(--text3); font-size: 16px; padding-bottom: 2px; }
-  .savings-highlight {
-    background: rgba(45,212,160,0.08); border: 1px solid rgba(45,212,160,0.25);
-    border-radius: var(--radius); padding: 12px 14px;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .savings-highlight-left .savings-highlight-label { font-size: 13px; color: var(--green); font-weight: 500; }
-  .savings-highlight-left .savings-highlight-sub { font-size: 11px; color: rgba(45,212,160,0.6); margin-top: 2px; }
-  .savings-highlight-val { font-size: 24px; font-weight: 500; font-family: var(--mono); color: var(--green); }
-  .savings-negative {
-    background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.2);
-    border-radius: var(--radius); padding: 10px 14px;
-    font-size: 12px; color: #f87171; font-family: var(--mono); text-align: center;
-  }
+/* ACTION ROW */
+.action-row { display: flex; gap: 8px; justify-content: flex-end; }
+.action-btn { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 7px 14px; font-size: 12px; font-family: var(--mono); color: var(--text2); cursor: pointer; transition: all 0.12s; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.action-btn:hover { border-color: var(--border2); color: var(--text); }
+.action-btn.share { border-color: rgba(108,99,255,0.3); color: var(--accent2); }
+.action-btn.share:hover { background: var(--accent-bg); }
+.action-btn.reset { border-color: rgba(248,113,113,0.2); color: #f87171; }
+.action-btn.reset:hover { background: rgba(248,113,113,0.08); }
+.copy-confirm { font-size: 11px; color: var(--green); font-family: var(--mono); text-align: right; min-height: 16px; }
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); display: inline-block; margin-right: 6px; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-  .email-panel {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 1.25rem 1.5rem;
-  }
-  .email-panel-title {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text2);
-    margin-bottom: 4px;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .email-panel-title::before {
-    content: '';
-    width: 3px; height: 13px;
-    background: var(--green);
-    border-radius: 2px;
-    display: inline-block;
-  }
-  .email-panel-sub {
-    font-size: 12px;
-    color: var(--text3);
-    margin-bottom: 12px;
-  }
-  .email-row {
-    display: flex;
-    gap: 8px;
-  }
-  .email-input {
-    flex: 1;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 9px 14px;
-    font-size: 13px;
-    font-family: var(--mono);
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .email-input::placeholder { color: var(--text3); }
-  .email-input:focus { border-color: var(--accent); }
-  .email-send-btn {
-    background: var(--green);
-    color: #0c0c0e;
-    border: none;
-    border-radius: 8px;
-    padding: 9px 16px;
-    font-size: 13px;
-    font-weight: 500;
-    font-family: var(--sans);
-    cursor: pointer;
-    white-space: nowrap;
-    transition: opacity 0.15s;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .email-send-btn:hover { opacity: 0.85; }
-  .email-send-btn:disabled { opacity: 0.5; cursor: default; }
-  .email-feedback {
-    font-size: 12px;
-    font-family: var(--mono);
-    margin-top: 8px;
-    min-height: 18px;
-  }
-  .email-feedback.ok { color: var(--green); }
-  .email-feedback.err { color: #f87171; }
+/* TOOLTIP */
+.info-tip { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; border: 1px solid var(--border2); font-size: 10px; color: var(--text3); cursor: help; font-family: var(--mono); position: relative; margin-left: 4px; vertical-align: middle; flex-shrink: 0; }
+.info-tip:hover .tip-text { display: block; }
+.tip-text { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius); padding: 8px 12px; font-size: 11px; color: var(--text2); line-height: 1.5; white-space: normal; width: 220px; z-index: 20; font-family: var(--sans); pointer-events: none; }
+.tip-text::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: var(--border2); }
 
-  /* MODAL OVERLAY */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius-lg);
-    width: 100%;
-    max-width: 460px;
-    padding: 2rem;
-    position: relative;
-  }
-  .modal-close {
-    position: absolute;
-    top: 1rem; right: 1rem;
-    background: none;
-    border: none;
-    color: var(--text3);
-    font-size: 20px;
-    cursor: pointer;
-    line-height: 1;
-    padding: 4px;
-  }
-  .modal-close:hover { color: var(--text); }
-  .modal-eyebrow {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--accent2);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-  .modal h2 {
-    font-size: 20px;
-    font-weight: 300;
-    letter-spacing: -0.02em;
-    color: var(--text);
-    margin-bottom: 6px;
-  }
-  .modal h2 strong { font-weight: 500; }
-  .modal-sub {
-    font-size: 13px;
-    color: var(--text2);
-    margin-bottom: 1.5rem;
-    line-height: 1.5;
-  }
-  .modal-estimate-box {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px 16px;
-    margin-bottom: 1.25rem;
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--text2);
-    line-height: 1.8;
-  }
-  .modal-estimate-box .est-val { color: var(--accent2); }
-  .form-field { margin-bottom: 12px; }
-  .form-label {
-    font-size: 11px;
-    font-family: var(--mono);
-    color: var(--text3);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    display: block;
-    margin-bottom: 6px;
-  }
-  .form-input {
-    width: 100%;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 14px;
-    font-family: var(--sans);
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .form-input::placeholder { color: var(--text3); }
-  .form-input:focus { border-color: var(--accent); }
-  textarea.form-input { resize: vertical; min-height: 80px; line-height: 1.5; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .modal-submit {
-    width: 100%;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 12px;
-    font-size: 14px;
-    font-weight: 500;
-    font-family: var(--sans);
-    cursor: pointer;
-    transition: opacity 0.15s;
-    margin-top: 4px;
-  }
-  .modal-submit:hover { opacity: 0.85; }
-  .modal-submit:disabled { opacity: 0.5; cursor: default; }
-  .modal-feedback {
-    font-size: 12px;
-    font-family: var(--mono);
-    text-align: center;
-    margin-top: 10px;
-    min-height: 18px;
-  }
-  .modal-feedback.ok { color: var(--green); }
-  .modal-feedback.err { color: #f87171; }
-  .modal-success {
-    text-align: center;
-    padding: 1rem 0;
-    display: none;
-  }
-  .modal-success-icon {
-    font-size: 36px;
-    margin-bottom: 12px;
-  }
-  .modal-success h3 {
-    font-size: 18px;
-    font-weight: 400;
-    color: var(--text);
-    margin-bottom: 6px;
-  }
-  .modal-success p {
-    font-size: 13px;
-    color: var(--text2);
-  }
+/* ICEBERG */
+.iceberg-note { padding: 10px 1.25rem; border-top: 1px solid var(--border); background: rgba(255,255,255,0.02); font-size: 11px; color: var(--text3); line-height: 1.6; font-family: var(--mono); }
+.iceberg-note strong { color: var(--text2); }
+.readiness-panel { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.readiness-header { padding: 1rem 1.25rem 0.75rem; border-bottom: 1px solid var(--border); }
+.readiness-title { font-size: 13px; font-weight: 500; color: var(--text2); display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+.readiness-title::before { content: ''; width: 3px; height: 13px; background: var(--accent2); border-radius: 2px; display: inline-block; }
+.readiness-sub { font-size: 12px; color: var(--text3); }
+.readiness-body { padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 10px; }
+.readiness-signal { display: flex; gap: 10px; align-items: flex-start; }
+.readiness-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.readiness-dot.green { background: var(--green); }
+.readiness-dot.amber { background: var(--amber); }
+.readiness-dot.accent { background: var(--accent2); }
+.readiness-signal-text { font-size: 12px; color: var(--text2); line-height: 1.5; }
+.readiness-empty { font-size: 12px; color: var(--text3); text-align: center; padding: 4px 0; }
+.readiness-cta { margin-top: 4px; padding: 10px 12px; background: var(--accent-bg); border: 1px solid rgba(108,99,255,0.2); border-radius: var(--radius); font-size: 12px; color: var(--accent2); line-height: 1.5; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.readiness-cta:hover { background: rgba(108,99,255,0.2); }
 
-  .disclaimer-banner {
-    margin-top: 1.25rem;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-    font-size: 11px;
-    color: var(--text3);
-    line-height: 1.6;
-    padding: 8px 14px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    font-family: var(--mono);
-  }
+/* PDF */
+.pdf-btn { width: 100%; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 11px; font-size: 13px; font-family: var(--sans); color: var(--text2); cursor: pointer; transition: all 0.12s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.pdf-btn:hover { border-color: var(--border2); color: var(--text); background: var(--bg3); }
 
-  /* INDUSTRY PRESETS */
-  .preset-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0; }
-  .preset-btn {
-    background: var(--bg3); border: 1px solid var(--border);
-    border-radius: 8px; padding: 7px 14px; font-size: 12px;
-    cursor: pointer; color: var(--text2); transition: all 0.12s;
-    font-family: var(--sans);
-  }
-  .preset-btn:hover { border-color: var(--border2); color: var(--text); }
-  .preset-btn.active { border-color: var(--accent); background: var(--accent-bg); color: var(--accent2); }
+/* MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; padding: 1rem; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius-lg); width: 100%; max-width: 460px; padding: 2rem; position: relative; }
+.modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text3); font-size: 20px; cursor: pointer; line-height: 1; padding: 4px; }
+.modal-close:hover { color: var(--text); }
+.modal-eyebrow { font-family: var(--mono); font-size: 10px; color: var(--accent2); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+.modal h2 { font-size: 20px; font-weight: 300; letter-spacing: -0.02em; color: var(--text); margin-bottom: 6px; }
+.modal h2 strong { font-weight: 500; }
+.modal-sub { font-size: 13px; color: var(--text2); margin-bottom: 1.5rem; line-height: 1.5; }
+.modal-estimate-box { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 1.25rem; font-family: var(--mono); font-size: 12px; color: var(--text2); line-height: 1.8; }
+.modal-estimate-box .est-val { color: var(--accent2); }
+.form-field { margin-bottom: 12px; }
+.form-label { font-size: 11px; font-family: var(--mono); color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; display: block; margin-bottom: 6px; }
+.form-input { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; font-family: var(--sans); color: var(--text); outline: none; transition: border-color 0.15s; }
+.form-input::placeholder { color: var(--text3); }
+.form-input:focus { border-color: var(--accent); }
+textarea.form-input { resize: vertical; min-height: 80px; line-height: 1.5; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.modal-submit { width: 100%; background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 12px; font-size: 14px; font-weight: 500; font-family: var(--sans); cursor: pointer; transition: opacity 0.15s; margin-top: 4px; }
+.modal-submit:hover { opacity: 0.85; }
+.modal-submit:disabled { opacity: 0.5; cursor: default; }
+.modal-feedback { font-size: 12px; font-family: var(--mono); text-align: center; margin-top: 10px; min-height: 18px; }
+.modal-feedback.ok { color: var(--green); }
+.modal-feedback.err { color: #f87171; }
+.modal-success { text-align: center; padding: 1rem 0; display: none; }
+.modal-success-icon { font-size: 36px; margin-bottom: 12px; }
+.modal-success h3 { font-size: 18px; font-weight: 400; color: var(--text); margin-bottom: 6px; }
+.modal-success p { font-size: 13px; color: var(--text2); }
 
-  /* RECOMMENDED MODEL */
-  .rec-model-panel {
-    background: var(--bg2); border: 1px solid rgba(45,212,160,0.25);
-    border-radius: var(--radius-lg); padding: 1rem 1.25rem;
-    display: none;
-  }
-  .rec-model-panel.visible { display: block; }
-  .rec-model-label { font-size: 10px; font-family: var(--mono); color: var(--green); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
-  .rec-model-name { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
-  .rec-model-reason { font-size: 12px; color: var(--text2); line-height: 1.5; }
-  .rec-model-saving { font-size: 11px; font-family: var(--mono); color: var(--green); margin-top: 6px; }
+/* FOOTER */
+footer { border-top: 1px solid var(--border); padding: 1.25rem 2rem; display: flex; flex-direction: column; gap: 6px; max-width: 1100px; margin: 0 auto; font-size: 11px; color: var(--text3); font-family: var(--mono); line-height: 1.6; }
+footer a { color: var(--text3); text-decoration: none; }
+footer a:hover { color: var(--text2); }
 
-  /* METHODOLOGY */
-  .methodology-panel {
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: var(--radius-lg); overflow: hidden;
-  }
-  .methodology-toggle {
-    width: 100%; background: none; border: none; padding: 1rem 1.25rem;
-    display: flex; justify-content: space-between; align-items: center;
-    cursor: pointer; color: var(--text2); font-size: 13px; font-weight: 500;
-    font-family: var(--sans); text-align: left;
-  }
-  .methodology-toggle:hover { color: var(--text); }
-  .methodology-toggle-icon { font-size: 16px; color: var(--text3); transition: transform 0.2s; }
-  .methodology-toggle.open .methodology-toggle-icon { transform: rotate(180deg); }
-  .methodology-body { display: none; padding: 0 1.25rem 1.25rem; }
-  .methodology-body.open { display: block; }
-  .methodology-task-row {
-    display: flex; justify-content: space-between; align-items: flex-start;
-    padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12px;
-  }
-  .methodology-task-row:last-child { border-bottom: none; }
-  .meth-name { color: var(--text2); flex: 1; }
-  .meth-detail { font-family: var(--mono); font-size: 11px; color: var(--text3); text-align: right; line-height: 1.6; }
-
-  /* GROWTH CHART */
-  .chart-panel {
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: var(--radius-lg); padding: 1.25rem 1.5rem;
-  }
-  .chart-panel-title {
-    font-size: 13px; font-weight: 500; color: var(--text2);
-    display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
-  }
-  .chart-panel-title::before { content: ''; width: 3px; height: 13px; background: var(--accent); border-radius: 2px; display: inline-block; }
-  .chart-panel-sub { font-size: 12px; color: var(--text3); margin-bottom: 14px; }
-  .chart-growth-row { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
-  .chart-growth-label { font-size: 12px; color: var(--text2); flex: 1; }
-  .chart-growth-select {
-    background: var(--bg3); border: 1px solid var(--border);
-    border-radius: 6px; padding: 5px 10px; font-size: 12px;
-    font-family: var(--mono); color: var(--text); outline: none;
-  }
-  .chart-bars { display: flex; align-items: flex-end; gap: 4px; height: 100px; }
-  .chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-  .chart-bar {
-    width: 100%; border-radius: 3px 3px 0 0;
-    background: var(--accent); opacity: 0.7;
-    transition: height 0.4s ease; min-height: 3px;
-  }
-  .chart-bar.current { opacity: 1; background: var(--green); }
-  .chart-bar-label { font-size: 9px; font-family: var(--mono); color: var(--text3); }
-  .chart-bar-val { font-size: 9px; font-family: var(--mono); color: var(--text3); }
-
-  /* SMART CTA */
-  .smart-cta {
-    background: var(--bg2);
-    border: 1px solid rgba(108,99,255,0.3);
-    border-radius: var(--radius-lg);
-    padding: 1.25rem 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .smart-cta-text {
-    font-size: 13px;
-    color: var(--text2);
-    line-height: 1.5;
-    flex: 1;
-  }
-  .smart-cta button {
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 9px 18px;
-    font-size: 13px;
-    font-weight: 500;
-    font-family: var(--sans);
-    cursor: pointer;
-    white-space: nowrap;
-    transition: opacity 0.15s;
-    flex-shrink: 0;
-  }
-  .smart-cta button:hover { opacity: 0.85; }
-
-  /* PDF BUTTON */
-  .pdf-btn {
-    width: 100%; background: var(--bg2); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 11px; font-size: 13px;
-    font-family: var(--sans); color: var(--text2); cursor: pointer;
-    transition: all 0.12s; display: flex; align-items: center;
-    justify-content: center; gap: 8px;
-  }
-  .pdf-btn:hover { border-color: var(--border2); color: var(--text); background: var(--bg3); }
-
-  @media print {
-    nav, .action-row, .copy-confirm, .email-panel, .cta-banner, .pdf-btn,
-    .methodology-toggle, .chart-growth-row, .preset-row, .preset-desc,
-    .task-vol-row, .savings-panel, .roi-panel { display: none !important; }
-    body { background: white !important; color: #111 !important; }
-    .app { grid-template-columns: 1fr !important; }
-    .task-btn { border: 1px solid #ddd !important; background: white !important; }
-    .task-btn:not(.active) { display: none !important; }
-    .task-btn-tokens { display: block !important; }
-    .task-btn-explain { border-left: 2px solid #ccc !important; background: #f9f9f9 !important; color: #444 !important; }
-    .metric-big-value, .metric-big-label, .metric-big-sub { color: #111 !important; }
-    .breakdown-panel, .task-breakdown-panel { border: 1px solid #ddd !important; }
-    .br-label, .br-val, .bt-label, .bt-val, .tbd-name, .tbd-runs, .tbd-cost { color: #111 !important; }
-  }
-
-  /* UNLOCK GATE */
-  .unlock-wall {
-    position: relative;
-    margin-bottom: 0;
-  }
-  .unlock-wall .locked-content {
-    filter: blur(4px);
-    pointer-events: none;
-    user-select: none;
-    opacity: 0.5;
-  }
-  .unlock-wall.unlocked .locked-content {
-    filter: none;
-    pointer-events: auto;
-    user-select: auto;
-    opacity: 1;
-  }
-  .unlock-gate {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 5;
-    background: rgba(12,12,14,0.55);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    text-align: center;
-    backdrop-filter: blur(2px);
-  }
-  .unlock-wall.unlocked .unlock-gate { display: none; }
-  .unlock-gate-icon { font-size: 22px; margin-bottom: 8px; }
-  .unlock-gate-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
-  .unlock-gate-sub { font-size: 12px; color: var(--text2); margin-bottom: 14px; line-height: 1.5; }
-  .unlock-form { display: flex; gap: 6px; width: 100%; max-width: 320px; }
-  .unlock-input {
-    flex: 1; background: var(--bg3); border: 1px solid var(--border2);
-    border-radius: 8px; padding: 9px 12px; font-size: 13px;
-    font-family: var(--sans); color: var(--text); outline: none;
-    transition: border-color 0.15s;
-  }
-  .unlock-input:focus { border-color: var(--accent); }
-  .unlock-input::placeholder { color: var(--text3); }
-  .unlock-submit {
-    background: var(--accent); color: #fff; border: none;
-    border-radius: 8px; padding: 9px 16px; font-size: 13px;
-    font-weight: 500; font-family: var(--sans); cursor: pointer;
-    white-space: nowrap; transition: opacity 0.15s;
-  }
-  .unlock-submit:hover { opacity: 0.85; }
-  .unlock-submit:disabled { opacity: 0.5; cursor: default; }
-  .unlock-feedback { font-size: 11px; font-family: var(--mono); margin-top: 8px; min-height: 16px; }
-  .unlock-feedback.err { color: #f87171; }
-  .unlock-already { font-size: 11px; color: var(--green); font-family: var(--mono); margin-top: 6px; }
-
-  /* CURRENCY SELECTOR */
-  .currency-row { display: flex; gap: 6px; }
-  .currency-btn {
-    font-family: var(--mono); font-size: 11px;
-    background: var(--bg3); border: 1px solid var(--border);
-    border-radius: 6px; padding: 4px 10px; cursor: pointer;
-    color: var(--text3); transition: all 0.12s;
-  }
-  .currency-btn:hover { color: var(--text); border-color: var(--border2); }
-  .currency-btn.active { border-color: var(--accent); color: var(--accent2); background: var(--accent-bg); }
-
-  /* TASK BREAKDOWN */
-  .task-breakdown-panel {
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: var(--radius-lg); overflow: hidden;
-  }
-  .task-breakdown-header {
-    padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--border);
-    font-family: var(--mono); font-size: 10px; color: var(--text3);
-    letter-spacing: 0.08em; text-transform: uppercase;
-  }
-  .task-breakdown-empty { padding: 1rem 1.25rem; font-size: 12px; color: var(--text3); text-align: center; }
-  .tbd-row {
-    display: grid; grid-template-columns: 1fr auto auto;
-    gap: 6px 10px; padding: 8px 1.25rem;
-    border-bottom: 1px solid var(--border); font-size: 12px; align-items: center;
-  }
-  .tbd-row:last-child { border-bottom: none; }
-  .tbd-name { color: var(--text2); }
-  .tbd-runs { font-family: var(--mono); font-size: 11px; color: var(--text3); }
-  .tbd-cost { font-family: var(--mono); font-weight: 500; color: var(--text); text-align: right; }
-  .tbd-bar-wrap { grid-column: 1/-1; height: 3px; background: var(--bg3); border-radius: 2px; margin-top: -2px; }
-  .tbd-bar-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.3s; }
-
-  /* ROI PANEL */
-  .roi-panel { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
-  .roi-panel-header { padding: 1rem 1.25rem 0.75rem; border-bottom: 1px solid var(--border); }
-  .roi-panel-title {
-    font-size: 13px; font-weight: 500; color: var(--text2);
-    display: flex; align-items: center; gap: 8px; margin-bottom: 3px;
-  }
-  .roi-panel-title::before { content: ''; width: 3px; height: 13px; background: var(--amber); border-radius: 2px; display: inline-block; }
-  .roi-panel-sub { font-size: 12px; color: var(--text3); }
-  .roi-inputs { padding: 0.85rem 1.25rem; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid var(--border); }
-  .roi-input-row { display: flex; align-items: center; gap: 8px; }
-  .roi-input-label { font-size: 12px; color: var(--text2); flex: 1; }
-  .roi-input {
-    background: var(--bg3); border: 1px solid var(--border); border-radius: 6px;
-    padding: 6px 10px; font-size: 13px; font-family: var(--mono); color: var(--text);
-    outline: none; width: 90px; text-align: right; transition: border-color 0.15s;
-  }
-  .roi-input:focus { border-color: var(--accent); }
-  .roi-unit { font-size: 12px; color: var(--text3); width: 50px; }
-  .roi-result { padding: 1rem 1.25rem; }
-  .roi-highlight {
-    background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2);
-    border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .roi-highlight-label { font-size: 12px; color: var(--amber); font-weight: 500; }
-  .roi-highlight-val { font-size: 22px; font-weight: 500; font-family: var(--mono); color: var(--amber); }
-  .roi-sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .roi-sub-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 10px; }
-  .roi-sub-label { font-size: 11px; color: var(--text3); margin-bottom: 2px; }
-  .roi-sub-val { font-size: 14px; font-weight: 500; font-family: var(--mono); color: var(--text2); }
-
-  /* SHARE + RESET */
-  .action-row { display: flex; gap: 8px; justify-content: flex-end; }
-  .action-btn {
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 7px 14px; font-size: 12px;
-    font-family: var(--mono); color: var(--text2); cursor: pointer;
-    transition: all 0.12s; display: flex; align-items: center; gap: 6px;
-    white-space: nowrap;
-  }
-  .action-btn:hover { border-color: var(--border2); color: var(--text); }
-  .action-btn.share { border-color: rgba(108,99,255,0.3); color: var(--accent2); }
-  .action-btn.share:hover { background: var(--accent-bg); }
-  .action-btn.reset { border-color: rgba(248,113,113,0.2); color: #f87171; }
-  .action-btn.reset:hover { background: rgba(248,113,113,0.08); }
-  .copy-confirm { font-size: 11px; color: var(--green); font-family: var(--mono); text-align: center; min-height: 16px; margin-top: 4px; }
+@media print {
+  nav, .steps-wrap, .step-nav, .action-row, .copy-confirm, .email-panel,
+  .cta-banner, .pdf-btn, .methodology-toggle, .chart-growth-row,
+  .preset-row, .preset-desc, .task-vol-row, .smart-cta { display: none !important; }
+  body { background: white !important; color: #111 !important; }
+  .app { grid-template-columns: 1fr !important; }
+  .step-panel { display: flex !important; }
+  .task-btn:not(.active) { display: none !important; }
+}
 </style>
 </head>
 <body>
@@ -1220,134 +394,273 @@
 <nav>
   <div class="nav-logo">BÜCHEMEIER <span>CONSULTING</span></div>
   <div class="currency-row">
-    <button class="currency-btn" onclick="setCurrency('USD','$')">USD</button>
-    <button class="currency-btn" onclick="setCurrency('EUR','€')">EUR</button>
-    <button class="currency-btn active" onclick="setCurrency('NOK','kr')">NOK</button>
-  </div>
-  <button class="nav-cta" onclick="document.getElementById('cta-section').scrollIntoView({behavior:'smooth'})">Book a session →</button>
+      <button class="currency-btn" onclick="setCurrency('USD','$')">USD</button>
+      <button class="currency-btn" onclick="setCurrency('EUR','€')">EUR</button>
+      <button class="currency-btn active" onclick="setCurrency('NOK','kr')">NOK</button>
+    </div>
+  <button class="nav-cta" onclick="openModal()">Start a conversation →</button>
 </nav>
 
 <div class="hero">
-  <div class="hero-eyebrow">AI infrastructure cost estimator</div>
-  <h1>Know what AI costs<br><strong>before you commit</strong></h1>
-  <p>Configure your enterprise use case and get an instant breakdown of token consumption and monthly costs across models.</p>
+  <div class="hero-eyebrow">AI Operating Cost Estimator</div>
+  <h1>What does AI actually cost<br><strong>your organisation?</strong></h1>
+  <p>Translate AI from abstract hype to operational economics. Configure your use case and get a cost breakdown across models, workflows and scale.</p>
+</div>
+
+<div class="steps-wrap">
+  <div class="steps">
+    <div class="step-item active" id="step-tab-1" onclick="goToStep(1)">
+      <div class="step-num" id="step-num-1">1</div>
+      <div class="step-label">Your use case</div>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step-item" id="step-tab-2" onclick="goToStep(2)">
+      <div class="step-num" id="step-num-2">2</div>
+      <div class="step-label">Choose a model</div>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step-item" id="step-tab-3" onclick="goToStep(3)">
+      <div class="step-num" id="step-num-3">3</div>
+      <div class="step-label">Your estimate</div>
+    </div>
+  </div>
 </div>
 
 <div class="app">
   <div class="left-col">
 
-    <div class="panel">
-      <div class="panel-title">Start with an industry preset</div>
-      <div class="preset-row">
-        <button class="preset-btn" onclick="applyPreset('finance',event)">Finance & Legal</button>
-        <button class="preset-btn" onclick="applyPreset('hr',event)">HR & Recruitment</button>
-        <button class="preset-btn" onclick="applyPreset('tech',event)">Tech & Engineering</button>
-        <button class="preset-btn" onclick="applyPreset('cs',event)">Customer Service</button>
-        <button class="preset-btn" onclick="applyPreset('sales',event)">Sales & Marketing</button>
-        <button class="preset-btn" onclick="applyPreset('industry',event)">Industry & Energy</button>
-        <button class="preset-btn" onclick="applyPreset('public',event)">Public Sector</button>
-        <button class="preset-btn" onclick="applyPreset('health',event)">Health & Care</button>
+    <!-- STEP 1 -->
+    <div class="step-panel active" id="step-1">
+      <div class="panel">
+        <div class="panel-title">Start with an industry preset</div>
+        <div class="preset-row">
+          <button class="preset-btn" onclick="applyPreset('finance',event)">Finance & Legal</button>
+          <button class="preset-btn" onclick="applyPreset('hr',event)">HR & Recruitment</button>
+          <button class="preset-btn" onclick="applyPreset('tech',event)">Tech & Engineering</button>
+          <button class="preset-btn" onclick="applyPreset('cs',event)">Customer Service</button>
+          <button class="preset-btn" onclick="applyPreset('sales',event)">Sales & Marketing</button>
+          <button class="preset-btn" onclick="applyPreset('industry',event)">Industry & Energy</button>
+          <button class="preset-btn" onclick="applyPreset('public',event)">Public Sector</button>
+          <button class="preset-btn" onclick="applyPreset('health',event)">Health & Care</button>
+        </div>
+        <div class="preset-desc" id="preset-desc"></div>
       </div>
-      <div class="preset-desc" id="preset-desc"></div>
-    </div>
 
-    <div class="panel">
-      <div class="panel-title">Select tasks & set daily volume</div>
-      <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.5;">Enter the number of employees using AI for each task and how many times per day. The calculator works out daily volume automatically.</p>
-      <div class="task-grid" id="task-grid"></div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-title">Model</div>
-      <div class="model-row" id="model-row"></div>
-      <div id="model-desc" style="font-size:12px;color:var(--text3);margin-top:10px;font-family:var(--mono);"></div>
-    </div>
-
-    <div class="rec-model-panel" id="rec-model-panel">
-      <div class="rec-model-label">⚡ Recommended for your tasks</div>
-      <div class="rec-model-name" id="rec-model-name">—</div>
-      <div class="rec-model-reason" id="rec-model-reason">—</div>
-      <div class="rec-model-saving" id="rec-model-saving"></div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-title">Context & volume</div>
-      <div class="slider-block">
-        <div class="slider-top">
-          <span class="slider-name">Document / context size</span>
-          <span class="slider-value" id="sv-ctx">Medium</span>
-        </div>
-        <input type="range" id="sl-ctx" min="0.5" max="6" step="0.5" value="1">
-        <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px;font-family:var(--mono);color:var(--text3);">
-          <span>Short</span><span>Medium</span><span>Long</span><span>Very long</span>
-        </div>
-        <div id="ctx-desc" style="margin-top:8px;font-size:11px;color:var(--text3);line-height:1.5;font-family:var(--mono);"></div>
+      <div class="panel">
+        <div class="panel-title">Select tasks &amp; set daily volume</div>
+        <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.5;">Enter the number of employees using AI for each task and how many times per day. The calculator works out daily volume automatically.</p>
+        <div class="task-grid" id="task-grid"></div>
       </div>
-      <div class="slider-block">
-        <div class="slider-top">
-          <span class="slider-name">Working days / month</span>
-          <span class="slider-value" id="sv-days">22</span>
+
+      <div class="panel">
+        <div class="panel-title">Context &amp; volume</div>
+        <div class="slider-block">
+          <div class="slider-top">
+            <span class="slider-name"><span class="slider-name">Document / context size</span>
+            <span class="slider-value" id="sv-ctx">Medium</span>
+          </div>
+          <input type="range" id="sl-ctx" min="0.5" max="6" step="0.5" value="1">
+          <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px;font-family:var(--mono);color:var(--text3);">
+            <span>Short</span><span>Medium</span><span>Long</span><span>Very long</span>
+          </div>
+          <div id="ctx-desc" style="margin-top:8px;font-size:11px;color:var(--text3);line-height:1.5;font-family:var(--mono);"></div>
         </div>
-        <input type="range" id="sl-days" min="1" max="31" step="1" value="22">
+        <div class="slider-block">
+          <div class="slider-top">
+            <span class="slider-name"><span class="slider-name">Working days / month</span>
+            <span class="slider-value" id="sv-days">22</span>
+          </div>
+          <input type="range" id="sl-days" min="1" max="31" step="1" value="22">
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <div></div>
+        <button class="step-nav-btn primary" onclick="goToStep(2)">Choose a model →</button>
       </div>
     </div>
 
-    <div class="panel">
-      <div class="panel-title">Optimisations</div>
-      <div class="toggle-row" onclick="toggleOpt('batch')">
-        <div>
-          <div class="toggle-name">Batch API <span class="toggle-badge">−50% input cost</span></div>
-          <div class="toggle-desc">Anthropic's async batch processing — ideal for non-real-time tasks</div>
-        </div>
-        <div class="toggle-switch" id="tog-batch"><div class="toggle-knob"></div></div>
+    <!-- STEP 2 -->
+    <div class="step-panel" id="step-2">
+      <div class="panel">
+        <div class="panel-title">Model</div>
+        <div class="model-row" id="model-row"></div>
+        <div id="model-desc" style="font-size:12px;color:var(--text3);margin-top:10px;font-family:var(--mono);"></div>
       </div>
-      <div class="toggle-row" onclick="toggleOpt('cache')" style="border-bottom:none;margin-bottom:0;padding-bottom:0">
-        <div>
-          <div class="toggle-name">Prompt caching <span class="toggle-badge">−90% repeated input</span></div>
-          <div class="toggle-desc">Cache repeated system prompts and context — big savings for RAG and document tasks</div>
+
+      <div class="rec-model-panel" id="rec-model-panel">
+        <div class="rec-model-label">⚡ Recommended for your tasks</div>
+        <div class="rec-model-name" id="rec-model-name">—</div>
+        <div class="rec-model-reason" id="rec-model-reason">—</div>
+        <div class="rec-model-saving" id="rec-model-saving"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Optimisations</div>
+        <div class="toggle-row" onclick="toggleOpt('batch')">
+          <div>
+            <div class="toggle-name">Batch API <span class="toggle-badge">−50% input cost</span></div>
+            <div class="toggle-desc"><div class="toggle-desc">Anthropic's async batch processing — ideal for non-real-time tasks</div>
+          </div>
+          <div class="toggle-switch" id="tog-batch"><div class="toggle-knob"></div></div>
         </div>
-        <div class="toggle-switch" id="tog-cache"><div class="toggle-knob"></div></div>
+        <div style="padding-bottom:0;margin-bottom:0;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <div>
+              <div class="toggle-name">Prompt caching <span class="toggle-badge" id="cache-badge">off</span></div>
+              <div class="toggle-desc"><div class="toggle-desc">How much of your input is static (system prompt, document base)? The higher the share, the more caching saves.</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="range" id="sl-cache" min="0" max="95" step="5" value="0" oninput="setCacheLevel(this.value)" style="flex:1;">
+            <span style="font-family:var(--mono);font-size:12px;color:var(--accent2);min-width:80px;text-align:right;" id="cache-saving-label">0% static</span>
+          </div>
+          <div style="margin-top:6px;font-size:11px;color:var(--text3);font-family:var(--mono);" id="cache-desc-text">Drag right to model how much of your input context is reused across requests.</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Compare two models</div>
+        <div class="compare-row">
+          <div class="compare-col">
+            <div class="section-label" style="margin-bottom:6px">Model A</div>
+            <select class="compare-select" id="cmp-a" onchange="updateCompare()"></select>
+          </div>
+          <div style="display:flex;align-items:center;padding-top:18px;color:var(--text3);font-size:13px;">vs</div>
+          <div class="compare-col">
+            <div class="section-label" style="margin-bottom:6px">Model B</div>
+            <select class="compare-select" id="cmp-b" onchange="updateCompare()"></select>
+          </div>
+        </div>
+        <div class="compare-result" id="compare-result"></div>
+      </div>
+
+      <div class="methodology-panel">
+        <button class="methodology-toggle" id="meth-toggle" onclick="toggleMethodology()">
+          <span>How we calculate these estimates</span>
+          <span class="methodology-toggle-icon">▾</span>
+        </button>
+        <div class="methodology-body" id="meth-body">
+          <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6;">Token estimates are based on typical enterprise usage patterns. Your actual costs will vary depending on prompt length, response complexity, and implementation. Use this as a directional guide, not a contract.</p>
+          <div id="meth-task-list"></div>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <button class="step-nav-btn" onclick="goToStep(1)">← Your use case</button>
+        <button class="step-nav-btn primary" onclick="goToStep(3)">See your estimate →</button>
       </div>
     </div>
 
-    <div class="panel">
-      <div class="panel-title">Compare two models</div>
-      <div class="compare-row">
-        <div class="compare-col">
-          <div class="section-label" style="margin-bottom:6px">Model A</div>
-          <select class="compare-select" id="cmp-a" onchange="updateCompare()"></select>
+    <!-- STEP 3 -->
+    <div class="step-panel" id="step-3">
+      <div class="roi-panel">
+        <div class="roi-panel-header">
+          <div class="roi-panel-title">ROI calculator</div>
+          <div class="roi-panel-sub">How much is the time saving worth in salary?</div>
         </div>
-        <div style="display:flex;align-items:center;padding-top:18px;color:var(--text3);font-size:13px;">vs</div>
-        <div class="compare-col">
-          <div class="section-label" style="margin-bottom:6px">Model B</div>
-          <select class="compare-select" id="cmp-b" onchange="updateCompare()"></select>
+        <div class="roi-inputs">
+          <div class="roi-input-row">
+            <span class="roi-input-label">Employees using AI</span>
+            <input class="roi-input" id="roi-employees" type="number" min="1" value="20" oninput="updateROI()">
+            <span class="roi-unit">people</span>
+          </div>
+          <div class="roi-input-row">
+            <span class="roi-input-label">Avg. hourly rate</span>
+            <input class="roi-input" id="roi-rate" type="number" min="1" value="650" oninput="updateROI()">
+            <span class="roi-unit" id="roi-rate-unit">kr/hour</span>
+          </div>
+          <div class="roi-input-row">
+            <span class="roi-input-label">Time saved per person</span>
+            <input class="roi-input" id="roi-minutes" type="number" min="1" value="45" oninput="updateROI()">
+            <span class="roi-unit">min/day</span>
+          </div>
+        </div>
+        <div class="roi-result" id="roi-result"></div>
+      </div>
+
+      <div class="savings-panel">
+        <div class="savings-panel-header">
+          <div class="savings-panel-title">What are you paying today?</div>
+          <div class="savings-panel-sub">Enter your current tool costs — we'll show you the potential saving.</div>
+        </div>
+        <div class="savings-tools">
+          <div class="savings-tool-row">
+            <span class="savings-tool-name">GitHub Copilot</span>
+            <div class="savings-tool-amount">
+              <input class="savings-tool-input" id="cost-copilot" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
+              <span class="savings-tool-unit">per user / mo</span>
+            </div>
+          </div>
+          <div class="savings-tool-row">
+            <span class="savings-tool-name">ChatGPT Team</span>
+            <div class="savings-tool-amount">
+              <input class="savings-tool-input" id="cost-chatgpt" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
+              <span class="savings-tool-unit">per user / mo</span>
+            </div>
+          </div>
+          <div class="savings-tool-row">
+            <span class="savings-tool-name">Microsoft Copilot</span>
+            <div class="savings-tool-amount">
+              <input class="savings-tool-input" id="cost-mscopilot" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
+              <span class="savings-tool-unit">per user / mo</span>
+            </div>
+          </div>
+        </div>
+        <div style="padding:10px 1.25rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.02);">
+          <span style="font-size:12px;color:var(--text2);flex:1;">How many users have these tools?</span>
+          <input class="savings-tool-input" id="cost-users" type="number" min="1" value="10" placeholder="10" oninput="updateSavings()">
+          <span style="font-size:11px;color:var(--text3);white-space:nowrap;">users</span>
+        </div>
+        <div class="savings-custom-row">
+          <span class="savings-custom-label">Other AI spend</span>
+          <input class="savings-custom-input" id="cost-custom" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
+          <span style="font-size:12px;color:var(--text3);white-space:nowrap">per month</span>
+        </div>
+        <div class="savings-result" id="savings-result">
+          <div style="font-size:12px;color:var(--text3);text-align:center;padding:4px 0;">Enter your current costs above to see potential savings.</div>
         </div>
       </div>
-      <div class="compare-result" id="compare-result"></div>
-    </div>
 
-    <div class="methodology-panel">
-      <button class="methodology-toggle" id="meth-toggle" onclick="toggleMethodology()">
-        <span>How we calculate these estimates</span>
-        <span class="methodology-toggle-icon">▾</span>
-      </button>
-      <div class="methodology-body" id="meth-body">
-        <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6;">Token estimates are based on typical enterprise usage patterns. Your actual costs will vary depending on prompt length, response complexity, and implementation. Use this as a directional guide, not a contract.</p>
-        <div id="meth-task-list"></div>
+      <div class="chart-panel">
+        <div class="chart-panel-title">Cost over time</div>
+        <div class="chart-panel-sub">Projected monthly cost as AI usage grows</div>
+        <div class="chart-growth-row">
+          <span class="chart-growth-label">Expected monthly growth</span>
+          <select class="chart-growth-select" id="growth-rate" onchange="updateChart()">
+            <option value="0">Flat (0%)</option>
+            <option value="5">Moderate (5%/mo)</option>
+            <option value="10" selected>Fast (10%/mo)</option>
+            <option value="20">Aggressive (20%/mo)</option>
+          </select>
+        </div>
+        <div class="chart-bars" id="chart-bars"></div>
+      </div>
+
+      <div class="smart-cta" id="smart-cta" style="display:none;">
+        <div class="smart-cta-text" id="smart-cta-text"></div>
+        <button onclick="openModal()">Let's talk →</button>
+      </div>
+
+      <div class="step-nav">
+        <button class="step-nav-btn" onclick="goToStep(2)">← Choose a model</button>
+        <div></div>
       </div>
     </div>
 
   </div>
 
+  <!-- RIGHT COLUMN — always visible -->
+  <div class="right-col">
     <div class="action-row">
-      <button class="action-btn share" id="share-btn" onclick="shareURL()">↗ Share estimate</button>
-      <button class="action-btn reset" onclick="resetAll()">↺ Reset all</button>
+      <button class="action-btn share" onclick="shareURL()">↗ Share</button>
+      <button class="action-btn reset" onclick="resetAll()">↺ Reset</button>
     </div>
     <div class="copy-confirm" id="copy-confirm"></div>
 
     <div class="metric-big">
-      <div class="metric-big-label"><span class="live-dot"></span>Monthly cost estimate</div>
-      <div class="metric-big-value" id="m-monthly">$0.00</div>
+      <div class="metric-big-label"><span class="live-dot"></span><span>Monthly cost estimate</span></div>
+      <div class="metric-big-value" id="m-monthly">kr 0</div>
       <div class="metric-big-sub" id="m-monthly-sub">Set daily volume on tasks above</div>
     </div>
 
@@ -1382,98 +695,28 @@
     </div>
 
     <div class="breakdown-panel">
-      <div class="breakdown-header">Cost breakdown</div>
-      <div class="breakdown-row"><span class="br-label">Input cost (daily total)</span><span class="br-val" id="b-in">—</span></div>
-      <div class="breakdown-row"><span class="br-label">Output cost (daily total)</span><span class="br-val" id="b-out">—</span></div>
+      <div class="breakdown-header">Cost breakdown — inference only</div>
+      <div class="breakdown-row"><span class="br-label">Input cost (daily)</span><span class="br-val" id="b-in">—</span></div>
+      <div class="breakdown-row"><span class="br-label">Output cost (daily)</span><span class="br-val" id="b-out">—</span></div>
       <div class="breakdown-row"><span class="br-label">Daily volume</span><span class="br-val" id="b-vol">—</span></div>
       <div class="breakdown-row"><span class="br-label">Daily cost</span><span class="br-val" id="b-day">—</span></div>
       <div class="breakdown-total">
         <span class="bt-label">Monthly total</span>
         <span class="bt-val" id="b-total">—</span>
       </div>
-    </div>
-
-    <div class="roi-panel">
-      <div class="roi-panel-header">
-        <div class="roi-panel-title">ROI calculator</div>
-        <div class="roi-panel-sub">How much is the time saving worth in salary?</div>
-      </div>
-      <div class="roi-inputs">
-        <div class="roi-input-row">
-          <span class="roi-input-label">Employees using AI</span>
-          <input class="roi-input" id="roi-employees" type="number" min="1" value="20" oninput="updateROI()">
-          <span class="roi-unit">people</span>
-        </div>
-        <div class="roi-input-row">
-          <span class="roi-input-label">Avg. hourly rate</span>
-          <input class="roi-input" id="roi-rate" type="number" min="1" value="650" oninput="updateROI()">
-          <span class="roi-unit" id="roi-rate-unit">kr/hour</span>
-        </div>
-        <div class="roi-input-row">
-          <span class="roi-input-label">Time saved per person</span>
-          <input class="roi-input" id="roi-minutes" type="number" min="1" value="45" oninput="updateROI()">
-          <span class="roi-unit">min/day</span>
-        </div>
-      </div>
-      <div class="roi-result" id="roi-result"></div>
-    </div>
-
-    <div class="savings-panel">
-      <div class="savings-panel-header">
-        <div class="savings-panel-title">What are you paying today?</div>
-        <div class="savings-panel-sub">Enter your current tool costs — we'll show you the potential saving.</div>
-      </div>
-      <div class="savings-tools">
-        <div class="savings-tool-row">
-          <span class="savings-tool-name">GitHub Copilot</span>
-          <div class="savings-tool-amount">
-            <input class="savings-tool-input" id="cost-copilot" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
-            <span class="savings-tool-unit">per user / mo</span>
-          </div>
-        </div>
-        <div class="savings-tool-row">
-          <span class="savings-tool-name">ChatGPT Team</span>
-          <div class="savings-tool-amount">
-            <input class="savings-tool-input" id="cost-chatgpt" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
-            <span class="savings-tool-unit">per user / mo</span>
-          </div>
-        </div>
-        <div class="savings-tool-row">
-          <span class="savings-tool-name">Microsoft Copilot</span>
-          <div class="savings-tool-amount">
-            <input class="savings-tool-input" id="cost-mscopilot" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
-            <span class="savings-tool-unit">per user / mo</span>
-          </div>
-        </div>
-      </div>
-      <div style="padding: 10px 1.25rem; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.02);">
-        <span style="font-size:12px;color:var(--text2);flex:1;">How many users have these tools?</span>
-        <input class="savings-tool-input" id="cost-users" type="number" min="1" value="10" placeholder="10" oninput="updateSavings()">
-        <span style="font-size:11px;color:var(--text3);white-space:nowrap;">users</span>
-      </div>
-      <div class="savings-custom-row">
-        <span class="savings-custom-label">Other AI spend</span>
-        <input class="savings-custom-input" id="cost-custom" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
-        <span style="font-size:12px;color:var(--text3);white-space:nowrap">per month</span>
-      </div>
-      <div class="savings-result" id="savings-result">
-        <div style="font-size:12px;color:var(--text3);text-align:center;padding:4px 0;">Enter your current costs above to see potential savings.</div>
+      <div class="iceberg-note">
+        <strong>These are inference costs only.</strong> Production deployments also carry vector database hosting, cloud infrastructure, integration development, testing, monitoring and ongoing maintenance — typically 2–5× the inference cost in year one.
       </div>
     </div>
 
-    <div class="chart-panel">
-      <div class="chart-panel-title">Cost over time</div>
-      <div class="chart-panel-sub">Projected monthly cost as AI usage grows</div>
-      <div class="chart-growth-row">
-        <span class="chart-growth-label">Expected monthly growth</span>
-        <select class="chart-growth-select" id="growth-rate" onchange="updateChart()">
-          <option value="0">Flat (0%)</option>
-          <option value="5">Moderate (5%/mo)</option>
-          <option value="10" selected>Fast (10%/mo)</option>
-          <option value="20">Aggressive (20%/mo)</option>
-        </select>
+    <div class="readiness-panel" id="readiness-panel">
+      <div class="readiness-header">
+        <div class="readiness-title">What your estimate signals</div>
+        <div class="readiness-sub">A pattern reading based on your configuration.</div>
       </div>
-      <div class="chart-bars" id="chart-bars"></div>
+      <div class="readiness-body" id="readiness-body">
+        <div class="readiness-empty">Configure tasks above to see your signal reading.</div>
+      </div>
     </div>
 
     <button class="pdf-btn" onclick="window.print()">⬇ Download as PDF</button>
@@ -1488,17 +731,11 @@
       <div class="email-feedback" id="email-feedback"></div>
     </div>
 
-    <div class="smart-cta" id="smart-cta" style="display:none;">
-      <div class="smart-cta-text" id="smart-cta-text"></div>
-      <button onclick="openModal()">Let's talk →</button>
-    </div>
-
     <div class="cta-banner" id="cta-section">
-      <p>Ready to run this in production? We'll help you architect the right solution for your scale.</p>
-      <button onclick="openModal()">Book a free 30-minute session →</button>
-      <p class="cta-sub">No commitment. No pitch deck.</p>
+      <p>data-en="The numbers are a starting point. The real question is how you design AI operations that scale without accumulating technical and organisational debt.">The numbers are a starting point. The real question is how you design AI operations that scale without accumulating technical and organisational debt.</p>
+      <button onclick="openModal()">Start an architecture conversation →</button>
+      <p class="cta-sub">30 minutes. No pitch deck. Real questions.</p>
     </div>
-
   </div>
 </div>
 
@@ -1512,36 +749,32 @@
 <div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
   <div class="modal" id="modal">
     <button class="modal-close" onclick="closeModal()" aria-label="Close">×</button>
-
     <div id="modal-form-wrap">
-      <div class="modal-eyebrow">Free architecture call</div>
-      <h2>Let's talk about <strong>your use case</strong></h2>
-      <p class="modal-sub">Tell us a bit about your setup and we'll come prepared with a real plan — not a pitch deck.</p>
-
+      <div class="modal-eyebrow">Architecture conversation</div>
+      <h2>From estimate to <strong>operating model</strong></h2>
+      <p class="modal-sub">Share your context and we'll come prepared to talk architecture, cost governance and what a scalable AI operating model looks like for your organisation.</p>
       <div class="modal-estimate-box" id="modal-estimate-box"></div>
-
       <div class="form-row">
         <div class="form-field">
           <label class="form-label">Name</label>
-          <input class="form-input" id="cf-name" type="text" placeholder="Ada Lovelace">
+          <input class="form-input" id="cf-name" type="text" placeholder="Ola Nordmann">
         </div>
         <div class="form-field">
           <label class="form-label">Company</label>
-          <input class="form-input" id="cf-company" type="text" placeholder="Acme Corp">
+          <input class="form-input" id="cf-company" type="text" placeholder="Acme AS">
         </div>
       </div>
       <div class="form-field">
         <label class="form-label">Work email</label>
-        <input class="form-input" id="cf-email" type="email" placeholder="ada@acme.com">
+        <input class="form-input" id="cf-email" type="email" placeholder="ola@acme.no">
       </div>
       <div class="form-field">
         <label class="form-label">Tell us about your use case</label>
         <textarea class="form-input" id="cf-message" placeholder="We're looking to automate document processing for ~500 contracts/day..."></textarea>
       </div>
-      <button class="modal-submit" id="modal-submit-btn" onclick="submitContact()">Send — book my call →</button>
+      <button class="modal-submit" id="modal-submit-btn" onclick="submitContact()">Send — book my session →</button>
       <div class="modal-feedback" id="modal-feedback"></div>
     </div>
-
     <div class="modal-success" id="modal-success">
       <div class="modal-success-icon">✓</div>
       <h3>You're booked in</h3>
@@ -1551,892 +784,591 @@
 </div>
 
 <script>
+let currentStep = 1;
+function goToStep(n) {
+  currentStep = n;
+  [1,2,3].forEach(i => {
+    document.getElementById('step-' + i).classList.toggle('active', i === n);
+    const tab = document.getElementById('step-tab-' + i);
+    tab.classList.remove('active','done');
+    if (i === n) tab.classList.add('active');
+    else if (i < n) tab.classList.add('done');
+    document.getElementById('step-num-' + i).textContent = i < n ? '✓' : i;
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 const TASKS = [
-  { id: 'summarise',
-    name: 'Summarise a document',
-    desc: 'Reports, contracts, meeting notes',
-    explain: 'Upload a report, contract or meeting notes and get a concise summary. Useful when you need the key points without reading everything.',
-    inTok: 8000, outTok: 600 },
-  { id: 'draft',
-    name: 'Write a first draft',
-    desc: 'Proposals, reports, presentations',
-    explain: 'Generate a first version of a report, proposal or presentation based on a brief. You review and refine, AI does the heavy lifting.',
-    inTok: 600, outTok: 1200 },
-  { id: 'email',
-    name: 'Draft an email or message',
-    desc: 'Internal or external communication',
-    explain: 'Turn a few bullet points into a professional email or message. Works for internal communication, client follow-ups and formal letters.',
-    inTok: 400, outTok: 350 },
-  { id: 'answer',
-    name: 'Answer a question',
-    desc: 'From internal docs, policies, FAQs',
-    explain: 'Ask questions about your own documents, policies or knowledge base and get instant answers. Like a search engine that actually understands context.',
-    inTok: 4000, outTok: 500 },
-  { id: 'invoice',
-    name: 'Process a document or form',
-    desc: 'Invoices, applications, structured forms',
-    explain: 'Extract structured data from invoices, applications or forms automatically. Eliminates manual data entry.',
-    inTok: 3000, outTok: 400 },
-  { id: 'feedback',
-    name: 'Analyse and categorise responses',
-    desc: 'Surveys, reviews, tickets, candidate responses',
-    explain: 'Find patterns across large volumes of surveys, reviews, support tickets or candidate responses. See what people are actually saying.',
-    inTok: 2000, outTok: 600 },
-  { id: 'translate',
-    name: 'Translate content',
-    desc: 'Documents or messages to another language',
-    explain: 'Translate documents or messages to another language while preserving tone and formatting.',
-    inTok: 3000, outTok: 2800 },
-  { id: 'screen',
-    name: 'Screen or compare',
-    desc: 'CVs, supplier offers, product options',
-    explain: 'Compare multiple CVs, supplier offers or options against a set of criteria. Get a ranked shortlist in seconds.',
-    inTok: 5000, outTok: 700 },
-  { id: 'agent-simple',
-    name: 'AI agent — simple task',
-    desc: '2–4 steps: read, look up, respond',
-    explain: 'An AI that completes a multi-step task on your behalf — for example: read an incoming email, look up the customer in your CRM, and draft a reply.',
-    inTok: 18000, outTok: 2400 },
-  { id: 'agent-complex',
-    name: 'AI agent — complex workflow',
-    desc: '6–10 steps: analyse, cross-check, draft, review',
-    explain: 'An AI that handles an entire workflow autonomously — for example: analyse a contract, check it against company policy, flag risks and draft a response.',
-    inTok: 80000, outTok: 8000 },
-  { id: 'code',
-    name: 'Generate or review code',
-    desc: 'Write, analyse or fix code',
-    explain: 'Write new code from a description, review existing code for bugs or improvements, or explain what a piece of code does.',
-    inTok: 5000, outTok: 1200 },
-  { id: 'sql',
-    name: 'SQL / data query',
-    desc: 'Natural language to SQL queries',
-    explain: 'Describe what data you need in plain English and get a ready-to-run SQL query. No SQL expertise required.',
-    inTok: 800, outTok: 400 },
-  { id: 'rag',
-    name: 'RAG / knowledge base Q&A',
-    desc: 'Answer over a large knowledge base',
-    explain: 'Connect AI to a large document library or database and let it answer questions by retrieving the most relevant content first.',
-    inTok: 6000, outTok: 700 },
-  { id: 'apidoc',
-    name: 'API documentation',
-    desc: 'Generate docs from code or OpenAPI spec',
-    explain: 'Automatically generate technical documentation from your codebase or API specification. Keeps docs in sync with your code.',
-    inTok: 4000, outTok: 2000 },
+  { id:'summarise', name:'Summarise a document', desc:'Reports, contracts, meeting notes', explain:'Upload a report, contract or meeting notes and get a concise summary. Useful when you need the key points without reading everything.', inTok:8000, outTok:600 },
+  { id:'draft', name:'Write a first draft', desc:'Proposals, reports, presentations', explain:'Generate a first version of a report, proposal or presentation based on a brief. You review and refine, AI does the heavy lifting.', inTok:600, outTok:1200 },
+  { id:'email', name:'Draft an email or message', desc:'Internal or external communication', explain:'Turn a few bullet points into a professional email or message. Works for internal communication, client follow-ups and formal letters.', inTok:400, outTok:350 },
+  { id:'answer', name:'Answer a question', desc:'From internal docs, policies, FAQs', explain:'Ask questions about your own documents, policies or knowledge base and get instant answers. The entire relevant document is included in each prompt — suitable for smaller document sets.', inTok:4000, outTok:500 },
+  { id:'invoice', name:'Process a document or form', desc:'Invoices, applications, structured forms', explain:'Extract structured data from invoices, applications or forms automatically. Eliminates manual data entry.', inTok:3000, outTok:400 },
+  { id:'feedback', name:'Analyse and categorise responses', desc:'Surveys, reviews, tickets, candidate responses', explain:'Find patterns across large volumes of surveys, reviews, support tickets or candidate responses. See what people are actually saying.', inTok:2000, outTok:600 },
+  { id:'translate', name:'Translate content', desc:'Documents or messages to another language', explain:'Translate documents or messages to another language while preserving tone and formatting.', inTok:3000, outTok:2800 },
+  { id:'screen', name:'Screen or compare', desc:'CVs, supplier offers, product options', explain:'Compare multiple CVs, supplier offers or options against a set of criteria. Get a ranked shortlist in seconds.', inTok:5000, outTok:700 },
+  { id:'agent-simple', name:'AI agent — simple task', desc:'2–4 steps: read, look up, respond', explain:'An AI that completes a multi-step task on your behalf — for example: read an incoming email, look up the customer in your CRM, and draft a reply.', inTok:18000, outTok:2400 },
+  { id:'agent-complex', name:'AI agent — complex workflow', desc:'6–10 steps: analyse, cross-check, draft, review', explain:'An AI that handles an entire workflow autonomously — for example: analyse a contract, check it against company policy, flag risks and draft a response.', inTok:80000, outTok:8000 },
+  { id:'code', name:'Generate or review code', desc:'Write, analyse or fix code', explain:'Write new code from a description, review existing code for bugs or improvements, or explain what a piece of code does.', inTok:5000, outTok:1200 },
+  { id:'sql', name:'SQL / data query', desc:'Natural language to SQL queries', explain:'Describe what data you need in plain English and get a ready-to-run SQL query. No SQL expertise required.', inTok:800, outTok:400 },
+  { id:'rag', name:'RAG / knowledge base Q&A', desc:'Answer over a large knowledge base', explain:'Instead of loading entire documents into every prompt, RAG retrieves only the most relevant chunks first — dramatically reducing token usage at scale. The architectural choice between this and "Answer a question" has significant cost implications for large document volumes.', inTok:6000, outTok:700 },
+  { id:'apidoc', name:'API documentation', desc:'Generate docs from code or OpenAPI spec', explain:'Automatically generate technical documentation from your codebase or API specification. Keeps docs in sync with your code.', inTok:4000, outTok:2000 },
 ];
 
 const MODELS = [
-  { id: 'haiku',    name: 'Haiku',          full: 'Claude Haiku 3.5',        inP: 0.80,  outP: 4.00,  note: '$0.80 / $4.00 per 1M tokens',    badge: 'Fast' },
-  { id: 'sonnet',   name: 'Sonnet',          full: 'Claude Sonnet 4',         inP: 3.00,  outP: 15.00, note: '$3.00 / $15.00 per 1M tokens',   badge: 'Balanced' },
-  { id: 'opus',     name: 'Opus',            full: 'Claude Opus 4',           inP: 15.00, outP: 75.00, note: '$15.00 / $75.00 per 1M tokens',  badge: 'Powerful' },
-  { id: 'gpt4o',    name: 'GPT-4o',          full: 'OpenAI GPT-4o',           inP: 5.00,  outP: 15.00, note: '$5.00 / $15.00 per 1M tokens',   badge: null },
-  { id: 'mini',     name: 'GPT-4o mini',     full: 'OpenAI GPT-4o mini',      inP: 0.15,  outP: 0.60,  note: '$0.15 / $0.60 per 1M tokens',    badge: null },
-  { id: 'g-flash',  name: 'Gemini Flash',    full: 'Google Gemini 2.0 Flash', inP: 0.10,  outP: 0.40,  note: '$0.10 / $0.40 per 1M tokens',    badge: 'Cheapest' },
-  { id: 'g-pro',    name: 'Gemini Pro',      full: 'Google Gemini 2.5 Pro',   inP: 1.25,  outP: 10.00, note: '$1.25 / $10.00 per 1M tokens',   badge: null },
+  { id:'haiku',   name:'Haiku',        full:'Claude Haiku 3.5',        inP:0.80,  outP:4.00,  note:'$0.80 / $4.00 per 1M tokens',    badge:'Fast' },
+  { id:'sonnet',  name:'Sonnet',        full:'Claude Sonnet 4',         inP:3.00,  outP:15.00, note:'$3.00 / $15.00 per 1M tokens',   badge:'Balanced' },
+  { id:'opus',    name:'Opus',          full:'Claude Opus 4',           inP:15.00, outP:75.00, note:'$15.00 / $75.00 per 1M tokens',  badge:'Powerful' },
+  { id:'gpt4o',   name:'GPT-4o',        full:'OpenAI GPT-4o',           inP:5.00,  outP:15.00, note:'$5.00 / $15.00 per 1M tokens',   badge:null },
+  { id:'mini',    name:'GPT-4o mini',   full:'OpenAI GPT-4o mini',      inP:0.15,  outP:0.60,  note:'$0.15 / $0.60 per 1M tokens',    badge:null },
+  { id:'g-flash', name:'Gemini Flash',  full:'Google Gemini 2.0 Flash', inP:0.10,  outP:0.40,  note:'$0.10 / $0.40 per 1M tokens',    badge:'Cheapest' },
+  { id:'g-pro',   name:'Gemini Pro',    full:'Google Gemini 2.5 Pro',   inP:1.25,  outP:10.00, note:'$1.25 / $10.00 per 1M tokens',   badge:null },
 ];
 
 const CTX_DESCRIPTIONS = [
-  { max: 0.5, label: 'Very short', desc: 'e.g. a short email, a single question, a brief prompt (~500 words)' },
-  { max: 1.0, label: 'Medium',     desc: 'e.g. a 1–2 page document, a support ticket, a code file (~2 000 words)' },
-  { max: 2.0, label: 'Long',       desc: 'e.g. a 5–10 page report, a full PR, a meeting transcript (~5 000 words)' },
-  { max: 4.0, label: 'Very long',  desc: 'e.g. a 20+ page contract, a large codebase, a detailed knowledge base (~15 000 words)' },
-  { max: 99,  label: 'Massive',    desc: 'e.g. entire document libraries, large RAG contexts, multi-document workflows (30 000+ words)' },
+  { max:0.5, label:'Very short', desc:'e.g. a short email, a single question, a brief prompt (~500 words)' },
+  { max:1.0, label:'Medium',     desc:'e.g. a 1–2 page document, a support ticket, a code file (~2 000 words)' },
+  { max:2.0, label:'Long',       desc:'e.g. a 5–10 page report, a full PR, a meeting transcript (~5 000 words)' },
+  { max:4.0, label:'Very long',  desc:'e.g. a 20+ page contract, a large codebase, a detailed knowledge base (~15 000 words)' },
+  { max:99,  label:'Massive',    desc:'e.g. entire document libraries, large RAG contexts, multi-document workflows (30 000+ words)' },
 ];
-function getCtxMeta(val) {
-  return CTX_DESCRIPTIONS.find(c => val <= c.max) || CTX_DESCRIPTIONS[CTX_DESCRIPTIONS.length - 1];
-}
+function getCtxMeta(val) { return CTX_DESCRIPTIONS.find(c => val <= c.max) || CTX_DESCRIPTIONS[CTX_DESCRIPTIONS.length-1]; }
 
-let sel = { model: 'sonnet', ctx: 1.0, days: 22, batch: false, cache: false };
-const taskRuns = {};
-const taskVol  = {};
-TASKS.forEach(t => {
-  taskRuns[t.id] = 0;
-  taskVol[t.id]  = { employees: 0, usesPerDay: 1 };
-});
-taskRuns['summarise'] = 0;
+let sel = { model:'sonnet', ctx:1.0, days:22, batch:false, cache:false, cachePct:0 };
+const taskRuns = {}, taskVol = {};
+TASKS.forEach(t => { taskRuns[t.id]=0; taskVol[t.id]={employees:0, usesPerDay:1}; });
 
-function fmt(n) {
-  if (n >= 1e6) return (n/1e6).toFixed(2) + 'M';
-  if (n >= 1000) return (n/1000).toFixed(1) + 'k';
-  return Math.round(n).toString();
-}
-function usd(v) {
-  if (v === 0) return '$0.00';
-  if (v >= 10000) return '$' + Math.round(v).toLocaleString('en-US');
-  if (v >= 100) return '$' + v.toFixed(0);
-  if (v >= 1) return '$' + v.toFixed(2);
-  if (v >= 0.01) return '$' + v.toFixed(4);
-  return '$' + v.toFixed(6);
-}
-
+function fmt(n) { if(n>=1e6) return (n/1e6).toFixed(2)+'M'; if(n>=1000) return (n/1000).toFixed(1)+'k'; return Math.round(n).toString(); }
+function usd(v) { if(v===0) return '$0.00'; if(v>=10000) return '$'+Math.round(v).toLocaleString(); if(v>=100) return '$'+v.toFixed(0); if(v>=1) return '$'+v.toFixed(2); if(v>=0.01) return '$'+v.toFixed(4); return '$'+v.toFixed(6); }
 function calcCost(task, model, ctx, batch, cache) {
-  const inTok  = Math.round(task.inTok * ctx);
-  const outTok = Math.round(task.outTok * ctx);
-  const inMult    = batch ? 0.5 : 1.0;
-  const cacheMult = cache ? 0.1 : 1.0;
-  const inCost  = inTok  / 1e6 * model.inP * inMult * cacheMult;
-  const outCost = outTok / 1e6 * model.outP;
-  return { inTok, outTok, inCost, outCost, runCost: inCost + outCost };
+  const inTok=Math.round(task.inTok*ctx), outTok=Math.round(task.outTok*ctx);
+  const batchMult = batch ? 0.5 : 1.0;
+  const staticShare = sel.cachePct / 100;
+  const inCost = staticShare > 0
+    ? (inTok * staticShare / 1e6 * model.inP * 0.1 + inTok * (1 - staticShare) / 1e6 * model.inP) * batchMult
+    : inTok / 1e6 * model.inP * batchMult;
+  const outCost=outTok/1e6*model.outP;
+  return {inTok,outTok,inCost,outCost,runCost:inCost+outCost};
 }
 
-let currency = { code: 'NOK', symbol: 'kr', rate: 10.8 };
-function updateSmartCTA(monthlyCost, activeTasks) {
-  const el   = document.getElementById('smart-cta');
-  const text = document.getElementById('smart-cta-text');
-  if (!el) return;
+let currency = {code:'NOK', symbol:'kr', rate:10.8};
+let CURRENCY_RATES = {USD:1.0, EUR:0.92, NOK:10.8};
 
-  const hasAgents   = activeTasks > 0 && TASKS.filter(t => t.id.startsWith('agent') && (taskRuns[t.id]||0) > 0).length > 0;
-  const highVolume  = monthlyCost * currency.rate > 50000;
-  const manyTasks   = activeTasks >= 4;
+function cx(v) {
+  const n=v*currency.rate, s=currency.symbol;
+  if(n===0) return s+' 0';
+  if(n>=10000) return s+' '+Math.round(n).toLocaleString();
+  if(n>=100) return s+' '+n.toFixed(0);
+  if(n>=1) return s+' '+n.toFixed(2);
+  if(n>=0.01) return s+' '+n.toFixed(4);
+  return s+' '+n.toFixed(6);
+}
 
-  let msg = null;
-  if (hasAgents) {
-    msg = 'Your setup includes multi-step AI agents. Getting the architecture right can reduce costs by 40–60% — and prevent hard-to-fix mistakes down the line.';
-  } else if (highVolume) {
-    msg = `At ${cx(monthlyCost)}/month, optimising your prompts, caching strategy and model selection could save you significantly. Worth a conversation.`;
-  } else if (manyTasks) {
-    msg = 'You\'re running AI across multiple workflows. A unified architecture will be more reliable and cheaper than building each one separately.';
-  }
+function setCurrency(code, symbol) {
+  currency={code,symbol,rate:CURRENCY_RATES[code]};
+  document.querySelectorAll('.currency-btn').forEach(b => b.classList.toggle('active', b.textContent===code));
+  document.getElementById('roi-rate-unit').textContent=symbol+'/hour';
+  update(); updateCompare(); updateROI(); updateSavings();
+}
 
-  if (msg) {
-    text.textContent = msg;
-    el.style.display = 'flex';
+function setCacheLevel(val) {
+  sel.cachePct = parseInt(val);
+  const pct = sel.cachePct;
+  const badge = document.getElementById('cache-badge');
+  const desc = document.getElementById('cache-desc-text');
+  const label = document.getElementById('cache-saving-label');
+  if(pct === 0) {
+    badge.textContent = 'off'; badge.style.background = ''; badge.style.color = '';
+    desc.textContent = 'Drag right to model how much of your input context is reused across requests.';
+    label.textContent = '0% static';
   } else {
-    el.style.display = 'none';
+    const saving = Math.round(pct * 0.9);
+    badge.textContent = `−${saving}% input cost`;
+    badge.style.background = 'rgba(45,212,160,0.15)'; badge.style.color = 'var(--green)';
+    desc.textContent = pct >= 80
+      ? `${pct}% static context — typical for RAG and document Q&A pipelines. Caching here is highly effective.`
+      : pct >= 40
+      ? `${pct}% static context — moderate caching benefit. Common in assistant-style workflows with a fixed system prompt.`
+      : `${pct}% static context — limited caching benefit at this level.`;
+    label.textContent = `${pct}% static`;
   }
+  update(); updateCompare();
 }
-
-let CURRENCY_RATES = { USD: 1.0, EUR: 0.92, NOK: 10.8 };
 
 async function fetchExchangeRates() {
   try {
-    const res = await fetch('https://open.er-api.com/v6/latest/USD');
-    if (!res.ok) return;
-    const data = await res.json();
-    if (data.result !== 'success') return;
-    CURRENCY_RATES = { USD: 1.0, EUR: data.rates.EUR, NOK: data.rates.NOK };
-    currency.rate = CURRENCY_RATES[currency.code];
+    const res=await fetch('https://open.er-api.com/v6/latest/USD');
+    if(!res.ok) return;
+    const data=await res.json();
+    if(data.result!=='success') return;
+    CURRENCY_RATES={USD:1.0,EUR:data.rates.EUR,NOK:data.rates.NOK};
+    currency.rate=CURRENCY_RATES[currency.code];
     update(); updateCompare(); updateROI(); updateSavings();
-    const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-    const el = document.getElementById('rates-updated');
-    if (el) el.textContent = today;
-  } catch (e) {
-    const el = document.getElementById('rates-updated');
-    if (el) el.textContent = 'rates not available';
+    const today=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+    const el=document.getElementById('rates-updated');
+    if(el) el.textContent=today;
+  } catch(e) {
+    const el=document.getElementById('rates-updated');
+    if(el) el.textContent='rates not available';
   }
 }
+
 const INDUSTRY_PRESETS = {
-  finance: {
-    name: 'Finance & Legal',
-    desc: 'Typical for finance and law firms: automating contract review, invoice processing and document screening. Pre-filled for a mid-size company with around 50 employees.',
-    tasks: { summarise: 200, invoice: 300, screen: 50, answer: 100, 'agent-simple': 20 },
-    vol:   { summarise: {e:20,u:2}, invoice: {e:30,u:2}, screen: {e:10,u:1}, answer: {e:50,u:2}, 'agent-simple': {e:10,u:2} },
-  },
-  hr: {
-    name: 'HR & Recruitment',
-    desc: 'Common in HR departments: CV screening, drafting job descriptions and employment contracts, translating documents across markets.',
-    tasks: { screen: 150, email: 200, draft: 50, answer: 80, feedback: 60 },
-    vol:   { screen: {e:5,u:5}, email: {e:10,u:4}, draft: {e:5,u:2}, answer: {e:20,u:4}, feedback: {e:10,u:2} },
-  },
-  tech: {
-    name: 'Tech & Engineering',
-    desc: 'Typical for tech companies and consultancies: code review, SQL generation, documentation and technical agents for CI/CD and data pipelines.',
-    tasks: { code: 100, sql: 80, apidoc: 30, 'agent-simple': 40, rag: 60 },
-    vol:   { code: {e:20,u:1}, sql: {e:15,u:1}, apidoc: {e:5,u:1}, 'agent-simple': {e:10,u:1}, rag: {e:20,u:1} },
-  },
-  cs: {
-    name: 'Customer Service',
-    desc: 'For companies with high volumes of customer enquiries: automated email and chat responses, sentiment analysis of feedback and summarising case documentation.',
-    tasks: { answer: 500, email: 300, feedback: 100, summarise: 50, translate: 80 },
-    vol:   { answer: {e:20,u:5}, email: {e:15,u:4}, feedback: {e:10,u:2}, summarise: {e:5,u:2}, translate: {e:8,u:2} },
-  },
-  sales: {
-    name: 'Sales & Marketing',
-    desc: 'For sales teams and marketing departments: personalised email drafts, customer feedback analysis, translation of materials across markets and screening of supplier offers.',
-    tasks: { email: 400, draft: 100, feedback: 150, screen: 60, translate: 50 },
-    vol:   { email: {e:20,u:4}, draft: {e:10,u:2}, feedback: {e:15,u:2}, screen: {e:6,u:2}, translate: {e:5,u:2} },
-  },
-  industry: {
-    name: 'Industry & Energy',
-    desc: 'For oil & gas, renewables, maritime, construction and process industries: HSE documentation, technical specifications, tender documents, compliance reporting and maintenance logs.',
-    tasks: { summarise: 150, draft: 100, invoice: 200, screen: 80, answer: 120, 'agent-simple': 30 },
-    vol:   { summarise: {e:15,u:2}, draft: {e:10,u:2}, invoice: {e:20,u:2}, screen: {e:8,u:2}, answer: {e:30,u:2}, 'agent-simple': {e:10,u:1} },
-  },
-  public: {
-    name: 'Public Sector',
-    desc: 'For municipalities, agencies and directorates: case processing, citizen communication, policy documentation, meeting minutes and regulatory reporting.',
-    tasks: { summarise: 200, draft: 150, answer: 300, email: 200, translate: 60 },
-    vol:   { summarise: {e:20,u:2}, draft: {e:15,u:2}, answer: {e:50,u:2}, email: {e:20,u:2}, translate: {e:10,u:1} },
-  },
-  health: {
-    name: 'Health & Care',
-    desc: 'For hospitals, clinics and health trusts: clinical documentation summaries, patient communication drafts, medical record processing and compliance with health regulations.',
-    tasks: { summarise: 300, draft: 100, answer: 200, email: 150, invoice: 100 },
-    vol:   { summarise: {e:30,u:2}, draft: {e:10,u:2}, answer: {e:40,u:2}, email: {e:15,u:2}, invoice: {e:10,u:2} },
-  },
+  finance:{ name:'Finance & Legal', desc:'Typical for finance and law firms: automating contract review, invoice processing and document screening. Pre-filled for a mid-size company with around 50 employees.', tasks:{summarise:200,invoice:300,screen:50,answer:100,'agent-simple':20}, vol:{summarise:{e:20,u:2},invoice:{e:30,u:2},screen:{e:10,u:1},answer:{e:50,u:2},'agent-simple':{e:10,u:2}} },
+  hr:{ name:'HR & Recruitment', desc:'Common in HR departments: CV screening, drafting job descriptions and employment contracts, translating documents across markets.', tasks:{screen:150,email:200,draft:50,answer:80,feedback:60}, vol:{screen:{e:5,u:5},email:{e:10,u:4},draft:{e:5,u:2},answer:{e:20,u:4},feedback:{e:10,u:2}} },
+  tech:{ name:'Tech & Engineering', desc:'Typical for tech companies and consultancies: code review, SQL generation, documentation and technical agents for CI/CD and data pipelines.', tasks:{code:100,sql:80,apidoc:30,'agent-simple':40,rag:60}, vol:{code:{e:20,u:1},sql:{e:15,u:1},apidoc:{e:5,u:1},'agent-simple':{e:10,u:1},rag:{e:20,u:1}} },
+  cs:{ name:'Customer Service', desc:'For companies with high volumes of customer enquiries: automated email and chat responses, sentiment analysis of feedback and summarising case documentation.', tasks:{answer:500,email:300,feedback:100,summarise:50,translate:80}, vol:{answer:{e:20,u:5},email:{e:15,u:4},feedback:{e:10,u:2},summarise:{e:5,u:2},translate:{e:8,u:2}} },
+  sales:{ name:'Sales & Marketing', desc:'For sales teams and marketing departments: personalised email drafts, customer feedback analysis, translation of materials across markets and screening of supplier offers.', tasks:{email:400,draft:100,feedback:150,screen:60,translate:50}, vol:{email:{e:20,u:4},draft:{e:10,u:2},feedback:{e:15,u:2},screen:{e:6,u:2},translate:{e:5,u:2}} },
+  industry:{ name:'Industry & Energy', desc:'For oil & gas, renewables, maritime, construction and process industries: HSE documentation, technical specifications, tender documents, compliance reporting and maintenance logs.', tasks:{summarise:150,draft:100,invoice:200,screen:80,answer:120,'agent-simple':30}, vol:{summarise:{e:15,u:2},draft:{e:10,u:2},invoice:{e:20,u:2},screen:{e:8,u:2},answer:{e:30,u:2},'agent-simple':{e:10,u:1}} },
+  public:{ name:'Public Sector', desc:'For municipalities, agencies and directorates: case processing, citizen communication, policy documentation, meeting minutes and regulatory reporting.', tasks:{summarise:200,draft:150,answer:300,email:200,translate:60}, vol:{summarise:{e:20,u:2},draft:{e:15,u:2},answer:{e:50,u:2},email:{e:20,u:2},translate:{e:10,u:1}} },
+  health:{ name:'Health & Care', desc:'For hospitals, clinics and health trusts: clinical documentation summaries, patient communication drafts, medical record processing and compliance with health regulations.', tasks:{summarise:300,draft:100,answer:200,email:150,invoice:100}, vol:{summarise:{e:30,u:2},draft:{e:10,u:2},answer:{e:40,u:2},email:{e:15,u:2},invoice:{e:10,u:2}} },
 };
 
-let activePreset = null;
-
+let activePreset=null;
 function applyPreset(id, e) {
-  activePreset = id;
-  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-  if (e && e.target) e.target.classList.add('active');
-  const preset = INDUSTRY_PRESETS[id];
-
-  TASKS.forEach(t => {
-    taskRuns[t.id] = 0;
-    taskVol[t.id]  = { employees: 0, usesPerDay: 1 };
+  activePreset=id;
+  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
+  if(e&&e.target) e.target.classList.add('active');
+  const p=INDUSTRY_PRESETS[id];
+  TASKS.forEach(t=>{taskRuns[t.id]=0;taskVol[t.id]={employees:0,usesPerDay:1};});
+  Object.entries(p.tasks).forEach(([tid,runs])=>{
+    if(!taskRuns.hasOwnProperty(tid)) return;
+    taskRuns[tid]=runs;
+    const v=p.vol[tid]||{e:10,u:1};
+    taskVol[tid]={employees:v.e,usesPerDay:v.u};
   });
-
-  Object.entries(preset.tasks).forEach(([tid, runs]) => {
-    if (!taskRuns.hasOwnProperty(tid)) return;
-    taskRuns[tid] = runs;
-    const v = preset.vol[tid] || { e: 10, u: 1 };
-    taskVol[tid] = { employees: v.e, usesPerDay: v.u };
-  });
-
-  const descEl = document.getElementById('preset-desc');
-  descEl.textContent = preset.desc;
-  descEl.classList.add('visible');
-
-  renderTasks();
-  update();
-  updateCompare();
-  updateRecommendedModel();
+  const d=document.getElementById('preset-desc');
+  d.textContent=p.desc; d.classList.add('visible');
+  renderTasks(); update(); updateCompare(); updateRecommendedModel();
 }
 
 function updateRecommendedModel() {
-  const panel = document.getElementById('rec-model-panel');
-  const activeTasks = TASKS.filter(t => (taskRuns[t.id] || 0) > 0);
-  if (activeTasks.length === 0) { panel.classList.remove('visible'); return; }
-
-  const totalRuns = activeTasks.reduce((s, t) => s + taskRuns[t.id], 0);
-  const agentRuns = activeTasks.filter(t => t.id.startsWith('agent')).reduce((s, t) => s + taskRuns[t.id], 0);
-  const agentPct  = totalRuns > 0 ? agentRuns / totalRuns : 0;
-  const avgInTok  = activeTasks.reduce((s, t) => s + t.inTok * taskRuns[t.id], 0) / totalRuns;
-
-  let recId, reason;
-  if (agentPct > 0.3 || avgInTok > 8000) {
-    recId  = 'sonnet';
-    reason = 'Your task mix includes complex multi-step workflows and large documents that benefit from Sonnet\'s stronger reasoning. Haiku may miss nuance at this complexity level.';
-  } else if (avgInTok < 1500 && agentPct === 0) {
-    recId  = 'haiku';
-    reason = 'Your tasks are mostly short, high-volume operations — email drafting, Q&A and document processing. Haiku handles these well at a fraction of the cost.';
-  } else {
-    recId  = 'sonnet';
-    reason = 'Your task mix is balanced. Sonnet gives you the best quality-to-cost ratio for this combination of document and operational tasks.';
-  }
-
-  const recModel  = MODELS.find(m => m.id === recId);
-  const currModel = MODELS.find(m => m.id === sel.model);
-
-  const recMonthly  = TASKS.reduce((s, t) => { const r = taskRuns[t.id]||0; if(!r) return s; return s + calcCost(t, recModel, sel.ctx, sel.batch, sel.cache).runCost * r * sel.days; }, 0);
-  const currMonthly = totalMonthly();
-  const saving = currMonthly - recMonthly;
-
-  document.getElementById('rec-model-name').textContent = recModel.full;
-  document.getElementById('rec-model-reason').textContent = reason;
-  document.getElementById('rec-model-saving').textContent = saving > 0.01
-    ? `Switching to ${recModel.name} saves ${cx(saving)}/month vs your current selection`
-    : recId === sel.model ? `You're already on the recommended model` : '';
-
+  const panel=document.getElementById('rec-model-panel');
+  const active=TASKS.filter(t=>(taskRuns[t.id]||0)>0);
+  if(active.length===0){panel.classList.remove('visible');return;}
+  const totalRuns=active.reduce((s,t)=>s+taskRuns[t.id],0);
+  const agentPct=active.filter(t=>t.id.startsWith('agent')).reduce((s,t)=>s+taskRuns[t.id],0)/totalRuns;
+  const avgInTok=active.reduce((s,t)=>s+t.inTok*taskRuns[t.id],0)/totalRuns;
+  let recId,reason;
+  if(agentPct>0.3||avgInTok>8000){recId='sonnet';reason='Your task mix includes complex multi-step workflows and large documents that benefit from Sonnet\'s stronger reasoning.';}
+  else if(avgInTok<1500&&agentPct===0){recId='haiku';reason='Your tasks are mostly short, high-volume operations — email drafting, Q&A and document processing. Haiku handles these well at a fraction of the cost.';}
+  else{recId='sonnet';reason='Your task mix is balanced. Sonnet gives you the best quality-to-cost ratio for this combination of tasks.';}
+  const recModel=MODELS.find(m=>m.id===recId);
+  const recMonthly=TASKS.reduce((s,t)=>{const r=taskRuns[t.id]||0;if(!r)return s;return s+calcCost(t,recModel,sel.ctx,sel.batch,sel.cache).runCost*r*sel.days;},0);
+  const saving=totalMonthly()-recMonthly;
+  document.getElementById('rec-model-name').textContent=recModel.full;
+  document.getElementById('rec-model-reason').textContent=reason;
+  document.getElementById('rec-model-saving').textContent=saving>0.01?`Switching to ${recModel.name} saves ${cx(saving)}/month vs your current selection`:recId===sel.model?'You\'re already on the recommended model':'';
   panel.classList.add('visible');
 }
 
 function toggleMethodology() {
-  const btn  = document.getElementById('meth-toggle');
-  const body = document.getElementById('meth-body');
-  btn.classList.toggle('open');
-  body.classList.toggle('open');
-  if (body.classList.contains('open')) renderMethodology();
+  const btn=document.getElementById('meth-toggle'),body=document.getElementById('meth-body');
+  btn.classList.toggle('open'); body.classList.toggle('open');
+  if(body.classList.contains('open')) renderMethodology();
 }
 
 const TASK_METHODOLOGY = {
-  summarise:      { basis: '~8 000 input tokens', note: 'Avg. 6-page document + system prompt' },
-  draft:          { basis: '~600 in / 1 200 out', note: 'Brief input, full document output' },
-  email:          { basis: '~400 in / 350 out',   note: 'Short context, professional reply' },
-  answer:         { basis: '~4 000 input tokens', note: 'Retrieved context + question' },
-  invoice:        { basis: '~3 000 input tokens', note: 'Document or form + extraction instructions' },
-  feedback:       { basis: '~2 000 in / 600 out', note: 'Batch of responses + pattern analysis output' },
-  translate:      { basis: '~3 000 in / 2 800 out', note: 'Input and output tokens roughly equal' },
-  screen:         { basis: '~5 000 input tokens', note: 'Multiple documents compared against criteria' },
-  'agent-simple': { basis: '~18 000 tokens total', note: '3–4 LLM calls × ~4 500 tokens each' },
-  'agent-complex':{ basis: '~80 000 tokens total', note: '8–10 LLM calls × ~8 000 tokens each' },
-  code:           { basis: '~5 000 in / 1 200 out', note: 'Code file + instructions, diff output' },
-  sql:            { basis: '~800 in / 400 out',   note: 'Schema + question, SQL query output' },
-  rag:            { basis: '~6 000 input tokens', note: 'Retrieved document chunks + query context' },
-  apidoc:         { basis: '~4 000 in / 2 000 out', note: 'Code or spec input, documentation output' },
+  summarise:{basis:'~8 000 input tokens',note:'Avg. 6-page document + system prompt'},
+  draft:{basis:'~600 in / 1 200 out',note:'Brief input, full document output'},
+  email:{basis:'~400 in / 350 out',note:'Short context, professional reply'},
+  answer:{basis:'~4 000 input tokens',note:'Retrieved context + question'},
+  invoice:{basis:'~3 000 input tokens',note:'Document or form + extraction instructions'},
+  feedback:{basis:'~2 000 in / 600 out',note:'Batch of responses + pattern analysis output'},
+  translate:{basis:'~3 000 in / 2 800 out',note:'Input and output tokens roughly equal'},
+  screen:{basis:'~5 000 input tokens',note:'Multiple documents compared against criteria'},
+  'agent-simple':{basis:'~18 000 tokens total',note:'3–4 LLM calls × ~4 500 tokens each'},
+  'agent-complex':{basis:'~80 000 tokens total',note:'8–10 LLM calls × ~8 000 tokens each'},
+  code:{basis:'~5 000 in / 1 200 out',note:'Code file + instructions, diff output'},
+  sql:{basis:'~800 in / 400 out',note:'Schema + question, SQL query output'},
+  rag:{basis:'~6 000 input tokens',note:'Retrieved document chunks + query context'},
+  apidoc:{basis:'~4 000 in / 2 000 out',note:'Code or spec input, documentation output'},
 };
 
 function renderMethodology() {
-  const el = document.getElementById('meth-task-list');
-  el.innerHTML = TASKS.map(t => {
-    const m = TASK_METHODOLOGY[t.id] || { basis: '—', note: '—' };
-    return `<div class="methodology-task-row">
-      <span class="meth-name">${t.name}</span>
-      <span class="meth-detail">${m.basis}<br><span style="color:var(--text3);font-size:10px">${m.note}</span></span>
-    </div>`;
+  document.getElementById('meth-task-list').innerHTML=TASKS.map(t=>{
+    const m=TASK_METHODOLOGY[t.id]||{basis:'—',note:'—'};
+    return `<div class="methodology-task-row"><span class="meth-name">${t.name}</span><span class="meth-detail">${m.basis}<br><span style="color:var(--text3);font-size:10px">${m.note}</span></span></div>`;
   }).join('');
 }
 
 function updateChart() {
-  const monthly   = totalMonthly();
-  const growthPct = parseFloat(document.getElementById('growth-rate').value) / 100;
-  const el        = document.getElementById('chart-bars');
-
-  if (monthly === 0) {
-    el.innerHTML = `<div style="width:100%;text-align:center;font-size:12px;color:var(--text3);padding:2rem 0;font-family:var(--mono);">Add tasks above to see the projection.</div>`;
-    return;
-  }
-
-  const months = ['Now','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'];
-  const values = months.map((_, i) => monthly * Math.pow(1 + growthPct, i));
-  const maxVal = Math.max(...values, 0.01);
-
-  el.innerHTML = values.map((v, i) => {
-    const label = v >= 10000 ? cx(v).replace(/\.\d+/, '') : v >= 100 ? cx(v).replace(/\.\d+/, '') : cx(v);
-    return `<div class="chart-bar-wrap">
-      <div class="chart-bar-val">${label}</div>
-      <div class="chart-bar${i === 0 ? ' current' : ''}" style="height:${Math.max(Math.round(v/maxVal*80), 3)}px"></div>
-      <div class="chart-bar-label">${months[i]}</div>
-    </div>`;
+  const monthly=totalMonthly(),growthPct=parseFloat(document.getElementById('growth-rate').value)/100;
+  const el=document.getElementById('chart-bars');
+  if(monthly===0){el.innerHTML=`<div style="width:100%;text-align:center;font-size:12px;color:var(--text3);padding:2rem 0;font-family:var(--mono);">Add tasks above to see the projection.</div>`;return;}
+  const months=['Now','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'];
+  const values=months.map((_,i)=>monthly*Math.pow(1+growthPct,i));
+  const maxVal=Math.max(...values,0.01);
+  el.innerHTML=values.map((v,i)=>{
+    const n=Math.round(v*currency.rate);
+    const label=n>=1000?currency.symbol+(n/1000).toFixed(0)+'k':currency.symbol+n;
+    return `<div class="chart-bar-wrap"><div class="chart-bar-val">${label}</div><div class="chart-bar${i===0?' current':''}" style="height:${Math.max(Math.round(v/maxVal*80),3)}px"></div><div class="chart-bar-label">${months[i]}</div></div>`;
   }).join('');
 }
 
+function updateReadiness() {
+  const el = document.getElementById('readiness-body');
+  if (!el) return;
+  const active = TASKS.filter(t => (taskRuns[t.id]||0) > 0);
+  if (active.length === 0) {
+    el.innerHTML = '<div class="readiness-empty">Configure tasks above to see your signal reading.</div>';
+    return;
+  }
+  const totalRuns = active.reduce((s,t) => s+taskRuns[t.id], 0);
+  const agentTasks = active.filter(t => t.id.startsWith('agent'));
+  const hasAgents = agentTasks.length > 0;
+  const agentPct = hasAgents ? agentTasks.reduce((s,t)=>s+taskRuns[t.id],0)/totalRuns : 0;
+  const avgInTok = active.reduce((s,t)=>s+t.inTok*taskRuns[t.id],0)/totalRuns;
+  const monthly = totalMonthly() * currency.rate;
+  const signals = [];
 
+  if (active.length >= 5) {
+    signals.push({ dot:'green', text:'You\'re thinking across multiple workflows — not just a single use case. This suggests readiness for a broader AI operating model rather than point solutions.' });
+  } else if (active.length >= 2) {
+    signals.push({ dot:'accent', text:'You\'ve identified a focused set of use cases. A good starting point — the key question is whether these will be built independently or as part of a shared architecture.' });
+  } else {
+    signals.push({ dot:'amber', text:'A single use case is a good pilot. The architecture decisions you make here will either constrain or enable everything you add later.' });
+  }
 
-function setCurrency(code, symbol) {
-  currency = { code, symbol, rate: CURRENCY_RATES[code] };
-  document.querySelectorAll('.currency-btn').forEach(b => {
-    b.classList.toggle('active', b.textContent === code);
-  });
-  document.getElementById('roi-rate-unit').textContent = symbol + '/hour';
-  update(); updateCompare(); updateROI(); updateSavings();
+  if (hasAgents) {
+    signals.push({ dot:'amber', text:'Agent workflows are in scope. These have a fundamentally different cost and governance profile — they require explicit design decisions around autonomy, error handling and human oversight.' });
+  }
+
+  if (avgInTok > 10000) {
+    signals.push({ dot:'accent', text:'High context volumes suggest document-heavy or knowledge-intensive workflows. Caching strategy and retrieval architecture will have a significant impact on cost and quality.' });
+  }
+
+  if (monthly > 100000) {
+    signals.push({ dot:'amber', text:'At this cost level, model selection, prompt architecture and batch processing are not optional optimisations — they are structural decisions that need governance.' });
+  } else if (monthly > 20000) {
+    signals.push({ dot:'green', text:'Costs are in a range where the economics are clearly favourable. The focus should be on getting the architecture right so this scales predictably.' });
+  }
+
+  const ctaText = hasAgents
+    ? 'Agent workflows in scope → architecture review recommended'
+    : monthly > 50000
+    ? 'At this scale, cost governance matters → let\'s map the operating model'
+    : 'Ready to move from estimate to architecture?';
+
+  el.innerHTML = signals.map(s =>
+    `<div class="readiness-signal"><div class="readiness-dot ${s.dot}"></div><div class="readiness-signal-text">${s.text}</div></div>`
+  ).join('') +
+  `<div class="readiness-cta" onclick="openModal()">${ctaText} <span>→</span></div>`;
 }
 
-function cx(usdVal) {
-  const v = usdVal * currency.rate;
-  const s = currency.symbol;
-  if (v === 0) return s + '0.00';
-  if (v >= 10000) return s + Math.round(v).toLocaleString();
-  if (v >= 100) return s + v.toFixed(0);
-  if (v >= 1) return s + v.toFixed(2);
-  if (v >= 0.01) return s + v.toFixed(4);
-  return s + v.toFixed(6);
+function updateSmartCTA(monthlyCost,activeTasks) {
+  const el=document.getElementById('smart-cta'),text=document.getElementById('smart-cta-text');
+  if(!el) return;
+  const hasAgents=activeTasks>0&&TASKS.filter(t=>t.id.startsWith('agent')&&(taskRuns[t.id]||0)>0).length>0;
+  const highVolume=monthlyCost*currency.rate>50000;
+  const manyTasks=activeTasks>=4;
+  let msg=null;
+  if(hasAgents) msg='Agent workflows carry architectural risk that token cost alone doesn\'t capture — error propagation, governance gaps and autonomy boundaries are where implementations fail.';
+  else if(highVolume) msg=`At ${cx(monthlyCost)}/month, caching strategy, model routing and prompt architecture are structural decisions — not optimisations to address later.`;
+  else if(manyTasks) msg='Running AI across multiple workflows without a shared architecture typically creates silos, duplicated effort and unpredictable cost growth.';
+  if(msg){text.textContent=msg;el.style.display='flex';}else el.style.display='none';
 }
 
 function updateTaskBreakdown(model) {
-  const activeTasks = TASKS.filter(t => (taskRuns[t.id] || 0) > 0);
-  const el = document.getElementById('task-breakdown-body');
-  if (activeTasks.length === 0) {
-    el.innerHTML = '<div class="task-breakdown-empty">No tasks active yet.</div>';
-    return;
-  }
-  const taskCosts = activeTasks.map(t => {
-    const runs = taskRuns[t.id];
-    const { runCost } = calcCost(t, model, sel.ctx, sel.batch, sel.cache);
-    return { t, monthly: runCost * runs * sel.days, runs };
-  });
-  const maxCost = Math.max(...taskCosts.map(x => x.monthly));
-  el.innerHTML = taskCosts.map(({ t, monthly, runs }) => {
-    const pct = maxCost > 0 ? Math.round(monthly / maxCost * 100) : 0;
-    return `<div class="tbd-row">
-      <span class="tbd-name">${t.name}</span>
-      <span class="tbd-runs">${runs}/day</span>
-      <span class="tbd-cost">${cx(monthly)}</span>
-      <div class="tbd-bar-wrap"><div class="tbd-bar-fill" style="width:${pct}%"></div></div>
-    </div>`;
+  const active=TASKS.filter(t=>(taskRuns[t.id]||0)>0);
+  const el=document.getElementById('task-breakdown-body');
+  if(active.length===0){el.innerHTML='<div class="task-breakdown-empty">No tasks active yet.</div>';return;}
+  const costs=active.map(t=>({t,monthly:calcCost(t,model,sel.ctx,sel.batch,sel.cache).runCost*taskRuns[t.id]*sel.days,runs:taskRuns[t.id]}));
+  const maxC=Math.max(...costs.map(x=>x.monthly));
+  el.innerHTML=costs.map(({t,monthly,runs})=>{
+    const pct=maxC>0?Math.round(monthly/maxC*100):0;
+    return `<div class="tbd-row"><span class="tbd-name">${t.name}</span><span class="tbd-runs">${runs}/day</span><span class="tbd-cost">${cx(monthly)}</span><div class="tbd-bar-wrap"><div class="tbd-bar-fill" style="width:${pct}%"></div></div></div>`;
   }).join('');
 }
 
 function updateROI() {
-  const employees = parseFloat(document.getElementById('roi-employees').value) || 0;
-  const rate      = parseFloat(document.getElementById('roi-rate').value) || 0;
-  const minutes   = parseFloat(document.getElementById('roi-minutes').value) || 0;
-  const el = document.getElementById('roi-result');
-  if (!employees || !rate || !minutes) {
-    el.innerHTML = '<div class="roi-result-empty" style="font-size:12px;color:var(--text3);text-align:center;">Fill in the fields above.</div>';
-    return;
-  }
-  const dailySavingUSD  = (minutes / 60) * rate * employees / currency.rate;
-  const monthlySavingUSD = dailySavingUSD * sel.days;
-  const annualSavingUSD  = monthlySavingUSD * 12;
-  const aiCostUSD = totalMonthly();
-  const roiPct = aiCostUSD > 0 ? Math.round((monthlySavingUSD - aiCostUSD) / aiCostUSD * 100) : 0;
-  el.innerHTML = `
+  const emp=parseFloat(document.getElementById('roi-employees').value)||0;
+  const rate=parseFloat(document.getElementById('roi-rate').value)||0;
+  const min=parseFloat(document.getElementById('roi-minutes').value)||0;
+  const el=document.getElementById('roi-result');
+  if(!emp||!rate||!min){el.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:8px 0;">Fill in the fields above.</div>';return;}
+  const monthSave=(min/60)*rate*emp/currency.rate*sel.days;
+  const annSave=monthSave*12;
+  const aiCost=totalMonthly();
+  const ratio=aiCost>0?Math.round(monthSave/aiCost*100):0;
+  el.innerHTML=`
     <div class="roi-highlight">
-      <div class="roi-highlight-label">Monthly value of time saved</div>
-      <div class="roi-highlight-val">${cx(monthlySavingUSD)}</div>
+      <div class="roi-highlight-label">Potential freed capacity / month</div>
+      <div class="roi-highlight-val">${cx(monthSave)}</div>
     </div>
     <div class="roi-sub-grid">
       <div class="roi-sub-card">
-        <div class="roi-sub-label">Annual value</div>
-        <div class="roi-sub-val">${cx(annualSavingUSD)}</div>
+        <div class="roi-sub-label">Annual capacity freed</div>
+        <div class="roi-sub-val">${cx(annSave)}</div>
       </div>
       <div class="roi-sub-card">
-        <div class="roi-sub-label">ROI vs AI cost</div>
-        <div class="roi-sub-val" style="color:${roiPct >= 0 ? 'var(--green)' : '#f87171'}">${roiPct >= 0 ? '+' : ''}${roiPct}%</div>
+        <div class="roi-sub-label">Capacity vs AI cost</div>
+        <div class="roi-sub-val" style="color:${ratio>=100?'var(--green)':'var(--text2)'}">${ratio}%</div>
       </div>
+    </div>
+    <div style="margin-top:10px;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;font-size:11px;color:var(--text3);line-height:1.6;font-family:var(--mono);">
+      Reflects salary value of time freed up. Actual return depends on integration costs, process change, data access and organisational adoption — not captured here.
     </div>`;
 }
 
 function shareURL() {
-  const params = new URLSearchParams();
-  params.set('model', sel.model);
-  params.set('ctx', sel.ctx);
-  params.set('days', sel.days);
-  params.set('batch', sel.batch ? '1' : '0');
-  params.set('cache', sel.cache ? '1' : '0');
-  TASKS.forEach(t => { if (taskRuns[t.id] > 0) params.set('t_' + t.id, taskRuns[t.id]); });
-  const url = window.location.origin + window.location.pathname + '?' + params.toString();
-  navigator.clipboard.writeText(url).then(() => {
-    const el = document.getElementById('copy-confirm');
-    el.textContent = '✓ Link copied to clipboard';
-    setTimeout(() => el.textContent = '', 3000);
+  const p=new URLSearchParams();
+  p.set('model',sel.model);p.set('ctx',sel.ctx);p.set('days',sel.days);
+  p.set('batch',sel.batch?'1':'0');p.set('cache',sel.cache?'1':'0');p.set('cpct',sel.cachePct||0);
+  TASKS.forEach(t=>{if(taskRuns[t.id]>0) p.set('t_'+t.id,taskRuns[t.id]);});
+  const url=window.location.origin+window.location.pathname+'?'+p.toString();
+  navigator.clipboard.writeText(url).then(()=>{
+    const el=document.getElementById('copy-confirm');
+    el.textContent='✓ Link copied to clipboard';
+    setTimeout(()=>el.textContent='',3000);
   });
 }
 
 function loadFromURL() {
-  const params = new URLSearchParams(window.location.search);
-  if (!params.has('model')) return;
-  sel.model = params.get('model') || sel.model;
-  sel.ctx   = parseFloat(params.get('ctx')) || 1.0;
-  sel.days  = parseInt(params.get('days')) || 22;
-  sel.batch = params.get('batch') === '1';
-  sel.cache = params.get('cache') === '1';
-  TASKS.forEach(t => {
-    const v = params.get('t_' + t.id);
-    if (v) taskRuns[t.id] = parseInt(v);
-  });
-  document.getElementById('tog-batch').classList.toggle('on', sel.batch);
-  document.getElementById('tog-cache').classList.toggle('on', sel.cache);
-  document.getElementById('sl-ctx').value = sel.ctx;
-  document.getElementById('sl-days').value = sel.days;
-  document.getElementById('sv-days').textContent = sel.days;
-  const meta = getCtxMeta(sel.ctx);
-  document.getElementById('sv-ctx').textContent = meta.label;
-  document.getElementById('ctx-desc').textContent = meta.desc;
+  const p=new URLSearchParams(window.location.search);
+  if(!p.has('model')) return;
+  sel.model=p.get('model')||sel.model;
+  sel.ctx=parseFloat(p.get('ctx'))||1.0;
+  sel.days=parseInt(p.get('days'))||22;
+  sel.batch=p.get('batch')==='1';
+  sel.cache=p.get('cache')==='1';
+  TASKS.forEach(t=>{const v=p.get('t_'+t.id);if(v) taskRuns[t.id]=parseInt(v);});
+  document.getElementById('tog-batch').classList.toggle('on',sel.batch);
+  if (document.getElementById('sl-cache')) {
+    document.getElementById('sl-cache').value = sel.cachePct || 0;
+    setCacheLevel(sel.cachePct || 0);
+  }
+  document.getElementById('sl-ctx').value=sel.ctx;
+  document.getElementById('sl-days').value=sel.days;
+  document.getElementById('sv-days').textContent=sel.days;
+  const meta=getCtxMeta(sel.ctx);
+  document.getElementById('sv-ctx').textContent=meta.label;
+  document.getElementById('ctx-desc').textContent=meta.desc;
 }
 
 function resetAll() {
-  TASKS.forEach(t => {
-    taskRuns[t.id] = 0;
-    taskVol[t.id]  = { employees: 0, usesPerDay: 1 };
-  });
-  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-  const descEl = document.getElementById('preset-desc');
-  if (descEl) { descEl.textContent = ''; descEl.classList.remove('visible'); }
-  renderTasks();
-  update();
-  updateCompare();
-  updateROI();
+  TASKS.forEach(t=>{taskRuns[t.id]=0;taskVol[t.id]={employees:0,usesPerDay:1};});
+  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
+  const d=document.getElementById('preset-desc');
+  if(d){d.textContent='';d.classList.remove('visible');}
+  renderTasks();update();updateCompare();updateROI();goToStep(1);
 }
 
 function renderTasks() {
-  const grid = document.getElementById('task-grid');
-  let html = '';
-  TASKS.forEach(t => {
-    if (t.id === 'agent-simple') {
-      html += `<div style="grid-column:1/-1;margin:6px 0 2px;display:flex;align-items:center;gap:10px;">
-        <span style="font-size:10px;font-family:var(--mono);color:var(--amber);white-space:nowrap;">AI agents — multi-step workflows</span>
-        <div style="flex:1;height:1px;background:var(--border);"></div>
-      </div>`;
-    }
-    if (t.id === 'code') {
-      html += `<div style="grid-column:1/-1;margin:6px 0 2px;display:flex;align-items:center;gap:10px;">
-        <span style="font-size:10px;font-family:var(--mono);color:var(--text3);white-space:nowrap;">Technical tasks</span>
-        <div style="flex:1;height:1px;background:var(--border);"></div>
-      </div>`;
-    }
-    const runs    = taskRuns[t.id] || 0;
-    const vol     = taskVol[t.id];
-    const isAgent = t.id.startsWith('agent');
-    const isActive = runs > 0;
-    html += `<div class="task-btn${isActive ? ' active' : ''}${isAgent ? ' agent-task' : ''}">
-      <div class="task-btn-name">${t.name}${isAgent ? `<span class="agent-badge">multi-step</span>` : ''}</div>
-      <div class="task-btn-desc">${t.desc}</div>
-      <div class="task-btn-explain">${t.explain}</div>
+  let html='';
+  TASKS.forEach(t=>{
+    const tr = t;
+    if(t.id==='agent-simple') html+=`<div style="grid-column:1/-1;margin:6px 0 2px;display:flex;align-items:center;gap:10px;"><span style="font-size:10px;font-family:var(--mono);color:var(--amber);white-space:nowrap;">AI agents — multi-step workflows</span><div style="flex:1;height:1px;background:var(--border);"></div></div>`;
+    if(t.id==='code') html+=`<div style="grid-column:1/-1;margin:6px 0 2px;display:flex;align-items:center;gap:10px;"><span style="font-size:10px;font-family:var(--mono);color:var(--text3);white-space:nowrap;">Technical tasks</span><div style="flex:1;height:1px;background:var(--border);"></div></div>`;
+    const runs=taskRuns[t.id]||0,vol=taskVol[t.id],isAgent=t.id.startsWith('agent');
+    html+=`<div class="task-btn${runs>0?' active':''}${isAgent?' agent-task':''}">
+      <div class="task-btn-name">${tr.name}${isAgent?`<span class="agent-badge">multi-step</span>`:''}</div>
+      <div class="task-btn-desc">${tr.desc}</div>
+      <div class="task-btn-explain">${tr.explain||t.explain}</div>
       <div class="task-vol-row">
-        <div class="task-vol-field">
-          <label class="task-vol-label">Employees</label>
-          <input class="task-vol-input" type="number" min="0" value="${vol.employees}"
-            oninput="setTaskVol('${t.id}','employees',this.value)">
-        </div>
+        <div class="task-vol-field"><label class="task-vol-label">Employees</label><input class="task-vol-input" type="number" min="0" value="${vol.employees}" oninput="setTaskVol('${t.id}','employees',this.value)"></div>
         <div class="task-vol-sep">×</div>
-        <div class="task-vol-field">
-          <label class="task-vol-label">Times/day</label>
-          <input class="task-vol-input" type="number" min="0" step="0.5" value="${vol.usesPerDay}"
-            oninput="setTaskVol('${t.id}','usesPerDay',this.value)">
-        </div>
+        <div class="task-vol-field"><label class="task-vol-label">Times/day</label><input class="task-vol-input" type="number" min="0" step="0.5" value="${vol.usesPerDay}" oninput="setTaskVol('${t.id}','usesPerDay',this.value)"></div>
         <div class="task-vol-sep">=</div>
-        <div class="task-vol-result">
-          <span class="task-runs-val" id="rv-${t.id}">${runs === 0 ? 'off' : runs + '/day'}</span>
-        </div>
+        <div class="task-vol-result"><span class="task-runs-val" id="rv-${t.id}">${runs===0?'off':runs+'/day'}</span></div>
       </div>
-      <div class="task-btn-tokens">~${fmt(t.inTok)} in · ~${fmt(t.outTok)} out per run</div>
+      <div class="task-btn-tokens">~${fmt(t.inTok)} in · ~${fmt(t.outTok)} out ${'per run'}</div>
     </div>`;
   });
-  grid.innerHTML = html;
+  document.getElementById('task-grid').innerHTML=html;
 }
 
-function setTaskVol(id, field, val) {
-  taskVol[id][field] = parseFloat(val) || 0;
-  const runs = Math.round(taskVol[id].employees * taskVol[id].usesPerDay);
-  taskRuns[id] = runs;
-  const valEl = document.getElementById('rv-' + id);
-  if (valEl) {
-    const card = valEl.closest('.task-btn');
-    card.classList.toggle('active', runs > 0);
-    valEl.textContent = runs === 0 ? 'off' : runs + '/day';
-  }
-  update();
-  updateCompare();
+function setTaskVol(id,field,val) {
+  taskVol[id][field]=parseFloat(val)||0;
+  const runs=Math.round(taskVol[id].employees*taskVol[id].usesPerDay);
+  taskRuns[id]=runs;
+  const v=document.getElementById('rv-'+id);
+  if(v){v.closest('.task-btn').classList.toggle('active',runs>0);v.textContent=runs===0?'off':runs+'/day';}
+  update();updateCompare();
 }
 
 function renderModels() {
-  document.getElementById('model-row').innerHTML = MODELS.map(m => `
-    <button class="model-pill${m.id===sel.model?' active':''}" onclick="pick('model','${m.id}')">
-      ${m.name}${m.badge?`<span class="pill-badge">${m.badge}</span>`:''}
-    </button>`).join('');
-  const m = MODELS.find(x=>x.id===sel.model);
-  document.getElementById('model-desc').textContent = m.full + ' — ' + m.note;
+  document.getElementById('model-row').innerHTML=MODELS.map(m=>`<button class="model-pill${m.id===sel.model?' active':''}" onclick="pick('model','${m.id}')">${m.name}${m.badge?`<span class="pill-badge">${m.badge}</span>`:''}</button>`).join('');
+  const m=MODELS.find(x=>x.id===sel.model);
+  document.getElementById('model-desc').textContent=m.full+' — '+m.note;
 }
 
 function toggleOpt(key) {
-  sel[key] = !sel[key];
-  document.getElementById('tog-' + key).classList.toggle('on', sel[key]);
-  update();
-  updateCompare();
+  sel[key]=!sel[key];
+  document.getElementById('tog-'+key).classList.toggle('on',sel[key]);
+  update();updateCompare();
 }
 
 function updateSavings() {
-  const copilot   = parseFloat(document.getElementById('cost-copilot').value)   || 0;
-  const chatgpt   = parseFloat(document.getElementById('cost-chatgpt').value)   || 0;
-  const mscopilot = parseFloat(document.getElementById('cost-mscopilot').value) || 0;
-  const users     = parseFloat(document.getElementById('cost-users').value)     || 1;
-  const custom    = parseFloat(document.getElementById('cost-custom').value)    || 0;
-  const currentTotal = (copilot + chatgpt + mscopilot) * users + custom;
-  const optimisedMonthly = totalMonthly();
-  const el = document.getElementById('savings-result');
-
-  if (currentTotal === 0) {
-    el.innerHTML = `<div style="font-size:12px;color:var(--text3);text-align:center;padding:4px 0;">Enter your current costs above to see potential savings.</div>`;
-    return;
-  }
-  const saving = currentTotal - optimisedMonthly;
-  const pct    = Math.round(Math.abs(saving) / currentTotal * 100);
-  if (saving > 0) {
-    el.innerHTML = `
-      <div class="savings-vs-row">
-        <div class="savings-vs-item"><div class="savings-vs-label">Current spend</div><div class="savings-vs-val current">${usd(currentTotal)}</div></div>
-        <div class="savings-vs-sep">→</div>
-        <div class="savings-vs-item"><div class="savings-vs-label">With custom AI</div><div class="savings-vs-val optimised">${usd(optimisedMonthly)}</div></div>
-      </div>
-      <div class="savings-highlight">
-        <div class="savings-highlight-left">
-          <div class="savings-highlight-label">Potential monthly saving</div>
-          <div class="savings-highlight-sub">${pct}% reduction in AI spend</div>
-        </div>
-        <div class="savings-highlight-val">${usd(saving)}</div>
-      </div>`;
+  const cop=parseFloat(document.getElementById('cost-copilot').value)||0;
+  const gpt=parseFloat(document.getElementById('cost-chatgpt').value)||0;
+  const ms=parseFloat(document.getElementById('cost-mscopilot').value)||0;
+  const usr=parseFloat(document.getElementById('cost-users').value)||1;
+  const cust=parseFloat(document.getElementById('cost-custom').value)||0;
+  const total=(cop+gpt+ms)*usr+cust;
+  const opt=totalMonthly();
+  const el=document.getElementById('savings-result');
+  if(total===0){el.innerHTML=`<div style="font-size:12px;color:var(--text3);text-align:center;padding:4px 0;">Enter your current costs above to see potential savings.</div>`;return;}
+  const saving=total-opt,pct=Math.round(Math.abs(saving)/total*100);
+  if(saving>0){
+    el.innerHTML=`<div class="savings-vs-row"><div class="savings-vs-item"><div class="savings-vs-label">Current spend</div><div class="savings-vs-val current">${usd(total)}</div></div><div class="savings-vs-sep">→</div><div class="savings-vs-item"><div class="savings-vs-label">With custom AI</div><div class="savings-vs-val optimised">${usd(opt)}</div></div></div>
+      <div class="savings-highlight"><div class="savings-highlight-left"><div class="savings-highlight-label">Potential monthly saving</div><div class="savings-highlight-sub">${pct}% reduction in AI spend</div></div><div class="savings-highlight-val">${usd(saving)}</div></div>`;
   } else {
-    el.innerHTML = `
-      <div class="savings-vs-row">
-        <div class="savings-vs-item"><div class="savings-vs-label">Current spend</div><div class="savings-vs-val current">${usd(currentTotal)}</div></div>
-        <div class="savings-vs-sep">→</div>
-        <div class="savings-vs-item"><div class="savings-vs-label">With custom AI</div><div class="savings-vs-val optimised">${usd(optimisedMonthly)}</div></div>
-      </div>
+    el.innerHTML=`<div class="savings-vs-row"><div class="savings-vs-item"><div class="savings-vs-label">Current spend</div><div class="savings-vs-val current">${usd(total)}</div></div><div class="savings-vs-sep">→</div><div class="savings-vs-item"><div class="savings-vs-label">With custom AI</div><div class="savings-vs-val optimised">${usd(opt)}</div></div></div>
       <div class="savings-negative">Your current setup is ${pct}% cheaper for this config — try enabling Batch API or Caching above.</div>`;
   }
 }
 
 function totalMonthly() {
-  const model = MODELS.find(m => m.id === sel.model);
-  let total = 0;
-  TASKS.forEach(t => {
-    const runs = taskRuns[t.id] || 0;
-    if (runs === 0) return;
-    total += calcCost(t, model, sel.ctx, sel.batch, sel.cache).runCost * runs * sel.days;
-  });
-  return total;
+  const model=MODELS.find(m=>m.id===sel.model);
+  return TASKS.reduce((s,t)=>{const r=taskRuns[t.id]||0;if(!r)return s;return s+calcCost(t,model,sel.ctx,sel.batch,sel.cache).runCost*r*sel.days;},0);
 }
 
 function update() {
-  const model = MODELS.find(m => m.id === sel.model);
-  let totalIn = 0, totalOut = 0, totalInCost = 0, totalOutCost = 0, totalRuns = 0, activeTasks = 0;
-  TASKS.forEach(t => {
-    const runs = taskRuns[t.id] || 0;
-    if (runs === 0) return;
-    const { inTok, outTok, inCost, outCost } = calcCost(t, model, sel.ctx, sel.batch, sel.cache);
-    totalIn      += inTok * runs;
-    totalOut     += outTok * runs;
-    totalInCost  += inCost * runs;
-    totalOutCost += outCost * runs;
-    totalRuns    += runs;
-    activeTasks  += 1;
+  const model=MODELS.find(m=>m.id===sel.model);
+  let tIn=0,tOut=0,tInC=0,tOutC=0,tRuns=0,active=0;
+  TASKS.forEach(t=>{
+    const r=taskRuns[t.id]||0;if(!r)return;
+    const {inTok,outTok,inCost,outCost}=calcCost(t,model,sel.ctx,sel.batch,sel.cache);
+    tIn+=inTok*r;tOut+=outTok*r;tInC+=inCost*r;tOutC+=outCost*r;tRuns+=r;active++;
   });
-  const dailyCost   = totalInCost + totalOutCost;
-  const monthlyCost = dailyCost * sel.days;
-  const avgRunCost  = totalRuns > 0 ? dailyCost / totalRuns : 0;
-
-  document.getElementById('m-monthly').textContent = cx(monthlyCost);
-  document.getElementById('m-monthly-sub').textContent = totalRuns > 0
-    ? `${totalRuns.toLocaleString()} runs/day across ${activeTasks} task${activeTasks !== 1 ? 's' : ''} × ${sel.days} days`
-    : 'Set daily volume on tasks above';
-  document.getElementById('m-run').textContent = totalRuns > 0 ? cx(avgRunCost) : '—';
-  document.getElementById('m-daily').textContent = totalRuns > 0 ? cx(dailyCost) : '—';
-
-  const totalTok = totalIn + totalOut;
-  const inPct = totalTok > 0 ? Math.round(totalIn / totalTok * 100) : 0;
-  document.getElementById('bar-in').style.width  = inPct + '%';
-  document.getElementById('bar-out').style.width = (100 - inPct) + '%';
-  document.getElementById('bv-in').textContent  = totalRuns > 0 ? fmt(totalIn) : '—';
-  document.getElementById('bv-out').textContent = totalRuns > 0 ? fmt(totalOut) : '—';
-
-  document.getElementById('b-in').textContent  = cx(totalInCost);
-  document.getElementById('b-out').textContent = cx(totalOutCost);
-  document.getElementById('b-vol').textContent = totalRuns > 0 ? totalRuns.toLocaleString() + ' runs' : '—';
-  document.getElementById('b-day').textContent = cx(dailyCost);
-  document.getElementById('b-total').textContent = cx(monthlyCost);
-
-  updateTaskBreakdown(model);
-  updateSavings();
-  updateROI();
-  updateRecommendedModel();
-  updateChart();
-  updateSmartCTA(monthlyCost, activeTasks);
+  const daily=tInC+tOutC,monthly=daily*sel.days;
+  document.getElementById('m-monthly').textContent=cx(monthly);
+  document.getElementById('m-monthly-sub').textContent=tRuns>0?`${tRuns.toLocaleString()} ${'runs/day'} ${'across'} ${active} ${active!==1?'tasks':'task'} × ${sel.days} ${'days'}`:'Set daily volume on tasks above';
+  document.getElementById('m-run').textContent=tRuns>0?cx(daily/tRuns):'—';
+  document.getElementById('m-daily').textContent=tRuns>0?cx(daily):'—';
+  const tt=tIn+tOut,inPct=tt>0?Math.round(tIn/tt*100):0;
+  document.getElementById('bar-in').style.width=inPct+'%';
+  document.getElementById('bar-out').style.width=(100-inPct)+'%';
+  document.getElementById('bv-in').textContent=tRuns>0?fmt(tIn):'—';
+  document.getElementById('bv-out').textContent=tRuns>0?fmt(tOut):'—';
+  document.getElementById('b-in').textContent=cx(tInC);
+  document.getElementById('b-out').textContent=cx(tOutC);
+  document.getElementById('b-vol').textContent=tRuns>0?tRuns.toLocaleString()+' runs':'—';
+  document.getElementById('b-day').textContent=cx(daily);
+  document.getElementById('b-total').textContent=cx(monthly);
+  updateTaskBreakdown(model);updateSavings();updateROI();updateRecommendedModel();updateChart();updateSmartCTA(monthly,active);updateReadiness();
 }
 
 function updateCompare() {
-  const idA = document.getElementById('cmp-a').value;
-  const idB = document.getElementById('cmp-b').value;
-  const mA  = MODELS.find(m => m.id === idA);
-  const mB  = MODELS.find(m => m.id === idB);
-  if (!mA || !mB) return;
-  let mthA = 0, mthB = 0;
-  TASKS.forEach(t => {
-    const runs = taskRuns[t.id] || 0;
-    if (runs === 0) return;
-    mthA += calcCost(t, mA, sel.ctx, sel.batch, sel.cache).runCost * runs * sel.days;
-    mthB += calcCost(t, mB, sel.ctx, sel.batch, sel.cache).runCost * runs * sel.days;
-  });
-  const cheaperA = mthA <= mthB;
-  const diff = Math.abs(mthA - mthB);
-  const pct  = Math.max(mthA, mthB) > 0 ? Math.round(diff / Math.max(mthA, mthB) * 100) : 0;
-  document.getElementById('compare-result').innerHTML = `
-    <div class="cmp-card${cheaperA?' cheaper':''}">
-      <div class="cmp-card-name">${mA.name}</div>
-      <div class="cmp-card-val">${usd(mthA)}</div>
-      <div class="cmp-card-sub">per month</div>
-    </div>
-    <div class="cmp-card${!cheaperA?' cheaper':''}">
-      <div class="cmp-card-name">${mB.name}</div>
-      <div class="cmp-card-val">${usd(mthB)}</div>
-      <div class="cmp-card-sub">per month</div>
-    </div>
-    ${diff > 0 ? `<div class="cmp-saving">${cheaperA ? mA.name : mB.name} is ${pct}% cheaper — saves ${usd(diff)}/month</div>` : ''}`;
+  const mA=MODELS.find(m=>m.id===document.getElementById('cmp-a').value);
+  const mB=MODELS.find(m=>m.id===document.getElementById('cmp-b').value);
+  if(!mA||!mB) return;
+  let a=0,b=0;
+  TASKS.forEach(t=>{const r=taskRuns[t.id]||0;if(!r)return;a+=calcCost(t,mA,sel.ctx,sel.batch,sel.cache).runCost*r*sel.days;b+=calcCost(t,mB,sel.ctx,sel.batch,sel.cache).runCost*r*sel.days;});
+  const diff=Math.abs(a-b),pct=Math.max(a,b)>0?Math.round(diff/Math.max(a,b)*100):0;
+  document.getElementById('compare-result').innerHTML=`
+    <div class="cmp-card${a<=b?' cheaper':''}"><div class="cmp-card-name">${mA.name}</div><div class="cmp-card-val">${usd(a)}</div><div class="cmp-card-sub">per month</div></div>
+    <div class="cmp-card${b<a?' cheaper':''}"><div class="cmp-card-name">${mB.name}</div><div class="cmp-card-val">${usd(b)}</div><div class="cmp-card-sub">per month</div></div>
+    ${diff>0?`<div class="cmp-saving">${a<=b?mA.name:mB.name} is ${pct}% cheaper — saves ${usd(diff)}/month</div>`:''}`;
 }
 
-function pick(type, val) {
-  sel[type] = val;
-  if (type === 'model') renderModels();
-  update();
-  updateCompare();
+function pick(type,val) {
+  sel[type]=val;
+  if(type==='model') renderModels();
+  update();updateCompare();
 }
 
-document.getElementById('sl-ctx').addEventListener('input', e => {
-  sel.ctx = parseFloat(e.target.value);
-  const meta = getCtxMeta(sel.ctx);
-  document.getElementById('sv-ctx').textContent = meta.label;
-  document.getElementById('ctx-desc').textContent = meta.desc;
-  update(); updateCompare();
+document.getElementById('sl-ctx').addEventListener('input',e=>{
+  sel.ctx=parseFloat(e.target.value);
+  const m=getCtxMeta(sel.ctx);
+  document.getElementById('sv-ctx').textContent=m.label;
+  document.getElementById('ctx-desc').textContent=m.desc;
+  update();updateCompare();
+});
+document.getElementById('ctx-desc').textContent=getCtxMeta(1.0).desc;
+document.getElementById('sl-days').addEventListener('input',e=>{
+  sel.days=parseInt(e.target.value);
+  document.getElementById('sv-days').textContent=sel.days;
+  update();updateCompare();
 });
 
-document.getElementById('ctx-desc').textContent = getCtxMeta(1.0).desc;
-document.getElementById('sl-days').addEventListener('input', e => {
-  sel.days = parseInt(e.target.value);
-  document.getElementById('sv-days').textContent = sel.days;
-  update(); updateCompare();
+const sA=document.getElementById('cmp-a'),sB=document.getElementById('cmp-b');
+MODELS.forEach((m,i)=>{
+  sA.innerHTML+=`<option value="${m.id}"${i===0?' selected':''}>${m.full}</option>`;
+  sB.innerHTML+=`<option value="${m.id}"${i===1?' selected':''}>${m.full}</option>`;
 });
 
-const selA = document.getElementById('cmp-a');
-const selB = document.getElementById('cmp-b');
-MODELS.forEach((m, i) => {
-  selA.innerHTML += `<option value="${m.id}"${i===0?' selected':''}>${m.full}</option>`;
-  selB.innerHTML += `<option value="${m.id}"${i===1?' selected':''}>${m.full}</option>`;
-});
+loadFromURL();renderTasks();renderModels();update();updateCompare();updateROI();updateChart();fetchExchangeRates();
 
-loadFromURL();
-renderTasks();
-renderModels();
-update();
-updateCompare();
-updateROI();
-updateChart();
-fetchExchangeRates();
-
-// ── EmailJS config ──────────────────────────────────────────────
-// Template variables available for both templates:
-// {{to_email}}, {{task}}, {{model}}, {{runs_per_day}}, {{working_days}},
-// {{monthly_cost}}, {{daily_cost}}, {{cost_per_run}},
-// {{input_tokens}}, {{output_tokens}},
-// {{batch_enabled}}, {{cache_enabled}},
-// {{current_spend}}, {{potential_saving}}
-// Contact template also has: {{name}}, {{company}}, {{from_email}}, {{message}}
-const EMAILJS_PUBLIC_KEY  = 'w-kY387QsqMVyl64T';
-const EMAILJS_SERVICE_ID  = 'service_m5irvcv';
-const EMAILJS_TEMPLATE_ID = 'template_w2p05wi';
-
-emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+const EMAILJS_PUBLIC_KEY='w-kY387QsqMVyl64T';
+const EMAILJS_SERVICE_ID='service_m5irvcv';
+const EMAILJS_TEMPLATE_ID='template_w2p05wi';
+const EMAILJS_CONTACT_TEMPLATE_ID='template_mryqvss';
+emailjs.init({publicKey:EMAILJS_PUBLIC_KEY});
 
 function buildEstimateParams(toEmail) {
-  const model = MODELS.find(m => m.id === sel.model);
-  const monthly = totalMonthly();
-  const daily   = monthly / sel.days;
-  const activeTasks = TASKS.filter(t => (taskRuns[t.id] || 0) > 0);
-  const taskSummary = activeTasks.map(t => `${t.name}: ${taskRuns[t.id]}/day`).join(', ');
-  const totalRuns = activeTasks.reduce((s, t) => s + taskRuns[t.id], 0);
-
-  const copilot   = parseFloat(document.getElementById('cost-copilot').value)   || 0;
-  const chatgpt   = parseFloat(document.getElementById('cost-chatgpt').value)   || 0;
-  const mscopilot = parseFloat(document.getElementById('cost-mscopilot').value) || 0;
-  const users     = parseFloat(document.getElementById('cost-users').value)     || 1;
-  const custom    = parseFloat(document.getElementById('cost-custom').value)    || 0;
-  const currentTotal = (copilot + chatgpt + mscopilot) * users + custom;
-  const saving = currentTotal > 0 ? currentTotal - monthly : null;
-
+  const model=MODELS.find(m=>m.id===sel.model);
+  const monthly=totalMonthly(),daily=monthly/sel.days;
+  const active=TASKS.filter(t=>(taskRuns[t.id]||0)>0);
+  const totalRuns=active.reduce((s,t)=>s+taskRuns[t.id],0);
+  const cop=parseFloat(document.getElementById('cost-copilot').value)||0;
+  const gpt=parseFloat(document.getElementById('cost-chatgpt').value)||0;
+  const ms=parseFloat(document.getElementById('cost-mscopilot').value)||0;
+  const usr=parseFloat(document.getElementById('cost-users').value)||1;
+  const cust=parseFloat(document.getElementById('cost-custom').value)||0;
+  const curr=(cop+gpt+ms)*usr+cust;
+  const saving=curr>0?curr-monthly:null;
   return {
-    to_email:         toEmail,
-    task:             taskSummary || 'None selected',
-    model:            model.full,
-    runs_per_day:     totalRuns.toLocaleString(),
-    working_days:     sel.days,
-    monthly_cost:     cx(monthly),
-    daily_cost:       cx(daily),
-    cost_per_run:     totalRuns > 0 ? cx(daily / totalRuns) : cx(0),
-    input_tokens:     fmt(activeTasks.reduce((s, t) => s + Math.round(t.inTok * sel.ctx) * taskRuns[t.id], 0)) + ' /day',
-    output_tokens:    fmt(activeTasks.reduce((s, t) => s + Math.round(t.outTok * sel.ctx) * taskRuns[t.id], 0)) + ' /day',
-    batch_enabled:    sel.batch ? 'Yes (−50% input)' : 'No',
-    cache_enabled:    sel.cache ? 'Yes (−90% repeated input)' : 'No',
-    current_spend:    currentTotal > 0 ? cx(currentTotal) + '/mo' : 'Not provided',
-    potential_saving: saving !== null && saving > 0 ? cx(saving) + '/mo' : 'N/A',
+    to_email:toEmail, task:active.map(t=>`${t.name}: ${taskRuns[t.id]}/day`).join(', ')||'None',
+    model:model.full, runs_per_day:totalRuns.toLocaleString(), working_days:sel.days,
+    monthly_cost:cx(monthly), daily_cost:cx(daily),
+    cost_per_run:totalRuns>0?cx(daily/totalRuns):cx(0),
+    input_tokens:fmt(active.reduce((s,t)=>s+Math.round(t.inTok*sel.ctx)*taskRuns[t.id],0))+' /day',
+    output_tokens:fmt(active.reduce((s,t)=>s+Math.round(t.outTok*sel.ctx)*taskRuns[t.id],0))+' /day',
+    batch_enabled:sel.batch?'Yes (−50% input)':'No',
+    cache_enabled:sel.cache?'Yes (−90% repeated input)':'No',
+    current_spend:curr>0?cx(curr)+'/mo':'Not provided',
+    potential_saving:saving&&saving>0?cx(saving)+'/mo':'N/A',
   };
 }
 
 async function sendEstimate() {
-  const emailEl = document.getElementById('email-addr');
-  const btn     = document.getElementById('email-send-btn');
-  const fb      = document.getElementById('email-feedback');
-  const email   = emailEl.value.trim();
-
-  if (!email || !email.includes('@')) {
-    fb.className = 'email-feedback err';
-    fb.textContent = 'Please enter a valid email address.';
-    return;
-  }
-  if (EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY') {
-    fb.className = 'email-feedback err';
-    fb.textContent = 'EmailJS not configured yet — see code comments.';
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = 'Sending…';
-  fb.className = 'email-feedback';
-  fb.textContent = '';
-
+  const emailEl=document.getElementById('email-addr'),btn=document.getElementById('email-send-btn'),fb=document.getElementById('email-feedback');
+  const email=emailEl.value.trim();
+  if(!email||!email.includes('@')){fb.className='email-feedback err';fb.textContent='Please enter a valid email address.';return;}
+  btn.disabled=true;btn.textContent='Sending…';fb.className='email-feedback';fb.textContent='';
   try {
-    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, buildEstimateParams(email));
-    fb.className = 'email-feedback ok';
-    fb.textContent = '✓ Estimate sent — check your inbox.';
-    emailEl.value = '';
-  } catch (err) {
-    fb.className = 'email-feedback err';
-    fb.textContent = 'Could not send — check your EmailJS config.';
-    console.error(err);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Send ↗';
-  }
+    await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,buildEstimateParams(email));
+    fb.className='email-feedback ok';fb.textContent='✓ Estimate sent — check your inbox.';emailEl.value='';
+  } catch(err){fb.className='email-feedback err';fb.textContent='Could not send — check your EmailJS config.';}
+  finally{btn.disabled=false;btn.textContent='Send ↗';}
 }
-
-// ── Contact modal ────────────────────────────────────────────────
-// Uses the same EmailJS service. Create a second template for the
-// contact form with variables: {{name}}, {{company}}, {{from_email}},
-// {{message}}, plus all estimate variables above.
-const EMAILJS_CONTACT_TEMPLATE_ID = 'template_mryqvss';
 
 function openModal() {
-  const model = MODELS.find(m => m.id === sel.model);
-  const monthly = totalMonthly();
-  const activeTasks = TASKS.filter(t => (taskRuns[t.id] || 0) > 0);
-  const totalRuns = activeTasks.reduce((s, t) => s + taskRuns[t.id], 0);
-  const taskSummary = activeTasks.length > 0
-    ? activeTasks.map(t => t.name).join(', ')
-    : 'No tasks selected';
-
-  document.getElementById('modal-estimate-box').innerHTML =
-    `Tasks: <span class="est-val">${taskSummary}</span><br>` +
-    `Model: <span class="est-val">${model.full}</span> &nbsp;·&nbsp; ` +
-    `Runs/day: <span class="est-val">${totalRuns.toLocaleString()}</span> &nbsp;·&nbsp; ` +
-    `Monthly estimate: <span class="est-val">${cx(monthly)}</span>`;
-
-  document.getElementById('modal-form-wrap').style.display = '';
-  document.getElementById('modal-success').style.display = 'none';
-  document.getElementById('modal-feedback').textContent = '';
+  const model=MODELS.find(m=>m.id===sel.model);
+  const active=TASKS.filter(t=>(taskRuns[t.id]||0)>0);
+  const totalRuns=active.reduce((s,t)=>s+taskRuns[t.id],0);
+  document.getElementById('modal-estimate-box').innerHTML=
+    `Tasks: <span class="est-val">${active.length>0?active.map(t=>t.name).join(', '):'No tasks selected'}</span><br>`+
+    `Model: <span class="est-val">${model.full}</span> &nbsp;·&nbsp; `+
+    `Runs/day: <span class="est-val">${totalRuns.toLocaleString()}</span> &nbsp;·&nbsp; `+
+    `Monthly estimate: <span class="est-val">${cx(totalMonthly())}</span>`;
+  document.getElementById('modal-form-wrap').style.display='';
+  document.getElementById('modal-success').style.display='none';
+  document.getElementById('modal-feedback').textContent='';
   document.getElementById('modal-overlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow='hidden';
 }
 
-function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function closeModalOutside(e) {
-  if (e.target === document.getElementById('modal-overlay')) closeModal();
-}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');document.body.style.overflow='';}
+function closeModalOutside(e){if(e.target===document.getElementById('modal-overlay'))closeModal();}
 
 async function submitContact() {
-  const name    = document.getElementById('cf-name').value.trim();
-  const company = document.getElementById('cf-company').value.trim();
-  const email   = document.getElementById('cf-email').value.trim();
-  const message = document.getElementById('cf-message').value.trim();
-  const btn     = document.getElementById('modal-submit-btn');
-  const fb      = document.getElementById('modal-feedback');
-
-  if (!name || !email || !email.includes('@')) {
-    fb.className = 'modal-feedback err';
-    fb.textContent = 'Please fill in name and a valid email.';
-    return;
-  }
-  if (EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY') {
-    fb.className = 'modal-feedback err';
-    fb.textContent = 'EmailJS not configured yet — see code comments.';
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = 'Sending…';
-  fb.textContent = '';
-
-  const params = {
-    ...buildEstimateParams(email),
-    name, company,
-    from_email: email,
-    message: message || '(no message)',
-  };
-
+  const name=document.getElementById('cf-name').value.trim();
+  const company=document.getElementById('cf-company').value.trim();
+  const email=document.getElementById('cf-email').value.trim();
+  const message=document.getElementById('cf-message').value.trim();
+  const btn=document.getElementById('modal-submit-btn'),fb=document.getElementById('modal-feedback');
+  if(!name||!email||!email.includes('@')){fb.className='modal-feedback err';fb.textContent='Please fill in name and a valid email.';return;}
+  btn.disabled=true;btn.textContent='Sending…';fb.textContent='';
   try {
-    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_CONTACT_TEMPLATE_ID, params);
-    document.getElementById('modal-form-wrap').style.display = 'none';
-    document.getElementById('modal-success').style.display = 'block';
-  } catch (err) {
-    fb.className = 'modal-feedback err';
-    fb.textContent = 'Could not send — check your EmailJS config.';
-    console.error(err);
-    btn.disabled = false;
-    btn.textContent = 'Send — book my call →';
+    await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_CONTACT_TEMPLATE_ID,{...buildEstimateParams(email),name,company,from_email:email,message:message||'(no message)'});
+    document.getElementById('modal-form-wrap').style.display='none';
+    document.getElementById('modal-success').style.display='block';
+  } catch(err){
+    fb.className='modal-feedback err';fb.textContent='Could not send — check your EmailJS config.';
+    btn.disabled=false;btn.textContent='Send — book my session →';
   }
 }
 </script>
