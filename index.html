@@ -654,8 +654,8 @@ footer a:hover{color:var(--text2)}
         </div>
         <div class="roi-inputs">
           <div class="roi-input-row">
-            <span class="roi-input-label">Employees using AI</span>
-            <input class="roi-input" id="roi-employees" type="number" min="1" value="20" oninput="updateROI()">
+            <span class="roi-input-label">Employees using AI <span style="font-size:11px;color:var(--text3);font-family:var(--mono);">(from tasks)</span></span>
+            <span class="roi-input" id="roi-employees-display" style="display:inline-flex;align-items:center;justify-content:flex-end;background:var(--bg3);border:1px solid var(--border);cursor:default;color:var(--accent2);">0</span>
             <span class="roi-unit">people</span>
           </div>
           <div class="roi-input-row">
@@ -1302,12 +1302,15 @@ function updateTaskBreakdown(model) {
 }
 
 function updateROI() {
-  const emp=parseFloat(document.getElementById('roi-employees').value)||0;
+  const maxEmployees = Math.max(0, ...TASKS.map(t => taskVol[t.id]?.employees || 0));
+  const dispEl = document.getElementById('roi-employees-display');
+  if (dispEl) dispEl.textContent = maxEmployees || '—';
+  const emp = maxEmployees;
   const rate=parseFloat(document.getElementById('roi-rate').value)||0;
   const min=parseFloat(document.getElementById('roi-minutes').value)||0;
   const review=parseFloat(document.getElementById('roi-review').value)||0;
   const el=document.getElementById('roi-result');
-  if(!emp||!rate||!min){el.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:8px 0;">Fill in the fields above.</div>';return;}
+  if(!emp||!rate||!min){el.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:8px 0;">Add tasks with employees in step 1 to see capacity freed.</div>';return;}
   const netMin=Math.max(0,min-review);
   const monthSave=(netMin/60)*rate*emp/currency.rate*sel.days;
   const grossSave=(min/60)*rate*emp/currency.rate*sel.days;
@@ -1324,7 +1327,7 @@ function updateROI() {
       <div class="roi-sub-card"><div class="roi-sub-label">Annual capacity</div><div class="roi-sub-val">${cx(annSave)}</div></div>
       <div class="roi-sub-card"><div class="roi-sub-label">Capacity vs AI cost</div><div class="roi-sub-val" style="color:${ratio>=100?'var(--green)':'var(--text2)'}">${ratio}%</div></div>
     </div>
-    ${review>0?`<div style="margin-top:8px;padding:7px 10px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:6px;font-size:13px;color:var(--text3);font-family:var(--mono);">Review &amp; QA absorbs ${reviewPct}% of gross saving (${cx(grossSave-monthSave)}/mo) — human-in-the-loop cost included above</div>`:''}
+    ${review>0?`<div style="margin-top:8px;padding:7px 10px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:6px;font-size:13px;color:var(--text3);font-family:var(--mono);">Review &amp; QA absorbs ${reviewPct}% of gross saving (${cx(grossSave-monthSave)}/mo)</div>`:''}
     <div style="margin-top:8px;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;font-size:13px;color:var(--text3);line-height:1.6;font-family:var(--mono);">Reflects salary value of time freed up. Actual return also depends on integration costs, process change and organisational adoption.</div>`;
 }
 
@@ -1498,6 +1501,8 @@ function resetAll() {
   document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
   const d=document.getElementById('preset-desc');
   if(d){d.textContent='';d.classList.remove('visible');}
+  const roiSrc=document.getElementById('roi-emp-source');
+  if(roiSrc) roiSrc.textContent='(from tasks)';
   renderTasks(); update(); updateCompare(); updateROI(); goToStep(1);
 }
 
