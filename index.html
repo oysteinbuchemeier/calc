@@ -896,6 +896,99 @@
     color: var(--text2);
   }
 
+  /* INDUSTRY PRESETS */
+  .preset-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0; }
+  .preset-btn {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 14px; font-size: 12px;
+    cursor: pointer; color: var(--text2); transition: all 0.12s;
+    font-family: var(--sans);
+  }
+  .preset-btn:hover { border-color: var(--border2); color: var(--text); }
+  .preset-btn.active { border-color: var(--accent); background: var(--accent-bg); color: var(--accent2); }
+
+  /* RECOMMENDED MODEL */
+  .rec-model-panel {
+    background: var(--bg2); border: 1px solid rgba(45,212,160,0.25);
+    border-radius: var(--radius-lg); padding: 1rem 1.25rem;
+    display: none;
+  }
+  .rec-model-panel.visible { display: block; }
+  .rec-model-label { font-size: 10px; font-family: var(--mono); color: var(--green); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .rec-model-name { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .rec-model-reason { font-size: 12px; color: var(--text2); line-height: 1.5; }
+  .rec-model-saving { font-size: 11px; font-family: var(--mono); color: var(--green); margin-top: 6px; }
+
+  /* METHODOLOGY */
+  .methodology-panel {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); overflow: hidden;
+  }
+  .methodology-toggle {
+    width: 100%; background: none; border: none; padding: 1rem 1.25rem;
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer; color: var(--text2); font-size: 13px; font-weight: 500;
+    font-family: var(--sans); text-align: left;
+  }
+  .methodology-toggle:hover { color: var(--text); }
+  .methodology-toggle-icon { font-size: 16px; color: var(--text3); transition: transform 0.2s; }
+  .methodology-toggle.open .methodology-toggle-icon { transform: rotate(180deg); }
+  .methodology-body { display: none; padding: 0 1.25rem 1.25rem; }
+  .methodology-body.open { display: block; }
+  .methodology-task-row {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12px;
+  }
+  .methodology-task-row:last-child { border-bottom: none; }
+  .meth-name { color: var(--text2); flex: 1; }
+  .meth-detail { font-family: var(--mono); font-size: 11px; color: var(--text3); text-align: right; line-height: 1.6; }
+
+  /* GROWTH CHART */
+  .chart-panel {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 1.25rem 1.5rem;
+  }
+  .chart-panel-title {
+    font-size: 13px; font-weight: 500; color: var(--text2);
+    display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+  }
+  .chart-panel-title::before { content: ''; width: 3px; height: 13px; background: var(--accent); border-radius: 2px; display: inline-block; }
+  .chart-panel-sub { font-size: 12px; color: var(--text3); margin-bottom: 14px; }
+  .chart-growth-row { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
+  .chart-growth-label { font-size: 12px; color: var(--text2); flex: 1; }
+  .chart-growth-select {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 6px; padding: 5px 10px; font-size: 12px;
+    font-family: var(--mono); color: var(--text); outline: none;
+  }
+  .chart-bars { display: flex; align-items: flex-end; gap: 4px; height: 100px; }
+  .chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .chart-bar {
+    width: 100%; border-radius: 3px 3px 0 0;
+    background: var(--accent); opacity: 0.7;
+    transition: height 0.4s ease; min-height: 3px;
+  }
+  .chart-bar.current { opacity: 1; background: var(--green); }
+  .chart-bar-label { font-size: 9px; font-family: var(--mono); color: var(--text3); }
+  .chart-bar-val { font-size: 9px; font-family: var(--mono); color: var(--text3); }
+
+  /* PDF BUTTON */
+  .pdf-btn {
+    width: 100%; background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 11px; font-size: 13px;
+    font-family: var(--sans); color: var(--text2); cursor: pointer;
+    transition: all 0.12s; display: flex; align-items: center;
+    justify-content: center; gap: 8px;
+  }
+  .pdf-btn:hover { border-color: var(--border2); color: var(--text); background: var(--bg3); }
+
+  @media print {
+    nav, .action-row, .copy-confirm, .email-panel, .cta-banner, .pdf-btn,
+    .methodology-toggle, .chart-growth-row { display: none !important; }
+    body { background: white !important; color: black !important; }
+    .app { grid-template-columns: 1fr !important; }
+  }
+
   /* CURRENCY SELECTOR */
   .currency-row { display: flex; gap: 6px; }
   .currency-btn {
@@ -1000,6 +1093,17 @@
   <div class="left-col">
 
     <div class="panel">
+      <div class="panel-title">Start with an industry preset</div>
+      <div class="preset-row">
+        <button class="preset-btn" onclick="applyPreset('finance')">Finance & Legal</button>
+        <button class="preset-btn" onclick="applyPreset('hr')">HR & Recruitment</button>
+        <button class="preset-btn" onclick="applyPreset('tech')">Tech & Engineering</button>
+        <button class="preset-btn" onclick="applyPreset('cs')">Customer Service</button>
+        <button class="preset-btn" onclick="applyPreset('sales')">Sales & Marketing</button>
+      </div>
+    </div>
+
+    <div class="panel">
       <div class="panel-title">Select tasks & set daily volume</div>
       <div class="task-grid" id="task-grid"></div>
     </div>
@@ -1008,6 +1112,13 @@
       <div class="panel-title">Model</div>
       <div class="model-row" id="model-row"></div>
       <div id="model-desc" style="font-size:12px;color:var(--text3);margin-top:10px;font-family:var(--mono);"></div>
+    </div>
+
+    <div class="rec-model-panel" id="rec-model-panel">
+      <div class="rec-model-label">⚡ Recommended for your tasks</div>
+      <div class="rec-model-name" id="rec-model-name">—</div>
+      <div class="rec-model-reason" id="rec-model-reason">—</div>
+      <div class="rec-model-saving" id="rec-model-saving"></div>
     </div>
 
     <div class="panel">
@@ -1066,9 +1177,18 @@
       <div class="compare-result" id="compare-result"></div>
     </div>
 
-  </div>
+    <div class="methodology-panel">
+      <button class="methodology-toggle" id="meth-toggle" onclick="toggleMethodology()">
+        <span>How we calculate these estimates</span>
+        <span class="methodology-toggle-icon">▾</span>
+      </button>
+      <div class="methodology-body" id="meth-body">
+        <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6;">Token estimates are based on typical enterprise usage patterns. Your actual costs will vary depending on prompt length, response complexity, and implementation. Use this as a directional guide, not a contract.</p>
+        <div id="meth-task-list"></div>
+      </div>
+    </div>
 
-  <div class="right-col">
+  </div>
 
     <div class="action-row">
       <button class="action-btn share" onclick="shareURL()">↗ Share estimate</button>
@@ -1185,6 +1305,23 @@
         <div style="font-size:12px;color:var(--text3);text-align:center;padding:4px 0;">Enter your current costs above to see potential savings.</div>
       </div>
     </div>
+
+    <div class="chart-panel">
+      <div class="chart-panel-title">Cost over time</div>
+      <div class="chart-panel-sub">Projected monthly cost as AI usage grows</div>
+      <div class="chart-growth-row">
+        <span class="chart-growth-label">Expected monthly growth</span>
+        <select class="chart-growth-select" id="growth-rate" onchange="updateChart()">
+          <option value="0">Flat (0%)</option>
+          <option value="5">Moderate (5%/mo)</option>
+          <option value="10" selected>Fast (10%/mo)</option>
+          <option value="20">Aggressive (20%/mo)</option>
+        </select>
+      </div>
+      <div class="chart-bars" id="chart-bars"></div>
+    </div>
+
+    <button class="pdf-btn" onclick="window.print()">⬇ Download as PDF</button>
 
     <div class="email-panel">
       <div class="email-panel-title">Send estimate to yourself</div>
@@ -1319,7 +1456,119 @@ function calcCost(task, model, ctx, batch, cache) {
 }
 
 let currency = { code: 'USD', symbol: '$', rate: 1.0 };
-const CURRENCY_RATES = { USD: 1.0, EUR: 0.92, NOK: 10.8 };
+const INDUSTRY_PRESETS = {
+  finance: { name: 'Finance & Legal', tasks: { summarise: 200, invoice: 300, screen: 50, answer: 100, 'agent-simple': 20 } },
+  hr:      { name: 'HR & Recruitment', tasks: { screen: 150, email: 200, draft: 50, answer: 80, feedback: 60 } },
+  tech:    { name: 'Tech & Engineering', tasks: { code: 100, sql: 80, apidoc: 30, 'agent-simple': 40, rag: 60 } },
+  cs:      { name: 'Customer Service', tasks: { answer: 500, email: 300, feedback: 100, summarise: 50, translate: 80 } },
+  sales:   { name: 'Sales & Marketing', tasks: { email: 400, draft: 100, feedback: 150, screen: 60, translate: 50 } },
+};
+
+let activePreset = null;
+
+function applyPreset(id) {
+  activePreset = id;
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  TASKS.forEach(t => taskRuns[t.id] = 0);
+  const preset = INDUSTRY_PRESETS[id];
+  Object.entries(preset.tasks).forEach(([tid, runs]) => { if (taskRuns.hasOwnProperty(tid)) taskRuns[tid] = runs; });
+  renderTasks();
+  update();
+  updateCompare();
+  updateRecommendedModel();
+}
+
+function updateRecommendedModel() {
+  const panel = document.getElementById('rec-model-panel');
+  const activeTasks = TASKS.filter(t => (taskRuns[t.id] || 0) > 0);
+  if (activeTasks.length === 0) { panel.classList.remove('visible'); return; }
+
+  const totalRuns = activeTasks.reduce((s, t) => s + taskRuns[t.id], 0);
+  const agentRuns = activeTasks.filter(t => t.id.startsWith('agent')).reduce((s, t) => s + taskRuns[t.id], 0);
+  const agentPct  = totalRuns > 0 ? agentRuns / totalRuns : 0;
+  const avgInTok  = activeTasks.reduce((s, t) => s + t.inTok * taskRuns[t.id], 0) / totalRuns;
+
+  let recId, reason;
+  if (agentPct > 0.3 || avgInTok > 8000) {
+    recId  = 'sonnet';
+    reason = 'Your task mix includes complex multi-step workflows and large documents that benefit from Sonnet\'s stronger reasoning. Haiku may miss nuance at this complexity level.';
+  } else if (avgInTok < 1500 && agentPct === 0) {
+    recId  = 'haiku';
+    reason = 'Your tasks are mostly short, high-volume operations — email, Q&A, simple extraction. Haiku handles these well at a fraction of the cost.';
+  } else {
+    recId  = 'sonnet';
+    reason = 'Your task mix is balanced. Sonnet gives you the best quality-to-cost ratio for this combination of document and operational tasks.';
+  }
+
+  const recModel  = MODELS.find(m => m.id === recId);
+  const currModel = MODELS.find(m => m.id === sel.model);
+
+  const recMonthly  = TASKS.reduce((s, t) => { const r = taskRuns[t.id]||0; if(!r) return s; return s + calcCost(t, recModel, sel.ctx, sel.batch, sel.cache).runCost * r * sel.days; }, 0);
+  const currMonthly = totalMonthly();
+  const saving = currMonthly - recMonthly;
+
+  document.getElementById('rec-model-name').textContent = recModel.full;
+  document.getElementById('rec-model-reason').textContent = reason;
+  document.getElementById('rec-model-saving').textContent = saving > 0.01
+    ? `Switching to ${recModel.name} saves ${cx(saving)}/month vs your current selection`
+    : recId === sel.model ? `You're already on the recommended model` : '';
+
+  panel.classList.add('visible');
+}
+
+function toggleMethodology() {
+  const btn  = document.getElementById('meth-toggle');
+  const body = document.getElementById('meth-body');
+  btn.classList.toggle('open');
+  body.classList.toggle('open');
+  if (body.classList.contains('open')) renderMethodology();
+}
+
+const TASK_METHODOLOGY = {
+  summarise:      { basis: '~8 000 input tokens', note: 'Avg. 6-page document + system prompt' },
+  draft:          { basis: '~600 in / 1 200 out', note: 'Brief input, full document output' },
+  email:          { basis: '~400 in / 350 out',   note: 'Short context, professional reply' },
+  answer:         { basis: '~4 000 input tokens', note: 'Retrieved context + question' },
+  invoice:        { basis: '~3 000 input tokens', note: 'Structured document + extraction schema' },
+  feedback:       { basis: '~2 000 in / 600 out', note: 'Batch of reviews + categorisation output' },
+  translate:      { basis: '~3 000 in / 2 800 out', note: 'Input and output tokens roughly equal' },
+  screen:         { basis: '~5 000 input tokens', note: 'Multiple documents compared against criteria' },
+  'agent-simple': { basis: '~18 000 tokens total', note: '3–4 LLM calls × ~4 500 tokens each' },
+  'agent-complex':{ basis: '~80 000 tokens total', note: '8–10 LLM calls × ~8 000 tokens each' },
+  code:           { basis: '~5 000 in / 1 200 out', note: 'Code file + instructions, diff output' },
+  sql:            { basis: '~800 in / 400 out',   note: 'Schema + question, SQL query output' },
+  rag:            { basis: '~6 000 input tokens', note: 'Retrieved chunks + query context' },
+  apidoc:         { basis: '~4 000 in / 2 000 out', note: 'Code/spec input, documentation output' },
+};
+
+function renderMethodology() {
+  const el = document.getElementById('meth-task-list');
+  el.innerHTML = TASKS.map(t => {
+    const m = TASK_METHODOLOGY[t.id] || { basis: '—', note: '—' };
+    return `<div class="methodology-task-row">
+      <span class="meth-name">${t.name}</span>
+      <span class="meth-detail">${m.basis}<br><span style="color:var(--text3);font-size:10px">${m.note}</span></span>
+    </div>`;
+  }).join('');
+}
+
+function updateChart() {
+  const monthly  = totalMonthly();
+  const growthPct = parseFloat(document.getElementById('growth-rate').value) / 100;
+  const months   = ['Now','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'];
+  const values   = months.map((_, i) => monthly * Math.pow(1 + growthPct, i));
+  const maxVal   = Math.max(...values, 0.01);
+
+  document.getElementById('chart-bars').innerHTML = values.map((v, i) => `
+    <div class="chart-bar-wrap">
+      <div class="chart-bar-val">${v >= 1000 ? cx(v).replace(/\.\d+/, '') : cx(v)}</div>
+      <div class="chart-bar${i === 0 ? ' current' : ''}" style="height:${Math.max(Math.round(v/maxVal*80), 3)}px"></div>
+      <div class="chart-bar-label">${months[i]}</div>
+    </div>`).join('');
+}
+
+
 
 function setCurrency(code, symbol) {
   currency = { code, symbol, rate: CURRENCY_RATES[code] };
@@ -1597,6 +1846,8 @@ function update() {
   updateTaskBreakdown(model);
   updateSavings();
   updateROI();
+  updateRecommendedModel();
+  updateChart();
 }
 
 function updateCompare() {
@@ -1664,6 +1915,7 @@ renderModels();
 update();
 updateCompare();
 updateROI();
+updateChart();
 
 // ── EmailJS config ──────────────────────────────────────────────
 // Replace these three values after creating a free EmailJS account:
@@ -1701,15 +1953,15 @@ function buildEstimateParams(toEmail) {
     model:            model.full,
     runs_per_day:     totalRuns.toLocaleString(),
     working_days:     sel.days,
-    monthly_cost:     usd(monthly),
-    daily_cost:       usd(daily),
-    cost_per_run:     totalRuns > 0 ? usd(daily / totalRuns) : '$0',
-    input_tokens:     '—',
-    output_tokens:    '—',
+    monthly_cost:     cx(monthly),
+    daily_cost:       cx(daily),
+    cost_per_run:     totalRuns > 0 ? cx(daily / totalRuns) : cx(0),
+    input_tokens:     fmt(activeTasks.reduce((s, t) => s + Math.round(t.inTok * sel.ctx) * taskRuns[t.id], 0)) + ' /day',
+    output_tokens:    fmt(activeTasks.reduce((s, t) => s + Math.round(t.outTok * sel.ctx) * taskRuns[t.id], 0)) + ' /day',
     batch_enabled:    sel.batch ? 'Yes (−50% input)' : 'No',
     cache_enabled:    sel.cache ? 'Yes (−90% repeated input)' : 'No',
-    current_spend:    currentTotal > 0 ? usd(currentTotal) + '/mo' : 'Not provided',
-    potential_saving: saving !== null && saving > 0 ? usd(saving) + '/mo' : 'N/A',
+    current_spend:    currentTotal > 0 ? cx(currentTotal) + '/mo' : 'Not provided',
+    potential_saving: saving !== null && saving > 0 ? cx(saving) + '/mo' : 'N/A',
   };
 }
 
