@@ -73,6 +73,9 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 2rem
 .step-item.done .step-label{color:var(--text2)}
 .step-connector{flex:0 0 1px;height:1px;background:var(--border)}
 .app{display:grid;grid-template-columns:1fr 320px;gap:2rem;max-width:1100px;margin:0 auto;padding:1.5rem 2rem 3rem;align-items:start}
+.left-col{min-height:calc(100vh - 120px)}
+.right-col{display:flex;flex-direction:column;gap:1rem;position:sticky;top:80px;max-height:calc(100vh - 100px);overflow-y:auto;scrollbar-width:none}
+.right-col::-webkit-scrollbar{display:none}
 @media(max-width:768px){.app{grid-template-columns:1fr}}
 .step-panel{display:none;flex-direction:column;gap:1.25rem}
 .step-panel.active{display:flex}
@@ -165,7 +168,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .methodology-task-row:last-child{border-bottom:none}
 .meth-name{color:var(--text2);flex:1}
 .meth-detail{font-family:var(--mono);font-size:13px;color:var(--text3);text-align:right;line-height:1.6}
-.right-col{display:flex;flex-direction:column;gap:1rem;position:sticky;top:80px}
 .section-label{font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px}
 .metric-big{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem}
 .metric-big-label{font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
@@ -767,7 +769,10 @@ footer a:hover{color:var(--text2)}
 
       <div class="step-nav">
         <button class="step-nav-btn" onclick="goToStep(2)">← Choose a model</button>
-        <div></div>
+        <div style="display:flex;gap:8px;">
+          <button class="action-btn share" onclick="shareURL()">↗ Share estimate</button>
+          <button class="step-nav-btn primary" onclick="openModal()">Book a free 30-minute session →</button>
+        </div>
       </div>
     </div>
 
@@ -785,6 +790,10 @@ footer a:hover{color:var(--text2)}
       <div class="metric-big-label"><span class="live-dot"></span>Monthly cost estimate</div>
       <div class="metric-big-value" id="m-monthly">kr 0</div>
       <div class="metric-big-sub" id="m-monthly-sub">Set daily volume on tasks above</div>
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:var(--text3);">Model</span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--accent2);" id="m-model-label">Claude Sonnet 4</span>
+      </div>
     </div>
 
     <div class="metric-grid-2">
@@ -1352,6 +1361,8 @@ function update() {
   const daily=tInC+tOutC, monthly=daily*sel.days;
   document.getElementById('m-monthly').textContent=cx(monthly);
   document.getElementById('m-monthly-sub').textContent=tRuns>0?`${tRuns.toLocaleString()} runs/day across ${active} task${active!==1?'s':''} × ${sel.days} days`:'Set daily volume on tasks above';
+  const modelLabel = document.getElementById('m-model-label');
+  if (modelLabel) modelLabel.textContent = model.full;
   document.getElementById('m-run').textContent=tRuns>0?cx(daily/tRuns):'—';
   document.getElementById('m-daily').textContent=tRuns>0?cx(daily):'—';
   const tt=tIn+tOut, inPct=tt>0?Math.round(tIn/tt*100):0;
