@@ -987,7 +987,7 @@
     <button class="currency-btn" onclick="setCurrency('EUR','€')">EUR</button>
     <button class="currency-btn" onclick="setCurrency('NOK','kr')">NOK</button>
   </div>
-  <button class="nav-cta" onclick="document.getElementById('cta-section').scrollIntoView({behavior:'smooth'})">Book a demo →</button>
+  <button class="nav-cta" onclick="document.getElementById('cta-section').scrollIntoView({behavior:'smooth'})">Book a session →</button>
 </nav>
 
 <div class="hero">
@@ -1198,7 +1198,7 @@
 
     <div class="cta-banner" id="cta-section">
       <p>Ready to run this in production? We'll help you architect the right solution for your scale.</p>
-      <button onclick="openModal()">Book a free 30-minute demo →</button>
+      <button onclick="openModal()">Book a free 30-minute session →</button>
       <p class="cta-sub">No commitment. No pitch deck.</p>
     </div>
 
@@ -1757,18 +1757,19 @@ async function sendEstimate() {
 const EMAILJS_CONTACT_TEMPLATE_ID = 'template_mryqvss';
 
 function openModal() {
-  const task  = TASKS.find(t => t.id === sel.task);
   const model = MODELS.find(m => m.id === sel.model);
-  const inTok  = Math.round(task.inTok * sel.ctx);
-  const outTok = Math.round(task.outTok * sel.ctx);
-  const runCost = (inTok / 1e6 * model.inP) + (outTok / 1e6 * model.outP);
-  const monthly = runCost * sel.runs * sel.days;
+  const monthly = totalMonthly();
+  const activeTasks = TASKS.filter(t => (taskRuns[t.id] || 0) > 0);
+  const totalRuns = activeTasks.reduce((s, t) => s + taskRuns[t.id], 0);
+  const taskSummary = activeTasks.length > 0
+    ? activeTasks.map(t => t.name).join(', ')
+    : 'No tasks selected';
 
   document.getElementById('modal-estimate-box').innerHTML =
-    `Task: <span class="est-val">${task.name}</span> &nbsp;·&nbsp; ` +
-    `Model: <span class="est-val">${model.full}</span><br>` +
-    `Runs/day: <span class="est-val">${sel.runs.toLocaleString()}</span> &nbsp;·&nbsp; ` +
-    `Monthly estimate: <span class="est-val">${usd(monthly)}</span>`;
+    `Tasks: <span class="est-val">${taskSummary}</span><br>` +
+    `Model: <span class="est-val">${model.full}</span> &nbsp;·&nbsp; ` +
+    `Runs/day: <span class="est-val">${totalRuns.toLocaleString()}</span> &nbsp;·&nbsp; ` +
+    `Monthly estimate: <span class="est-val">${cx(monthly)}</span>`;
 
   document.getElementById('modal-form-wrap').style.display = '';
   document.getElementById('modal-success').style.display = 'none';
