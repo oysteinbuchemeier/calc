@@ -55,12 +55,12 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 2rem
 .complexity-warning-item:last-child{border-bottom:none}
 .iceberg-viz{padding:1.25rem 1.5rem;border-top:1px solid var(--border)}
 .iceberg-title{font-size:12px;font-family:var(--mono);color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:12px}
-.iceberg-layers{display:flex;flex-direction:column;gap:6px}
-.iceberg-layer{border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;font-size:13px;position:relative;gap:12px}
-.iceberg-layer-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
-.iceberg-layer-name{font-weight:500;white-space:nowrap}
-.iceberg-layer-tag{font-size:11px;font-family:var(--mono);padding:3px 8px;border-radius:4px;flex-shrink:0;white-space:nowrap}
-.iceberg-layer-note{font-size:12px;font-family:var(--mono);opacity:0.85;text-align:right;white-space:nowrap;flex-shrink:0}
+.iceberg-layers{display:flex;flex-direction:column;gap:5px}
+.iceberg-layer{border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px;font-size:13px}
+.iceberg-layer-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.iceberg-layer-name{font-weight:500}
+.iceberg-layer-tag{font-size:11px;font-family:var(--mono);padding:2px 7px;border-radius:4px}
+.iceberg-layer-note{font-size:12px;font-family:var(--mono);opacity:0.8;color:inherit}
 .steps-wrap{max-width:680px;margin:1.5rem auto 0;padding:0 2rem}
 .steps{display:flex;align-items:center}
 .step-item{display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 16px;border-radius:var(--radius);transition:background 0.15s;flex:1}
@@ -835,30 +835,30 @@ footer a:hover{color:var(--text2)}
               <span class="iceberg-layer-name">Inference</span>
               <span class="iceberg-layer-tag" style="background:var(--accent-bg);color:var(--accent2)">this calculator</span>
             </div>
-            <span class="iceberg-layer-note">what you see above</span>
+            <div class="iceberg-layer-note">what you see above</div>
           </div>
           <div class="iceberg-layer" style="background:rgba(255,255,255,0.04);color:var(--text2)">
-            <span class="iceberg-layer-name">Vector DB &amp; retrieval</span>
-            <span class="iceberg-layer-note">+10–30% for RAG setups</span>
+            <div class="iceberg-layer-name">Vector DB &amp; retrieval</div>
+            <div class="iceberg-layer-note">+10–30% for RAG setups</div>
           </div>
           <div class="iceberg-layer" style="background:rgba(255,255,255,0.03);color:var(--text2)">
-            <span class="iceberg-layer-name">Observability &amp; monitoring</span>
-            <span class="iceberg-layer-note">logging, evals, tracing</span>
+            <div class="iceberg-layer-name">Observability &amp; monitoring</div>
+            <div class="iceberg-layer-note">logging, evals, tracing</div>
           </div>
           <div class="iceberg-layer" style="background:rgba(255,255,255,0.02);color:var(--text3)">
-            <span class="iceberg-layer-name">Security &amp; guardrails</span>
-            <span class="iceberg-layer-note">PII filtering, content checks</span>
+            <div class="iceberg-layer-name">Security &amp; guardrails</div>
+            <div class="iceberg-layer-note">PII filtering, content checks</div>
           </div>
           <div class="iceberg-layer" style="background:rgba(255,255,255,0.02);color:var(--text3)">
-            <span class="iceberg-layer-name">Cloud infrastructure</span>
-            <span class="iceberg-layer-note">compute, storage, networking</span>
+            <div class="iceberg-layer-name">Cloud infrastructure</div>
+            <div class="iceberg-layer-note">compute, storage, networking</div>
           </div>
           <div class="iceberg-layer" style="background:rgba(248,113,113,0.08);color:#f87171;border:1px solid rgba(248,113,113,0.2)">
             <div class="iceberg-layer-left">
               <span class="iceberg-layer-name">Integration &amp; maintenance</span>
               <span class="iceberg-layer-tag" style="background:rgba(248,113,113,0.15);color:#f87171">largest variable</span>
             </div>
-            <span class="iceberg-layer-note">typically 2–5× inference in yr 1</span>
+            <div class="iceberg-layer-note">typically 2–5× inference in yr 1</div>
           </div>
         </div>
       </div>
