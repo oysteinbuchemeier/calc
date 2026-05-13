@@ -233,7 +233,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .savings-tool-input{width:80px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:14px;font-family:var(--mono);color:var(--text);outline:none;text-align:right;transition:border-color 0.15s}
 .savings-tool-input:focus{border-color:var(--accent)}
 .savings-tool-unit{font-size:13px;color:var(--text3);white-space:nowrap}
-.savings-custom-row{display:flex;gap:8px;padding:0.75rem 1.25rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);align-items:center}
+.savings-custom-row{display:flex;gap:12px;padding:1rem 1.25rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);align-items:center;background:rgba(108,99,255,0.04)}
 .savings-custom-label{font-size:12px;color:var(--text2);flex:1}
 .savings-custom-input{background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:14px;font-family:var(--mono);color:var(--text);outline:none;width:80px;text-align:right;transition:border-color 0.15s}
 .savings-custom-input:focus{border-color:var(--accent)}
@@ -721,9 +721,12 @@ footer a:hover{color:var(--text2)}
           <span style="font-size:13px;color:var(--text3);white-space:nowrap;">users</span>
         </div>
         <div class="savings-custom-row">
-          <span class="savings-custom-label">Other AI spend</span>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;color:var(--text2);margin-bottom:3px;">Other AI tools — total monthly spend</div>
+            <div style="font-size:12px;color:var(--text3);">Grammarly, Salesforce Einstein, Zendesk AI, Adobe AI, internal tools, anything else</div>
+          </div>
           <input class="savings-custom-input" id="cost-custom" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
-          <span style="font-size:12px;color:var(--text3);white-space:nowrap">per month</span>
+          <span style="font-size:13px;color:var(--text3);white-space:nowrap">/ mo total</span>
         </div>
         <div class="savings-result" id="savings-result">
           <div style="font-size:12px;color:var(--text3);text-align:center;padding:4px 0;">Enter your current costs above to see potential savings.</div>
@@ -918,7 +921,7 @@ footer a:hover{color:var(--text2)}
         <label class="form-label">Tell us about your use case</label>
         <textarea class="form-input" id="cf-message" placeholder="We're looking to automate document processing for ~500 contracts/day..."></textarea>
       </div>
-      <button class="modal-submit" id="modal-submit-btn" onclick="submitContact()">Send — book my session →</button>
+      <button class="modal-submit" id="modal-submit-btn" onclick="submitContact()">Send — book a free session →</button>
       <div class="modal-feedback" id="modal-feedback"></div>
     </div>
     <div class="modal-success" id="modal-success">
@@ -1397,16 +1400,17 @@ function renderTasks() {
     if(t.id==='agent-simple') html+=`<div style="grid-column:1/-1;margin:6px 0 2px;display:flex;align-items:center;gap:10px;"><span style="font-size:12px;font-family:var(--mono);color:var(--amber);white-space:nowrap;">AI agents — multi-step workflows</span><div style="flex:1;height:1px;background:var(--border);"></div></div>`;
     if(t.id==='code') html+=`<div style="grid-column:1/-1;margin:6px 0 2px;display:flex;align-items:center;gap:10px;"><span style="font-size:12px;font-family:var(--mono);color:var(--text3);white-space:nowrap;">Technical tasks</span><div style="flex:1;height:1px;background:var(--border);"></div></div>`;
     const runs=taskRuns[t.id]||0, vol=taskVol[t.id], isAgent=t.id.startsWith('agent');
+    const isTech=['code','sql','rag','apidoc'].includes(t.id);
     html+=`<div class="task-btn${runs>0?' active':''}${isAgent?' agent-task':''}">
       <div class="task-btn-name">${t.name}${isAgent?`<span class="agent-badge">multi-step</span>`:''}</div>
       <div class="task-btn-desc">${t.desc}</div>
       <div class="task-btn-explain">${t.explain}</div>
       <div class="task-vol-row">
-        <div class="task-vol-field"><label class="task-vol-label">Employees</label><input class="task-vol-input" type="number" min="0" value="${vol.employees}" oninput="setTaskVol('${t.id}','employees',this.value)"></div>
+        <div class="task-vol-field"><label class="task-vol-label">${isAgent ? 'Triggers' : isTech ? 'Developers' : 'Employees'}</label><input class="task-vol-input" type="number" min="0" value="${vol.employees}" oninput="setTaskVol('${t.id}','employees',this.value)"></div>
         <div class="task-vol-sep">×</div>
-        <div class="task-vol-field"><label class="task-vol-label">Times/day</label><input class="task-vol-input" type="number" min="0" step="0.5" value="${vol.usesPerDay}" oninput="setTaskVol('${t.id}','usesPerDay',this.value)"></div>
+        <div class="task-vol-field"><label class="task-vol-label">${isAgent ? 'Per day' : isTech ? 'Queries/day' : 'Times/day'}</label><input class="task-vol-input" type="number" min="0" step="0.5" value="${vol.usesPerDay}" oninput="setTaskVol('${t.id}','usesPerDay',this.value)"></div>
         <div class="task-vol-sep">=</div>
-        <div class="task-vol-result"><span class="task-runs-val" id="rv-${t.id}">${runs===0?'off':runs+'/day'}</span></div>
+        <div class="task-vol-result"><span class="task-runs-val" id="rv-${t.id}">${runs===0?'off':runs+(isAgent?' triggers/day':'/day')}</span></div>
       </div>
       <div class="task-btn-tokens">~${fmt(t.inTok)} in · ~${fmt(t.outTok)} out per run</div>
     </div>`;
@@ -1419,7 +1423,8 @@ function setTaskVol(id,field,val) {
   const runs=Math.round(taskVol[id].employees*taskVol[id].usesPerDay);
   taskRuns[id]=runs;
   const v=document.getElementById('rv-'+id);
-  if(v){v.closest('.task-btn').classList.toggle('active',runs>0);v.textContent=runs===0?'off':runs+'/day';}
+  const isAgent=id.startsWith('agent');
+  if(v){v.closest('.task-btn').classList.toggle('active',runs>0);v.textContent=runs===0?'off':runs+(isAgent?' triggers/day':'/day');}
   update(); updateCompare();
 }
 
@@ -1576,7 +1581,7 @@ async function submitContact() {
     document.getElementById('modal-success').style.display='block';
   }catch(err){
     fb.className='modal-feedback err';fb.textContent='Could not send — check your EmailJS config.';
-    btn.disabled=false;btn.textContent='Send — book my session →';
+    btn.disabled=false;btn.textContent='Send — book a free session →';
   }
 }
 </script>
