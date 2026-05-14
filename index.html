@@ -136,7 +136,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .rec-model-label{font-size:12px;font-family:var(--sans);font-weight:600;color:var(--green);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:6px}
 .rec-model-name{font-size:15px;font-weight:500;color:var(--text);margin-bottom:4px}
 .rec-model-reason{font-size:12px;color:var(--text2);line-height:1.5}
-.rec-model-saving{font-size:13px;font-family:var(--mono);color:var(--green);margin-top:6px}
+.rec-model-saving{font-size:13px;font-family:var(--mono);margin-top:6px}
 .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--border);cursor:pointer}
 .toggle-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px;display:flex;align-items:center;gap:8px}
 .toggle-badge{font-size:12px;font-family:var(--mono);background:rgba(45,212,160,0.15);color:var(--green);padding:2px 7px;border-radius:4px;font-weight:400}
@@ -405,7 +405,7 @@ footer a:hover{color:var(--text2)}
   .task-breakdown-header{color:#555!important}
   .br-label,.br-val,.bt-label,.bt-val{color:#111!important}
   .bt-val,.bt-label{font-size:11pt!important}
-  .accent2,.rec-model-saving{color:#4a8a91!important}
+  .accent2{color:#4a8a91!important}
   .green{color:#1a7a5e!important}
 
   /* Hide inactive tasks, show active */
@@ -537,16 +537,11 @@ footer a:hover{color:var(--text2)}
 
     <!-- STEP 2 -->
     <div class="step-panel" id="step-2">
-      <div class="config-bar" id="config-bar-2" onclick="goToStep(1)">
-        <span class="config-bar-label">←</span>
-        <span class="config-bar-items" id="config-summary-2">—</span>
-        
-      </div>
       <div class="panel">
         <div class="panel-title">Model</div>
         <div class="model-row" id="model-row"></div>
         <div id="model-desc" style="font-size:12px;color:var(--text3);margin-top:10px;font-family:var(--mono);"></div>
-        <div style="margin-top:8px;padding:8px 10px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:6px;font-size:12px;color:var(--text3);font-family:var(--mono);">⚠ Model prices change frequently. We review monthly — last updated May 2026. Verify current pricing at provider documentation before budgeting.</div>
+        <div style="margin-top:8px;padding:8px 10px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:6px;font-size:12px;color:var(--text3);font-family:var(--mono);">⚠ Model prices change frequently — last updated May 2026. Verify current pricing at provider documentation before budgeting.</div>
       </div>
       <div class="rec-model-panel" id="rec-model-panel">
         <div class="rec-model-label">Model match</div>
@@ -627,12 +622,6 @@ footer a:hover{color:var(--text2)}
         </div>
       </div>
 
-      <div class="complexity-warning" id="complexity-warning">
-        <div class="complexity-warning-title">⚠ Orchestration complexity introduced</div>
-        <div class="complexity-warning-text">This configuration includes components with architectural implications. Key considerations:</div>
-        <div class="complexity-warning-list" id="complexity-warning-list"></div>
-      </div>
-
       <div class="methodology-panel">
         <button class="methodology-toggle" id="meth-toggle" onclick="toggleMethodology()">
           <span>How we calculate these estimates</span>
@@ -656,11 +645,6 @@ footer a:hover{color:var(--text2)}
 
     <!-- STEP 3 -->
     <div class="step-panel" id="step-3">
-      <div class="config-bar" id="config-bar-3" onclick="goToStep(2)">
-        <span class="config-bar-label">←</span>
-        <span class="config-bar-items" id="config-summary-3">—</span>
-        
-      </div>
       <div class="roi-panel">
         <div class="roi-panel-header">
           <div class="roi-panel-title">Productivity impact estimate</div>
@@ -772,28 +756,41 @@ footer a:hover{color:var(--text2)}
     </div>
     <div class="copy-confirm" id="copy-confirm"></div>
 
-    <!-- LIVE SNAPSHOT -->
+    <!-- LIVE SNAPSHOT: ECONOMY -->
     <div class="metric-big">
       <div class="metric-big-label"><span class="live-dot"></span>Monthly cost estimate</div>
       <div class="metric-big-value" id="m-monthly">kr 0</div>
-      <div class="metric-big-sub" id="m-monthly-sub">Set daily volume on tasks above</div>
-      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-size:12px;color:var(--text3);">Model</span>
-          <span style="font-size:12px;font-family:var(--mono);color:var(--accent2);" id="m-model-label">Claude Sonnet 4</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-size:12px;color:var(--text3);">Runs / day</span>
-          <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-runs-day">—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-size:12px;color:var(--text3);">Active workflows</span>
-          <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-workflows">—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-size:12px;color:var(--text3);">Working days</span>
-          <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-days-label">22</span>
-        </div>
+      <div style="margin-top:5px;display:flex;gap:14px;">
+        <span style="font-size:12px;color:var(--text3);font-family:var(--mono);" id="m-per-run"></span>
+        <span style="font-size:12px;color:var(--text3);font-family:var(--mono);" id="m-per-day"></span>
+      </div>
+    </div>
+
+    <!-- LIVE SNAPSHOT: CONFIG -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;display:flex;flex-direction:column;gap:6px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:var(--text3);">Model</span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--accent2);" id="m-model-label">Claude Sonnet 4.6</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:var(--text3);">Workflows</span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-workflows">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:var(--text3);">Runs / day</span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-runs-day">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:var(--text3);">Working days</span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-days-label">22</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;" id="m-batch-row">
+        <span style="font-size:12px;color:var(--text3);">Batch</span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-batch-label">off</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;" id="m-cache-row">
+        <span style="font-size:12px;color:var(--text3);">Cache</span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-cache-label">off</span>
       </div>
     </div>
 
@@ -933,13 +930,14 @@ const TASKS = [
 ];
 
 const MODELS = [
-  {id:'haiku',   name:'Haiku',        full:'Claude Haiku 3.5',        inP:0.80,  outP:4.00,  note:'$0.80 / $4.00 per 1M tokens',   badge:'Fast'},
-  {id:'sonnet',  name:'Sonnet',        full:'Claude Sonnet 4',         inP:3.00,  outP:15.00, note:'$3.00 / $15.00 per 1M tokens',  badge:'Balanced'},
-  {id:'opus',    name:'Opus',          full:'Claude Opus 4',           inP:15.00, outP:75.00, note:'$15.00 / $75.00 per 1M tokens', badge:'Powerful'},
-  {id:'gpt4o',   name:'GPT-4o',        full:'OpenAI GPT-4o',           inP:5.00,  outP:15.00, note:'$5.00 / $15.00 per 1M tokens',  badge:null},
-  {id:'mini',    name:'GPT-4o mini',   full:'OpenAI GPT-4o mini',      inP:0.15,  outP:0.60,  note:'$0.15 / $0.60 per 1M tokens',   badge:null},
-  {id:'g-flash', name:'Gemini Flash',  full:'Google Gemini 2.0 Flash', inP:0.10,  outP:0.40,  note:'$0.10 / $0.40 per 1M tokens',   badge:'Cheapest'},
-  {id:'g-pro',   name:'Gemini Pro',    full:'Google Gemini 2.5 Pro',   inP:1.25,  outP:10.00, note:'$1.25 / $10.00 per 1M tokens',  badge:null},
+  {id:'haiku',    name:'Claude Haiku',  full:'Claude Haiku 4.5',        inP:1.00,  outP:5.00,  note:'$1.00 / $5.00 per 1M tokens',   badge:'Fast'},
+  {id:'sonnet',   name:'Claude Sonnet', full:'Claude Sonnet 4.6',       inP:3.00,  outP:15.00, note:'$3.00 / $15.00 per 1M tokens',  badge:'Balanced'},
+  {id:'opus',     name:'Claude Opus',   full:'Claude Opus 4.7',         inP:5.00,  outP:25.00, note:'$5.00 / $25.00 per 1M tokens',  badge:'Powerful'},
+  {id:'gpt55',    name:'GPT-5.5',       full:'OpenAI GPT-5.5',          inP:5.00,  outP:30.00, note:'$5.00 / $30.00 per 1M tokens',  badge:null},
+  {id:'mini',     name:'GPT-4o mini',   full:'OpenAI GPT-4o mini',      inP:0.15,  outP:0.60,  note:'$0.15 / $0.60 per 1M tokens',   badge:null},
+  {id:'g-flash',  name:'Gemini Flash',  full:'Google Gemini 2.5 Flash', inP:0.30,  outP:2.50,  note:'$0.30 / $2.50 per 1M tokens',   badge:null},
+  {id:'g-pro',    name:'Gemini Pro',    full:'Google Gemini 3.1 Pro',   inP:2.00,  outP:12.00, note:'$2.00 / $12.00 per 1M tokens',  badge:null},
+  {id:'deepseek', name:'DeepSeek V4',   full:'DeepSeek V4 Flash',       inP:0.14,  outP:0.28,  note:'$0.14 / $0.28 per 1M tokens',   badge:'Cheapest'},
 ];
 
 
@@ -1048,16 +1046,43 @@ function updateRecommendedModel() {
   const totalRuns=active.reduce((s,t)=>s+taskRuns[t.id],0);
   const agentPct=active.filter(t=>t.id.startsWith('agent')).reduce((s,t)=>s+taskRuns[t.id],0)/totalRuns;
   const avgInTok=active.reduce((s,t)=>s+t.inTok*taskRuns[t.id],0)/totalRuns;
-  let recId,reason;
-  if(agentPct>0.3||avgInTok>8000){recId='sonnet';reason='Your task mix includes complex workflows and large documents that benefit from Sonnet\'s stronger reasoning.';}
-  else if(avgInTok<1500&&agentPct===0){recId='haiku';reason='Your tasks are mostly short, high-volume operations. Haiku handles these well at a fraction of the cost.';}
-  else{recId='sonnet';reason='Your task mix is balanced. Sonnet gives the best quality-to-cost ratio for this combination.';}
+
+  // Recommend based on task complexity
+  let recId, reason;
+  if(agentPct>0.3||avgInTok>8000) {
+    recId='sonnet';
+    reason='Complex workflows and large context. Sonnet balances capability and cost for this mix.';
+  } else if(avgInTok<1500&&agentPct===0) {
+    recId='haiku';
+    reason='Short, high-volume tasks. Claude Haiku handles these well at lower cost.';
+  } else {
+    recId='sonnet';
+    reason='Balanced task mix. Claude Sonnet offers strong quality-to-cost ratio for this combination.';
+  }
+
   const rec=MODELS.find(m=>m.id===recId);
+  const cur=MODELS.find(m=>m.id===sel.model);
   const recMonthly=TASKS.reduce((s,t)=>{const r=taskRuns[t.id]||0;if(!r)return s;return s+calcCost(t,rec,sel.ctx,sel.batch,sel.cachePct).runCost*r*sel.days;},0);
-  const saving=totalMonthly()-recMonthly;
+  const curMonthly=totalMonthly();
+  const saving=curMonthly-recMonthly;
+
   document.getElementById('rec-model-name').textContent=rec.full;
   document.getElementById('rec-model-reason').textContent=reason;
-  document.getElementById('rec-model-saving').textContent=saving>0.01?`Switching to ${rec.name} saves ${cx(saving)}/month vs your current selection`:recId===sel.model?'You\'re already on the recommended model':'';
+
+  const savingEl=document.getElementById('rec-model-saving');
+  savingEl.style.color='var(--accent2)';
+  if(recId===sel.model) {
+    savingEl.textContent='You\'re on the recommended model';
+    savingEl.style.color='var(--green)';
+  } else {
+    const diff=Math.abs(saving);
+    const cheaper=saving>0.01;
+    savingEl.textContent=cheaper
+      ? `Switching to ${rec.name} saves ${cx(diff)}/month`
+      : saving<-0.01
+        ? `${cur.name} costs ${cx(diff)}/month more than recommended`
+        : 'Similar cost to recommended model';
+  }
   panel.classList.add('visible');
 }
 
@@ -1556,7 +1581,10 @@ function update() {
   });
   const daily=tInC+tOutC, monthly=daily*sel.days;
   document.getElementById('m-monthly').textContent=cx(monthly);
-  document.getElementById('m-monthly-sub').textContent=tRuns>0?`${tRuns.toLocaleString()} runs/day · ${sel.days} days`:'Set daily volume on tasks above';
+  const perRunEl = document.getElementById('m-per-run');
+  const perDayEl = document.getElementById('m-per-day');
+  if (perRunEl) perRunEl.textContent = tRuns>0 ? cx(monthly/(tRuns*sel.days))+' / run' : '';
+  if (perDayEl) perDayEl.textContent = tRuns>0 ? cx(monthly/sel.days)+' / day' : '';
   const modelLabel = document.getElementById('m-model-label');
   if (modelLabel) modelLabel.textContent = model.full;
   const runsDay = document.getElementById('m-runs-day');
@@ -1565,6 +1593,10 @@ function update() {
   if (workflowsEl) workflowsEl.textContent = active > 0 ? active : '—';
   const daysLabel = document.getElementById('m-days-label');
   if (daysLabel) daysLabel.textContent = sel.days;
+  const batchStatusEl = document.getElementById('m-batch-label');
+  if (batchStatusEl) { batchStatusEl.textContent = sel.batch ? 'on' : 'off'; batchStatusEl.style.color = sel.batch ? 'var(--green)' : 'var(--text3)'; }
+  const cacheStatusEl = document.getElementById('m-cache-label');
+  if (cacheStatusEl) { cacheStatusEl.textContent = sel.cachePct > 0 ? sel.cachePct+'%' : 'off'; cacheStatusEl.style.color = sel.cachePct > 0 ? 'var(--green)' : 'var(--text3)'; }
   document.getElementById('m-run').textContent=tRuns>0?cx(daily/tRuns):'—';
   document.getElementById('m-daily').textContent=tRuns>0?cx(daily):'—';
   const tt=tIn+tOut, inPct=tt>0?Math.round(tIn/tt*100):0;
@@ -1754,7 +1786,7 @@ MODELS.forEach(m=>{
 });
 // Default: current model vs cheapest
 sA.value = sel.model;
-sB.value = 'g-flash';
+sB.value = 'deepseek';
 
 loadFromURL();
 renderTasks();
