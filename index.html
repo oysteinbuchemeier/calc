@@ -467,7 +467,6 @@ footer a:hover{color:var(--text2)}
     <button class="currency-btn" onclick="setCurrency('EUR','€')">EUR</button>
     <button class="currency-btn active" onclick="setCurrency('NOK','kr')">NOK</button>
   </div>
-  <button class="nav-cta" onclick="openModal()">Book a free 30-minute session →</button>
 </nav>
 
 <div class="hero">
@@ -683,22 +682,6 @@ footer a:hover{color:var(--text2)}
         <div id="system-summary-body" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
       </div>
 
-      <div class="methodology-panel">
-        <button class="methodology-toggle" id="meth-toggle" onclick="toggleMethodology()">
-          <span>How we calculate these estimates</span>
-          <span class="methodology-toggle-icon">▾</span>
-        </button>
-        <div class="methodology-body" id="meth-body">
-          <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6;">Token estimates are based on typical enterprise usage patterns. Your actual costs will vary. Use this as a directional guide, not a contract.</p>
-          <div style="margin-bottom:12px;padding:10px 12px;background:rgba(108,164,171,0.06);border:1px solid rgba(108,164,171,0.15);border-radius:6px;font-size:12px;color:var(--text2);line-height:1.7;">
-            <strong style="color:var(--accent2);">What's included in each input estimate:</strong> system prompt + instructions + user content (document, question or data). Every AI request carries this overhead — the system prompt alone is typically 200–800 tokens per call.<br><br>
-            <strong style="color:var(--amber);">Everyday tasks</strong> — one API call per run. Input = system prompt + content. Output = the response.<br>
-            <strong style="color:var(--amber);">Automated workflows</strong> — multiple API calls per trigger. Simple: 3–4 calls (~18k tokens total). Complex: 8–10 calls (~80k tokens total). Context accumulates across steps.
-          </div>
-          <div id="meth-task-list"></div>
-        </div>
-      </div>
-
       <!-- NEXT STEP -->
       <div style="background:rgba(108,164,171,0.06);border:1px solid rgba(108,164,171,0.2);border-radius:var(--radius-lg);padding:1.5rem;display:flex;flex-direction:column;gap:12px;">
         <div style="font-size:14px;color:var(--text2);line-height:1.5;">Ready to go from estimate to decision?</div>
@@ -799,6 +782,23 @@ footer a:hover{color:var(--text2)}
       </div>
     </div>
 
+    <!-- METHODOLOGY -->
+    <div class="methodology-panel">
+      <button class="methodology-toggle" id="meth-toggle" onclick="toggleMethodology()">
+        <span>Assumptions &amp; calculations</span>
+        <span class="methodology-toggle-icon">▾</span>
+      </button>
+      <div class="methodology-body" id="meth-body">
+        <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6;">Token estimates are based on typical enterprise usage patterns. Your actual costs will vary. Use this as a directional guide, not a contract.</p>
+        <div style="margin-bottom:12px;padding:10px 12px;background:rgba(108,164,171,0.06);border:1px solid rgba(108,164,171,0.15);border-radius:6px;font-size:12px;color:var(--text2);line-height:1.7;">
+          <strong style="color:var(--accent2);">What's included in each input estimate:</strong> system prompt + instructions + user content (document, question or data). Every AI request carries this overhead — the system prompt alone is typically 200–800 tokens per call.<br><br>
+          <strong style="color:var(--amber);">Everyday tasks</strong> — one API call per run. Input = system prompt + content. Output = the response.<br>
+          <strong style="color:var(--amber);">Automated workflows</strong> — multiple API calls per trigger. Simple: 3–4 calls (~18k tokens total). Complex: 8–10 calls (~80k tokens total). Context accumulates across steps.
+        </div>
+        <div id="meth-task-list"></div>
+      </div>
+    </div>
+
     <!-- HIDDEN IDs KEPT FOR JS COMPATIBILITY -->
     <span id="m-run" style="display:none"></span>
     <span id="m-daily" style="display:none"></span>
@@ -820,7 +820,7 @@ footer a:hover{color:var(--text2)}
 
 <footer>
   <span>© 2026 Büchemeier Consulting · <a href="https://www.linkedin.com/in/oystein-buchemeier/" target="_blank">LinkedIn</a></span>
-  <span>Exchange rates updated live · <span id="rates-updated">Loading…</span> · Model prices reviewed monthly, last updated May 2026</span>
+  <span>Exchange rates &amp; model prices updated live · <span id="rates-updated">Loading…</span></span>
   <span>For simulation purposes only. Not financial advice.</span>
 </footer>
 
@@ -897,15 +897,50 @@ const TASKS = [
 ];
 
 const MODELS = [
-  {id:'haiku',    name:'Claude Haiku',  full:'Claude Haiku 4.5',        inP:1.00,  outP:5.00,  note:'$1.00 / $5.00 per 1M tokens',   badge:'Fast'},
-  {id:'sonnet',   name:'Claude Sonnet', full:'Claude Sonnet 4.6',       inP:3.00,  outP:15.00, note:'$3.00 / $15.00 per 1M tokens',  badge:'Balanced'},
-  {id:'opus',     name:'Claude Opus',   full:'Claude Opus 4.7',         inP:5.00,  outP:25.00, note:'$5.00 / $25.00 per 1M tokens',  badge:'Powerful'},
-  {id:'gpt55',    name:'GPT-5.5',       full:'OpenAI GPT-5.5',          inP:5.00,  outP:30.00, note:'$5.00 / $30.00 per 1M tokens',  badge:null},
-  {id:'mini',     name:'GPT-4o mini',   full:'OpenAI GPT-4o mini',      inP:0.15,  outP:0.60,  note:'$0.15 / $0.60 per 1M tokens',   badge:null},
-  {id:'g-flash',  name:'Gemini Flash',  full:'Google Gemini 2.5 Flash', inP:0.30,  outP:2.50,  note:'$0.30 / $2.50 per 1M tokens',   badge:null},
-  {id:'g-pro',    name:'Gemini Pro',    full:'Google Gemini 3.1 Pro',   inP:2.00,  outP:12.00, note:'$2.00 / $12.00 per 1M tokens',  badge:null},
-  {id:'deepseek', name:'DeepSeek V4',   full:'DeepSeek V4 Flash',       inP:0.14,  outP:0.28,  note:'$0.14 / $0.28 per 1M tokens',   badge:'Cheapest'},
+  {id:'haiku',    name:'Claude Haiku',  full:'Claude Haiku 4.5',        inP:1.00,  outP:5.00,  note:'$1.00 / $5.00 per 1M tokens',   badge:'Fast',     orId:'anthropic/claude-haiku-4-5'},
+  {id:'sonnet',   name:'Claude Sonnet', full:'Claude Sonnet 4.6',       inP:3.00,  outP:15.00, note:'$3.00 / $15.00 per 1M tokens',  badge:'Balanced', orId:'anthropic/claude-sonnet-4-6'},
+  {id:'opus',     name:'Claude Opus',   full:'Claude Opus 4.7',         inP:5.00,  outP:25.00, note:'$5.00 / $25.00 per 1M tokens',  badge:'Powerful', orId:'anthropic/claude-opus-4-7'},
+  {id:'gpt55',    name:'GPT-5.5',       full:'OpenAI GPT-5.5',          inP:5.00,  outP:30.00, note:'$5.00 / $30.00 per 1M tokens',  badge:null,       orId:'openai/gpt-5.5'},
+  {id:'mini',     name:'GPT-4o mini',   full:'OpenAI GPT-4o mini',      inP:0.15,  outP:0.60,  note:'$0.15 / $0.60 per 1M tokens',   badge:null,       orId:'openai/gpt-4o-mini'},
+  {id:'g-flash',  name:'Gemini Flash',  full:'Google Gemini 2.5 Flash', inP:0.30,  outP:2.50,  note:'$0.30 / $2.50 per 1M tokens',   badge:null,       orId:'google/gemini-2.5-flash'},
+  {id:'g-pro',    name:'Gemini Pro',    full:'Google Gemini 3.1 Pro',   inP:2.00,  outP:12.00, note:'$2.00 / $12.00 per 1M tokens',  badge:null,       orId:'google/gemini-3.1-pro'},
+  {id:'deepseek', name:'DeepSeek V4',   full:'DeepSeek V4 Flash',       inP:0.14,  outP:0.28,  note:'$0.14 / $0.28 per 1M tokens',   badge:'Cheapest', orId:'deepseek/deepseek-v4-flash'},
 ];
+
+async function fetchModelPrices() {
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/models');
+    if (!res.ok) return;
+    const data = await res.json();
+    const orModels = data.data || [];
+    let updated = 0;
+    MODELS.forEach(m => {
+      if (!m.orId) return;
+      const or = orModels.find(o => o.id === m.orId);
+      if (!or || !or.pricing) return;
+      const inP  = parseFloat(or.pricing.prompt)  * 1e6; // OR gives price per token → convert to per 1M
+      const outP = parseFloat(or.pricing.completion) * 1e6;
+      if (!isNaN(inP) && inP > 0) {
+        m.inP  = Math.round(inP  * 1000) / 1000;
+        m.outP = Math.round(outP * 1000) / 1000;
+        m.note = `$${m.inP} / $${m.outP} per 1M tokens`;
+        updated++;
+      }
+    });
+    if (updated > 0) {
+      // Find cheapest and update badge
+      const cheapest = MODELS.reduce((min, m) => m.inP < min.inP ? m : min, MODELS[0]);
+      MODELS.forEach(m => { if (m.badge === 'Cheapest') m.badge = null; });
+      cheapest.badge = 'Cheapest';
+      renderModels();
+      update();
+      const el = document.getElementById('rates-updated');
+      const d2=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});if(el) el.textContent='Prices updated: '+d2;
+    }
+  } catch(e) {
+    // Silent fail — static prices remain
+  }
+}
 
 
 let sel = {model:'sonnet', ctx:1.0, days:22, batch:false, cachePct:0}; // ctx fixed at 1.0
@@ -970,17 +1005,19 @@ function setCacheLevel(val) {
 async function fetchExchangeRates() {
   try {
     const res=await fetch('https://open.er-api.com/v6/latest/USD');
-    if(!res.ok) return;
+    if(!res.ok) throw new Error('not ok');
     const data=await res.json();
-    if(data.result!=='success') return;
+    if(data.result!=='success') throw new Error('no success');
     CURRENCY_RATES={USD:1.0, EUR:data.rates.EUR, NOK:data.rates.NOK};
     currency.rate=CURRENCY_RATES[currency.code];
     update(); updateCompare(); updateROI(); updateSavings();
     const el=document.getElementById('rates-updated');
-    if(el) el.textContent=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+    const d=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});if(el) el.textContent='Prices updated: '+d;
   } catch(e) {
+    CURRENCY_RATES={USD:1.0, EUR:0.92, NOK:10.5};
+    currency.rate=CURRENCY_RATES[currency.code];
     const el=document.getElementById('rates-updated');
-    if(el) el.textContent='rates not available';
+    if(el) el.textContent='Prices last updated: 14 May 2026';
   }
 }
 
@@ -1764,6 +1801,7 @@ updateCompare();
 updateROI();
 updateChart();
 fetchExchangeRates();
+fetchModelPrices();
 
 const EMAILJS_PUBLIC_KEY='w-kY387QsqMVyl64T';
 const EMAILJS_SERVICE_ID='service_m5irvcv';
