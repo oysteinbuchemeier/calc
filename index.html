@@ -10,7 +10,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#1A2332;--bg2:#1f2b3e;--bg3:#243348;
+  --bg:#1A2332;--bg2:#1d2737;--bg3:#202c3d;
   --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.18);
   --text:#eef2f5;--text2:#c2cdd6;--text3:#8fa3ae;
   --accent:#6CA4AB;--accent2:#89bec5;--accent-bg:rgba(108,164,171,0.15);
@@ -502,7 +502,7 @@ footer a:hover{color:var(--text2)}
     <!-- STEP 1 -->
     <div class="step-panel active" id="step-1">
       <div class="panel">
-        <div class="panel-title">How big is your organisation?</div>
+        <div class="panel-title">Organisation size preset</div>
         <p style="font-size:13px;color:var(--text3);margin-bottom:14px;line-height:1.5;">This scales the daily volume across your selected tasks. You can adjust individual task volumes below.</p>
         <div class="preset-row" id="size-row">
           <button class="preset-btn" onclick="applySize('small',event)">1–20 people</button>
@@ -549,7 +549,7 @@ footer a:hover{color:var(--text2)}
         <div style="margin-top:8px;padding:8px 10px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:6px;font-size:12px;color:var(--text3);font-family:var(--mono);">⚠ Model prices change frequently. We review monthly — last updated May 2026. Verify current pricing at provider documentation before budgeting.</div>
       </div>
       <div class="rec-model-panel" id="rec-model-panel">
-        <div class="rec-model-label">⚡ Recommended for your tasks</div>
+        <div class="rec-model-label">Model match</div>
         <div class="rec-model-name" id="rec-model-name">—</div>
         <div class="rec-model-reason" id="rec-model-reason">—</div>
         <div class="rec-model-saving" id="rec-model-saving"></div>
@@ -629,7 +629,7 @@ footer a:hover{color:var(--text2)}
 
       <div class="complexity-warning" id="complexity-warning">
         <div class="complexity-warning-title">⚠ Orchestration complexity introduced</div>
-        <div class="complexity-warning-text">This setup goes beyond a simple API integration. Before committing to production, your architecture should address:</div>
+        <div class="complexity-warning-text">This configuration includes components with architectural implications. Key considerations:</div>
         <div class="complexity-warning-list" id="complexity-warning-list"></div>
       </div>
 
@@ -748,7 +748,7 @@ footer a:hover{color:var(--text2)}
 
       <div class="conclusion-panel" id="conclusion-panel">
         <div class="conclusion-header">
-          <div class="conclusion-eyebrow">Your estimate — what it means</div>
+          <div class="conclusion-eyebrow">Estimate breakdown</div>
           <div class="conclusion-summary" id="conclusion-summary">Configure your tasks in step 1 to see your personalised assessment.</div>
         </div>
         <div class="conclusion-body" id="conclusion-body"></div>
@@ -758,11 +758,25 @@ footer a:hover{color:var(--text2)}
         </div>
       </div>
 
+      <!-- SYSTEM SUMMARY -->
+      <div class="panel" id="system-summary-panel" style="display:none;">
+        <div class="panel-title">System summary</div>
+        <div id="system-summary-body" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+      </div>
+
+      <!-- INTERPRETATION & NEXT STEP -->
+      <div style="background:rgba(108,164,171,0.06);border:1px solid rgba(108,164,171,0.2);border-radius:var(--radius-lg);padding:1.5rem;display:flex;flex-direction:column;gap:14px;" id="interp-panel">
+        <div>
+          <div style="font-size:11px;font-family:var(--sans);font-weight:600;color:var(--accent2);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px;">Next step</div>
+          <div style="font-size:13px;color:var(--text2);" id="interp-text">Complete the estimate above.</div>
+        </div>
+        <button onclick="openModal()" style="background:var(--accent);color:#fff;border:none;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:500;font-family:var(--sans);cursor:pointer;width:100%;transition:opacity 0.15s;" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">Book a free 30-minute session →</button>
+      </div>
+
       <div class="step-nav">
         <button class="step-nav-btn" onclick="goToStep(2)">← Choose a model</button>
         <div style="display:flex;gap:8px;">
           <button class="action-btn share" onclick="shareURL()">↗ Share estimate</button>
-          <button class="step-nav-btn primary" onclick="openModal()">Book a free 30-minute session →</button>
         </div>
       </div>
     </div>
@@ -777,102 +791,72 @@ footer a:hover{color:var(--text2)}
     </div>
     <div class="copy-confirm" id="copy-confirm"></div>
 
+    <!-- LIVE SNAPSHOT -->
     <div class="metric-big">
       <div class="metric-big-label"><span class="live-dot"></span>Monthly cost estimate</div>
       <div class="metric-big-value" id="m-monthly">kr 0</div>
       <div class="metric-big-sub" id="m-monthly-sub">Set daily volume on tasks above</div>
-      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:12px;color:var(--text3);">Model</span>
-        <span style="font-size:12px;font-family:var(--mono);color:var(--accent2);" id="m-model-label">Claude Sonnet 4</span>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:12px;color:var(--text3);">Model</span>
+          <span style="font-size:12px;font-family:var(--mono);color:var(--accent2);" id="m-model-label">Claude Sonnet 4</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:12px;color:var(--text3);">Runs / day</span>
+          <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-runs-day">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:12px;color:var(--text3);">Active workflows</span>
+          <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-workflows">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:12px;color:var(--text3);">Working days</span>
+          <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-days-label">22</span>
+        </div>
       </div>
     </div>
 
-    <div class="metric-grid-2">
-      <div class="metric-small">
-        <div class="metric-small-label">Avg. cost per run</div>
-        <div class="metric-small-value" id="m-run">—</div>
-      </div>
-      <div class="metric-small">
-        <div class="metric-small-label">Daily cost</div>
-        <div class="metric-small-value" id="m-daily">—</div>
-      </div>
-    </div>
-
-    <div class="task-breakdown-panel">
-      <div class="task-breakdown-header">Cost per task / month</div>
-      <div id="task-breakdown-body"><div class="task-breakdown-empty">No tasks active yet.</div></div>
-    </div>
-
-    <div class="token-bar-wrap">
-      <div class="section-label" style="margin-bottom:12px">Token split (daily)</div>
-      <div class="tbar-row">
-        <span class="tbar-label">Input</span>
-        <div class="tbar-track"><div class="tbar-fill" id="bar-in" style="background:#6CA4AB;width:0%"></div></div>
-        <span class="tbar-val" id="bv-in">—</span>
-      </div>
-      <div class="tbar-row">
-        <span class="tbar-label">Output</span>
-        <div class="tbar-track"><div class="tbar-fill" id="bar-out" style="background:#2dd4a0;width:0%"></div></div>
-        <span class="tbar-val" id="bv-out">—</span>
-      </div>
-    </div>
-
-    <div class="breakdown-panel">
-      <div class="breakdown-header">Cost breakdown — inference only</div>
-      <div class="breakdown-row"><span class="br-label">Input cost (daily)</span><span class="br-val" id="b-in">—</span></div>
-      <div class="breakdown-row"><span class="br-label">Output cost (daily)</span><span class="br-val" id="b-out">—</span></div>
-      <div class="breakdown-row"><span class="br-label">Daily volume</span><span class="br-val" id="b-vol">—</span></div>
-      <div class="breakdown-row"><span class="br-label">Daily cost</span><span class="br-val" id="b-day">—</span></div>
-      <div class="breakdown-total">
-        <span class="bt-label">Monthly total</span>
-        <span class="bt-val" id="b-total">—</span>
-      </div>
-      <div class="iceberg-viz">
-        <div class="iceberg-title">Total cost of ownership — not just inference</div>
-        <div class="iceberg-layers">
-          <div class="iceberg-layer" style="background:rgba(108,164,171,0.15);color:var(--accent2)">
-            <div class="iceberg-layer-left">
-              <span class="iceberg-layer-name">Inference</span>
-              <span class="iceberg-layer-tag" style="background:var(--accent-bg);color:var(--accent2)">this calculator</span>
-            </div>
-            <div class="iceberg-layer-note">what you see above</div>
+    <!-- DETAILS FOLD -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;">
+      <button onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.details-icon').style.transform=this.nextElementSibling.classList.contains('open')?'rotate(180deg)':''" style="width:100%;background:none;border:none;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;color:var(--text3);font-size:12px;font-family:var(--sans);">
+        <span>Cost breakdown &amp; details</span>
+        <span class="details-icon" style="transition:transform 0.2s;">▾</span>
+      </button>
+      <div class="details-fold" style="display:none;padding:0 14px 14px;">
+        <div class="task-breakdown-panel" style="margin-bottom:10px;border-radius:6px;">
+          <div class="task-breakdown-header">Cost per task / month</div>
+          <div id="task-breakdown-body"><div class="task-breakdown-empty">No tasks active yet.</div></div>
+        </div>
+        <div class="token-bar-wrap" style="margin-bottom:10px;">
+          <div class="section-label" style="margin-bottom:10px;">Token split (daily)</div>
+          <div class="tbar-row">
+            <span class="tbar-label">Input</span>
+            <div class="tbar-track"><div class="tbar-fill" id="bar-in" style="background:#6CA4AB;width:0%"></div></div>
+            <span class="tbar-val" id="bv-in">—</span>
           </div>
-          <div class="iceberg-layer" style="background:rgba(255,255,255,0.04);color:var(--text2)">
-            <div class="iceberg-layer-name">Vector DB &amp; retrieval</div>
-            <div class="iceberg-layer-note">+10–30% for RAG setups</div>
+          <div class="tbar-row">
+            <span class="tbar-label">Output</span>
+            <div class="tbar-track"><div class="tbar-fill" id="bar-out" style="background:#2dd4a0;width:0%"></div></div>
+            <span class="tbar-val" id="bv-out">—</span>
           </div>
-          <div class="iceberg-layer" style="background:rgba(255,255,255,0.03);color:var(--text2)">
-            <div class="iceberg-layer-name">Observability &amp; monitoring</div>
-            <div class="iceberg-layer-note">logging, evals, tracing</div>
-          </div>
-          <div class="iceberg-layer" style="background:rgba(255,255,255,0.02);color:var(--text3)">
-            <div class="iceberg-layer-name">Security &amp; guardrails</div>
-            <div class="iceberg-layer-note">PII filtering, content checks</div>
-          </div>
-          <div class="iceberg-layer" style="background:rgba(255,255,255,0.02);color:var(--text3)">
-            <div class="iceberg-layer-name">Cloud infrastructure</div>
-            <div class="iceberg-layer-note">compute, storage, networking</div>
-          </div>
-          <div class="iceberg-layer" style="background:rgba(248,113,113,0.08);color:#f87171;border:1px solid rgba(248,113,113,0.2)">
-            <div class="iceberg-layer-left">
-              <span class="iceberg-layer-name">Integration &amp; maintenance</span>
-              <span class="iceberg-layer-tag" style="background:rgba(248,113,113,0.15);color:#f87171">largest variable</span>
-            </div>
-            <div class="iceberg-layer-note">typically 2–5× inference in yr 1</div>
+        </div>
+        <div class="breakdown-panel">
+          <div class="breakdown-header">Inference breakdown</div>
+          <div class="breakdown-row"><span class="br-label">Input cost (daily)</span><span class="br-val" id="b-in">—</span></div>
+          <div class="breakdown-row"><span class="br-label">Output cost (daily)</span><span class="br-val" id="b-out">—</span></div>
+          <div class="breakdown-row"><span class="br-label">Daily volume</span><span class="br-val" id="b-vol">—</span></div>
+          <div class="breakdown-row"><span class="br-label">Daily cost</span><span class="br-val" id="b-day">—</span></div>
+          <div class="breakdown-total">
+            <span class="bt-label">Monthly total</span>
+            <span class="bt-val" id="b-total">—</span>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="readiness-panel" id="readiness-panel">
-      <div class="readiness-header">
-        <div class="readiness-title">What your estimate signals</div>
-        <div class="readiness-sub">A pattern reading based on your configuration.</div>
-      </div>
-      <div class="readiness-body" id="readiness-body">
-        <div class="readiness-empty">Configure tasks above to see your signal reading.</div>
-      </div>
-    </div>
+    <!-- HIDDEN IDs KEPT FOR JS COMPATIBILITY -->
+    <span id="m-run" style="display:none"></span>
+    <span id="m-daily" style="display:none"></span>
 
     <button class="pdf-btn" onclick="window.print()">⬇ Download as PDF</button>
 
@@ -950,7 +934,7 @@ function goToStep(n) {
     else if (i<n) tab.classList.add('done');
     document.getElementById('step-num-'+i).textContent = i<n ? '✓' : i;
   });
-  if (n===3) { updateConclusion(); updateROI(); updateSavings(); updateChart(); updateBridge(); updateVariance(); }
+  if (n===3) { updateConclusion(); updateROI(); updateSavings(); updateChart(); updateBridge(); updateVariance(); updateSystemSummary(); updateInterpretation(); }
   updateConfigSummary();
   window.scrollTo({top:0, behavior:'smooth'});
 }
@@ -1169,6 +1153,106 @@ function updateVariance() {
     </div>`;
 }
 
+function updateSystemSummary() {
+  const panel = document.getElementById('system-summary-panel');
+  const body = document.getElementById('system-summary-body');
+  if (!panel || !body) return;
+  const active = TASKS.filter(t => (taskRuns[t.id]||0) > 0);
+  if (!active.length) { panel.style.display='none'; return; }
+  panel.style.display='block';
+
+  const totalRuns = active.reduce((s,t) => s+taskRuns[t.id], 0);
+  const hasAgents = active.some(t => t.id.startsWith('agent'));
+  const hasRAG = (taskRuns['rag']||0) > 0;
+  const model = MODELS.find(m => m.id === sel.model);
+  const monthly = totalMonthly();
+  const avgInTok = active.reduce((s,t) => s+t.inTok*(taskRuns[t.id]||0), 0) / totalRuns;
+
+  // Architecture class
+  let archClass = 'Single-workflow integration';
+  if (hasAgents && active.length >= 4) archClass = 'Multi-workflow AI operating layer';
+  else if (hasAgents) archClass = 'Agent-enabled workflow integration';
+  else if (active.length >= 5) archClass = 'Multi-workflow integration';
+  else if (active.length >= 2) archClass = 'Focused multi-workflow integration';
+
+  // Model intensity
+  let intensity = 'Low context';
+  if (avgInTok > 20000) intensity = 'Very high context';
+  else if (avgInTok > 8000) intensity = 'High context';
+  else if (avgInTok > 3000) intensity = 'Medium context';
+  if (hasAgents) intensity += ' + agent orchestration';
+
+  // Cost structure (rough split)
+  const inferPct = sel.batch ? 70 : 78;
+  const orchPct = hasAgents ? 12 : 0;
+  const infraPct = 100 - inferPct - orchPct;
+
+  // Capacity multiplier
+  const pctEl = document.getElementById('roi-pct');
+  const pct = pctEl ? parseFloat(pctEl.value) : 10;
+  const annualCostEl = document.getElementById('roi-rate');
+  const annualCost = annualCostEl ? (parseFloat(annualCostEl.value)||0) / currency.rate : 0;
+  const maxEmp = Math.max(0, ...TASKS.map(t => taskVol[t.id]?.employees || 0));
+  const annualCapacity = annualCost * maxEmp * (pct/100);
+  const ratio = monthly > 0 && annualCapacity > 0 ? Math.round(annualCapacity / (monthly*12)) : null;
+
+  function card(label, value, sub='') {
+    return `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">${label}</div>
+      <div style="font-size:14px;font-weight:500;font-family:var(--mono);color:var(--text);">${value}</div>
+      ${sub?`<div style="font-size:11px;color:var(--text3);margin-top:2px;">${sub}</div>`:''}
+    </div>`;
+  }
+
+  body.innerHTML =
+    card('Total workflows', active.length + ' active', totalRuns.toLocaleString() + ' runs/day') +
+    card('Model', model.name, model.note) +
+    card('Model intensity', intensity) +
+    card('Architecture class', archClass) +
+    card('Cost structure', inferPct + '% inference' + (orchPct>0?' · '+orchPct+'% orchestration':''), infraPct+'% infrastructure estimate') +
+    (ratio ? card('Capacity multiplier', '~'+ratio+'×', 'capacity value per unit AI cost') : '') +
+    card('Optimisations', [sel.batch?'Batch API':'',sel.cachePct>0?'Cache '+sel.cachePct+'%':''].filter(Boolean).join(' · ')||'None applied');
+}
+
+function updateInterpretation() {
+  const el = document.getElementById('interp-text');
+  if (!el) return;
+  const active = TASKS.filter(t => (taskRuns[t.id]||0) > 0);
+  if (!active.length) {
+    el.innerHTML = '<span style="color:var(--text3);font-size:13px;">Configure workflows above to generate your estimate.</span>';
+    return;
+  }
+  const monthly = totalMonthly();
+  const model = MODELS.find(m => m.id === sel.model);
+  const pct = parseFloat(document.getElementById('roi-pct')?.value||10);
+  const annualCost = (parseFloat(document.getElementById('roi-rate')?.value)||0) / currency.rate;
+  const maxEmp = Math.max(0, ...TASKS.map(t => taskVol[t.id]?.employees || 0));
+  const annualCapacity = annualCost * maxEmp * (pct/100);
+  const ratio = monthly > 0 && annualCapacity > 0 ? Math.round(annualCapacity / (monthly*12)) : 0;
+  const hasAgents = active.some(t => t.id.startsWith('agent'));
+  const hasRAG = (taskRuns['rag']||0) > 0;
+  const opts = [sel.batch?'Batch API':'', sel.cachePct>0?'Prompt caching '+sel.cachePct+'%':''].filter(Boolean);
+
+  const rows = [
+    ['Modelled inference cost', cx(monthly)+' / month'],
+    ['Model', model.name],
+    ['Workflows', active.length+' active, '+active.reduce((s,t)=>s+taskRuns[t.id],0).toLocaleString()+' runs/day'],
+    ratio>0 ? ['Capacity multiplier', '~'+ratio+'× (at '+pct+'% efficiency assumption)'] : null,
+    hasAgents ? ['Agent cost pattern', 'Multi-call per trigger — orchestration not separately modelled'] : null,
+    hasAgents ? ['Governance dependency', 'External — not included in estimate'] : null,
+    hasRAG ? ['RAG overhead', 'Vector retrieval not included'] : null,
+    opts.length ? ['Optimisations', opts.join(' · ')] : ['Optimisations', 'None applied — 40–75% reduction available via batch + caching'],
+    ['Estimate scope', 'Inference only'],
+  ].filter(Boolean);
+
+  el.innerHTML = rows.map(([k,v]) =>
+    `<div style="display:flex;gap:12px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;">
+      <span style="color:var(--text3);min-width:160px;flex-shrink:0;">${k}</span>
+      <span style="color:var(--text2);">${v}</span>
+    </div>`
+  ).join('');
+}
+
 function updateBridge() {
   const panel = document.getElementById('bridge-panel');
   const body  = document.getElementById('bridge-body');
@@ -1216,56 +1300,37 @@ function updateConclusion() {
   const panel = document.getElementById('conclusion-panel');
   const summaryEl = document.getElementById('conclusion-summary');
   const bodyEl = document.getElementById('conclusion-body');
-  const ctaEl = document.getElementById('conclusion-cta-text');
   const ctaWrap = document.getElementById('conclusion-cta');
-  if (!panel || !summaryEl || !bodyEl || !ctaEl) return;
+  if (!panel || !summaryEl || !bodyEl) return;
+  if (ctaWrap) ctaWrap.style.display = 'none';
 
   const active = TASKS.filter(t => (taskRuns[t.id]||0) > 0);
-  if (!active.length) {
-    summaryEl.textContent = 'Configure your tasks in step 1 to see your personalised assessment.';
-    bodyEl.innerHTML = '';
-    if (ctaWrap) ctaWrap.style.display = 'none';
-    return;
-  }
+  if (!active.length) { panel.style.display='none'; return; }
+  panel.style.display='block';
 
   const monthly = totalMonthly();
-  const monthlyLocal = monthly * currency.rate;
-  const hasAgents = active.filter(t => t.id.startsWith('agent')).length > 0;
-  const hasRAG = (taskRuns['rag']||0) > 0;
   const model = MODELS.find(m => m.id === sel.model);
+  const hasAgents = active.some(t => t.id.startsWith('agent'));
+  const hasRAG = (taskRuns['rag']||0) > 0;
+  const totalRuns = active.reduce((s,t) => s+taskRuns[t.id], 0);
 
-  // Dynamic summary sentence
-  let summary;
-  if (monthlyLocal < 5000) {
-    summary = `At ${cx(monthly)}/month, this is a low-cost pilot configuration. The economics are favourable — the main question is whether the architecture will scale when you're ready to expand.`;
-  } else if (monthlyLocal < 50000) {
-    summary = `At ${cx(monthly)}/month across ${active.length} workflow${active.length>1?'s':''}, this is a meaningful operational commitment. How you design the architecture now will determine what it costs at 10× this volume.`;
-  } else {
-    summary = `At ${cx(monthly)}/month, you're at a scale where architecture decisions have direct financial consequences. Model routing, caching and prompt design are not optimisations — they're cost governance.`;
-  }
-  summaryEl.textContent = summary;
+  summaryEl.textContent = `Modelled inference cost: ${cx(monthly)}/month — ${active.length} workflow${active.length>1?'s':''}, ${totalRuns.toLocaleString()} runs/day on ${model.name}.`;
 
-  // Contextual insight bullets
   const items = [];
-  items.push({color:'var(--accent2)', text:`<strong>Inference cost: ${cx(monthly)}/month</strong> on ${model.full}. This is the visible part only — production deployments typically run 2–5× this in total infrastructure cost in year one.`});
-  if (hasAgents) items.push({color:'var(--amber)', text:`<strong>Agent workflows require design decisions before deployment</strong> — orchestration, error handling, human oversight gates and observability are not optional at production scale.`});
-  if (hasRAG) items.push({color:'var(--accent2)', text:`<strong>RAG is an architectural pattern, not a feature</strong> — embedding strategy, chunking, re-ranking and vector DB infrastructure all affect both cost and answer quality.`});
-  if (sel.cachePct >= 40) {
-    const saving = Math.round(sel.cachePct * 0.9);
-    items.push({color:'var(--green)', text:`<strong>Prompt caching at ${sel.cachePct}% saves ~${saving}% on input costs</strong> — factor this into any comparison with off-the-shelf tools.`});
+  items.push({color:'var(--text3)', label:'Inference estimate', value:cx(monthly)+'/month on '+model.full});
+  items.push({color:'var(--text3)', label:'Scope', value:'Inference only. Does not include integration, vector DB, observability, security or maintenance costs.'});
+  if (hasAgents) {
+    items.push({color:'var(--amber)', label:'Agent cost pattern', value:'Multi-call per trigger. Orchestration cost not modelled separately.'});
+    items.push({color:'var(--amber)', label:'Governance dependency', value:'External — not included in estimate.'});
+    items.push({color:'var(--amber)', label:'Error propagation', value:'Not modelled.'});
   }
-  if (active.length >= 4) items.push({color:'var(--green)', text:`<strong>Running ${active.length} workflows is an operating model decision</strong> — a shared architecture reduces total cost significantly compared to building each one independently.`});
-  items.push({color:'var(--text3)', text:`<strong>This estimate does not include</strong> review and QA time, integration development, change management, or the organisational capacity needed to absorb AI into existing workflows.`});
+  if (hasRAG) items.push({color:'var(--accent2)', label:'RAG overhead', value:'Vector retrieval costs not included in this inference estimate.'});
+  if (sel.cachePct > 0) items.push({color:'var(--green)', label:'Caching applied', value:sel.cachePct+'% static context — '+Math.round(sel.cachePct*0.9)+'% input cost reduction modelled.'});
+  if (sel.batch) items.push({color:'var(--green)', label:'Batch processing', value:'50% input cost reduction applied.'});
 
   bodyEl.innerHTML = items.map(item =>
-    `<div class="conclusion-item"><div class="conclusion-dot" style="background:${item.color}"></div><div class="conclusion-item-text">${item.text}</div></div>`
+    `<div class="conclusion-item"><div class="conclusion-dot" style="background:${item.color}"></div><div class="conclusion-item-text"><strong>${item.label}:</strong> ${item.value}</div></div>`
   ).join('');
-
-  // CTA
-  if (ctaWrap) ctaWrap.style.display = 'flex';
-  if (hasAgents) ctaEl.textContent = 'Your setup includes agent workflows — let\'s talk about what production-ready looks like for your organisation.';
-  else if (monthlyLocal > 30000) ctaEl.textContent = `At ${cx(monthly)}/month, the decisions you make now will compound. Let's talk about your AI investment.`;
-  else ctaEl.textContent = 'Ready to move from estimate to investment decision? Book a free 30-minute session.';
 }
 
 function updateConfigSummary() {
@@ -1378,38 +1443,34 @@ function updateChart() {
 }
 
 function updateSmartCTA(monthlyCost,activeTasks) {
-  const el=document.getElementById('smart-cta'),text=document.getElementById('smart-cta-text');
-  if(!el||!text) return;
-  const hasAgents=activeTasks>0&&TASKS.filter(t=>t.id.startsWith('agent')&&(taskRuns[t.id]||0)>0).length>0;
-  const highVolume=monthlyCost*currency.rate>50000;
-  const manyTasks=activeTasks>=4;
-  let msg=null;
-  if(hasAgents) msg='Agent workflows carry architectural risk that token cost alone doesn\'t capture — error propagation, governance gaps and autonomy boundaries are where implementations fail.';
-  else if(highVolume) msg=`At ${cx(monthlyCost)}/month, caching strategy, model routing and prompt architecture are structural decisions — not optimisations to address later.`;
-  else if(manyTasks) msg='Running AI across multiple workflows without a shared architecture typically creates silos, duplicated effort and unpredictable cost growth.';
-  if(msg){text.textContent=msg;el.style.display='flex';}else el.style.display='none';
+  // Smart CTA removed — Interpretation & next step panel handles closing
+  const el=document.getElementById('smart-cta');
+  if(el) el.style.display='none';
 }
 
 function updateReadiness() {
   const el=document.getElementById('readiness-body');
   if(!el) return;
   const active=TASKS.filter(t=>(taskRuns[t.id]||0)>0);
-  if(!active.length){el.innerHTML='<div class="readiness-empty">Configure tasks above to see your signal reading.</div>';return;}
+  if(!active.length){el.innerHTML='<div class="readiness-empty">Configure tasks above to see pattern analysis.</div>';return;}
   const totalRuns=active.reduce((s,t)=>s+taskRuns[t.id],0);
   const hasAgents=active.filter(t=>t.id.startsWith('agent')).length>0;
-  const agentPct=hasAgents?active.filter(t=>t.id.startsWith('agent')).reduce((s,t)=>s+taskRuns[t.id],0)/totalRuns:0;
+  const hasRAG=(taskRuns['rag']||0)>0;
   const avgInTok=active.reduce((s,t)=>s+t.inTok*taskRuns[t.id],0)/totalRuns;
   const monthly=totalMonthly()*currency.rate;
   const signals=[];
-  if(active.length>=5) signals.push({dot:'green',text:'You\'re thinking across multiple workflows — this suggests readiness for a broader AI operating model rather than point solutions.'});
-  else if(active.length>=2) signals.push({dot:'accent',text:'You\'ve identified a focused set of use cases. The key question is whether these will be built independently or as part of a shared architecture.'});
-  else signals.push({dot:'amber',text:'A single use case is a good pilot. The architecture decisions you make here will either constrain or enable everything you add later.'});
-  if(hasAgents) signals.push({dot:'amber',text:'Agent workflows are in scope. These have a fundamentally different cost and governance profile — they require explicit design decisions around autonomy, error handling and human oversight.'});
-  if(avgInTok>10000) signals.push({dot:'accent',text:'High context volumes suggest document-heavy workflows. Caching strategy and retrieval architecture will significantly impact cost and quality.'});
-  if(monthly>100000) signals.push({dot:'amber',text:'At this cost level, model selection, prompt architecture and batch processing are structural decisions that need governance.'});
-  else if(monthly>20000) signals.push({dot:'green',text:'Costs are in a range where the economics are clearly favourable. The focus should be on getting the architecture right so this scales predictably.'});
-  const ctaText=hasAgents?'Agent workflows in scope → architecture review recommended':monthly>50000?'At this scale, cost governance matters → let\'s map the operating model':'Ready to move from estimate to architecture?';
-  el.innerHTML=signals.map(s=>`<div class="readiness-signal"><div class="readiness-dot ${s.dot}"></div><div class="readiness-signal-text">${s.text}</div></div>`).join('')+`<div class="readiness-cta" onclick="openModal()">${ctaText} <span>→</span></div>`;
+  if(active.length>=5) signals.push({dot:'green',text:'Pattern: broad workflow coverage ('+active.length+' use cases). Shared infrastructure and unified prompt layer relevant at this scale.'});
+  else if(active.length>=2) signals.push({dot:'accent',text:'Pattern: multi-workflow configuration ('+active.length+' use cases, '+totalRuns.toLocaleString()+' runs/day).'});
+  else signals.push({dot:'text3',text:'Pattern: single workflow pilot. Predictable cost and straightforward architecture.'});
+  if(hasAgents) signals.push({dot:'amber',text:'Agent workflows included. Multi-call cost pattern per trigger. Orchestration, error handling, observability not modelled.'});
+  if(hasRAG) signals.push({dot:'accent',text:'RAG pattern included. Retrieval strategy and chunking: external cost and quality factors.'});
+  if(avgInTok>10000) signals.push({dot:'accent',text:'High context volume (avg '+Math.round(avgInTok/1000)+'k tokens/run). Prompt caching: high leverage at this input size.'});
+  if(monthly>100000) signals.push({dot:'amber',text:'Cost sensitivity: high. Cost sensitivity: high — batch processing and caching are material levers.'});
+  else if(monthly>20000) signals.push({dot:'green',text:'Cost sensitivity: medium. Cost sensitivity: medium — optimisation levers available.'});
+  else signals.push({dot:'green',text:'Cost sensitivity: low — pilot-scale configuration.'});
+  if(sel.cachePct>=50) signals.push({dot:'green',text:'Prompt caching: '+sel.cachePct+'% static context applied.'});
+  if(sel.batch) signals.push({dot:'green',text:'Batch processing: enabled. 50% input cost reduction.'});
+  el.innerHTML=signals.map(s=>`<div class="readiness-signal"><div class="readiness-dot ${s.dot}"></div><div class="readiness-signal-text">${s.text}</div></div>`).join('');
 }
 
 function updateTaskBreakdown(model) {
@@ -1519,9 +1580,15 @@ function update() {
   });
   const daily=tInC+tOutC, monthly=daily*sel.days;
   document.getElementById('m-monthly').textContent=cx(monthly);
-  document.getElementById('m-monthly-sub').textContent=tRuns>0?`${tRuns.toLocaleString()} runs/day across ${active} task${active!==1?'s':''} × ${sel.days} days`:'Set daily volume on tasks above';
+  document.getElementById('m-monthly-sub').textContent=tRuns>0?`${tRuns.toLocaleString()} runs/day · ${sel.days} days`:'Set daily volume on tasks above';
   const modelLabel = document.getElementById('m-model-label');
   if (modelLabel) modelLabel.textContent = model.full;
+  const runsDay = document.getElementById('m-runs-day');
+  if (runsDay) runsDay.textContent = tRuns > 0 ? tRuns.toLocaleString() : '—';
+  const workflowsEl = document.getElementById('m-workflows');
+  if (workflowsEl) workflowsEl.textContent = active > 0 ? active : '—';
+  const daysLabel = document.getElementById('m-days-label');
+  if (daysLabel) daysLabel.textContent = sel.days;
   document.getElementById('m-run').textContent=tRuns>0?cx(daily/tRuns):'—';
   document.getElementById('m-daily').textContent=tRuns>0?cx(daily):'—';
   const tt=tIn+tOut, inPct=tt>0?Math.round(tIn/tt*100):0;
@@ -1564,6 +1631,8 @@ function update() {
   updateComplexityWarning();
   updateConclusion();
   updateConfigSummary();
+  updateSystemSummary();
+  updateInterpretation();
 }
 
 function updateCompare() {
