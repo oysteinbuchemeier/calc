@@ -284,7 +284,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .smart-cta-text{font-size:13px;color:var(--text2);line-height:1.5;flex:1}
 .smart-cta button{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;white-space:nowrap;transition:opacity 0.15s;flex-shrink:0}
 .smart-cta button:hover{opacity:0.85}
-.conclusion-panel{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);overflow:hidden}
+.bridge-panel{background:var(--bg2);border:1px solid rgba(45,212,160,0.2);border-radius:var(--radius-lg);overflow:hidden}
+.bridge-ratio{font-size:22px;font-weight:500;font-family:var(--mono);color:var(--green);margin-bottom:4px}
+.bridge-label{font-size:12px;color:var(--text3);line-height:1.5}
+.bridge-inputs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.bridge-input-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px}
+.bridge-input-label{font-size:11px;color:var(--text3);margin-bottom:4px}
+.bridge-input-val{font-size:14px;font-weight:500;font-family:var(--mono);color:var(--text)}
 .conclusion-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);background:rgba(108,99,255,0.06)}
 .conclusion-eyebrow{font-family:var(--mono);font-size:12px;color:var(--accent2);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px}
 .conclusion-summary{font-size:16px;font-weight:400;color:var(--text);line-height:1.5;letter-spacing:-0.01em}
@@ -687,6 +693,12 @@ footer a:hover{color:var(--text2)}
         </div>
       </div>
 
+      <div class="panel" id="variance-panel" style="display:none;">
+        <div class="panel-title">Cost range — optimised to unoptimised</div>
+        <p style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.5;">Your current configuration sits in the middle. The range shows what this could cost with full optimisation vs. no optimisation.</p>
+        <div id="variance-body"></div>
+      </div>
+
       <div class="chart-panel">
         <div class="chart-panel-title">Cost over time</div>
         <div class="chart-panel-sub">Projected monthly cost as AI usage grows</div>
@@ -705,6 +717,16 @@ footer a:hover{color:var(--text2)}
       <div class="smart-cta" id="smart-cta" style="display:none;">
         <div class="smart-cta-text" id="smart-cta-text"></div>
         <button onclick="openModal()">Book a free 30-minute session →</button>
+      </div>
+
+      <div class="bridge-panel" id="bridge-panel" style="display:none;">
+        <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--border);">
+          <div style="font-size:13px;font-weight:500;color:var(--text2);display:flex;align-items:center;gap:8px;">
+            <span style="width:3px;height:13px;background:var(--green);border-radius:2px;display:inline-block;"></span>
+            Capacity-to-cost ratio
+          </div>
+        </div>
+        <div style="padding:1rem 1.5rem;display:flex;flex-direction:column;gap:8px;" id="bridge-body"></div>
       </div>
 
       <div class="conclusion-panel" id="conclusion-panel">
@@ -911,7 +933,7 @@ function goToStep(n) {
     else if (i<n) tab.classList.add('done');
     document.getElementById('step-num-'+i).textContent = i<n ? '✓' : i;
   });
-  if (n===3) { updateConclusion(); updateROI(); updateSavings(); updateChart(); }
+  if (n===3) { updateConclusion(); updateROI(); updateSavings(); updateChart(); updateBridge(); updateVariance(); }
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
@@ -1059,6 +1081,107 @@ function updateRecommendedModel() {
   document.getElementById('rec-model-reason').textContent=reason;
   document.getElementById('rec-model-saving').textContent=saving>0.01?`Switching to ${rec.name} saves ${cx(saving)}/month vs your current selection`:recId===sel.model?'You\'re already on the recommended model':'';
   panel.classList.add('visible');
+}
+
+function updateVariance() {
+  const panel = document.getElementById('variance-panel');
+  const body  = document.getElementById('variance-body');
+  if (!panel || !body) return;
+
+  const active = TASKS.filter(t => (taskRuns[t.id]||0) > 0);
+  if (!active.length) { panel.style.display='none'; return; }
+  panel.style.display='block';
+
+  const model = MODELS.find(m => m.id === sel.model);
+
+  // Low: batch=true, cache=80%
+  const low = TASKS.reduce((s,t) => {
+    const r = taskRuns[t.id]||0; if(!r) return s;
+    return s + calcCost(t, model, sel.ctx, true, 80).runCost * r * sel.days;
+  }, 0);
+
+  // Mid: current config
+  const mid = totalMonthly();
+
+  // High: batch=false, cache=0%
+  const high = TASKS.reduce((s,t) => {
+    const r = taskRuns[t.id]||0; if(!r) return s;
+    return s + calcCost(t, model, sel.ctx, false, 0).runCost * r * sel.days;
+  }, 0);
+
+  const barMax = high;
+  const lowPct  = Math.round(low  / barMax * 100);
+  const midPct  = Math.round(mid  / barMax * 100);
+
+  body.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
+      <div style="background:rgba(45,212,160,0.08);border:1px solid rgba(45,212,160,0.2);border-radius:var(--radius);padding:10px 12px;text-align:center;">
+        <div style="font-size:11px;color:var(--green);font-family:var(--mono);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em;">Optimised</div>
+        <div style="font-size:18px;font-weight:500;font-family:var(--mono);color:var(--green);">${cx(low)}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px;">batch + 80% cache</div>
+      </div>
+      <div style="background:var(--accent-bg);border:1px solid rgba(108,99,255,0.3);border-radius:var(--radius);padding:10px 12px;text-align:center;">
+        <div style="font-size:11px;color:var(--accent2);font-family:var(--mono);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em;">Current config</div>
+        <div style="font-size:18px;font-weight:500;font-family:var(--mono);color:var(--accent2);">${cx(mid)}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px;">your settings</div>
+      </div>
+      <div style="background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.15);border-radius:var(--radius);padding:10px 12px;text-align:center;">
+        <div style="font-size:11px;color:#f87171;font-family:var(--mono);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em;">Unoptimised</div>
+        <div style="font-size:18px;font-weight:500;font-family:var(--mono);color:#f87171;">${cx(high)}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px;">no batch or cache</div>
+      </div>
+    </div>
+    <div style="background:var(--bg3);border-radius:6px;padding:4px;position:relative;height:12px;margin-bottom:8px;">
+      <div style="position:absolute;left:0;top:0;height:100%;width:100%;background:rgba(248,113,113,0.15);border-radius:6px;"></div>
+      <div style="position:absolute;left:0;top:0;height:100%;width:${midPct}%;background:rgba(108,99,255,0.4);border-radius:6px;transition:width 0.4s;"></div>
+      <div style="position:absolute;left:0;top:0;height:100%;width:${lowPct}%;background:var(--green);border-radius:6px;transition:width 0.4s;"></div>
+    </div>
+    <div style="font-size:12px;color:var(--text3);line-height:1.6;">
+      Optimisation could reduce your cost by <strong style="color:var(--green)">${Math.round((1-low/high)*100)}%</strong> — from ${cx(high)} down to ${cx(low)}/month. Your current config is ${Math.round((mid-low)/(high-low)*100)}% of the way between optimised and unoptimised.
+    </div>`;
+}
+
+function updateBridge() {
+  const panel = document.getElementById('bridge-panel');
+  const body  = document.getElementById('bridge-body');
+  if (!panel || !body) return;
+
+  const aiMonthly   = totalMonthly();
+  const currentSpend = (parseFloat(document.getElementById('cost-custom').value)||0) / currency.rate;
+  const pctEl       = document.getElementById('roi-pct');
+  const pct         = pctEl ? parseFloat(pctEl.value) : 10;
+  const annualCostEl= document.getElementById('roi-rate');
+  const annualCost  = annualCostEl ? (parseFloat(annualCostEl.value)||0) / currency.rate : 0;
+  const maxEmployees= Math.max(0, ...TASKS.map(t => taskVol[t.id]?.employees || 0));
+  const annualCapacity = annualCost * maxEmployees * (pct / 100);
+
+  // Need at least AI cost and capacity to show
+  if (!aiMonthly || !annualCapacity) { panel.style.display='none'; return; }
+  panel.style.display='block';
+
+  const aiAnnual  = aiMonthly * 12;
+  const ratio     = annualCapacity > 0 ? (annualCapacity / aiAnnual) : 0;
+  const hasCurrentSpend = currentSpend > 0;
+
+  body.innerHTML = `
+    <div class="bridge-inputs">
+      ${hasCurrentSpend ? `<div class="bridge-input-card">
+        <div class="bridge-input-label">Current AI cost</div>
+        <div class="bridge-input-val">${cx(currentSpend)}<span style="font-size:11px;color:var(--text3);font-weight:400;"> / mo</span></div>
+      </div>` : ''}
+      <div class="bridge-input-card" ${hasCurrentSpend?'':'style="grid-column:1/2"'}>
+        <div class="bridge-input-label">Modelled AI cost</div>
+        <div class="bridge-input-val">${cx(aiMonthly)}<span style="font-size:11px;color:var(--text3);font-weight:400;"> / mo</span></div>
+      </div>
+      <div class="bridge-input-card" ${hasCurrentSpend?'':'style="grid-column:2/-1"'}>
+        <div class="bridge-input-label">Capacity impact</div>
+        <div class="bridge-input-val" style="color:var(--green)">${cx(annualCapacity)}<span style="font-size:11px;color:var(--text3);font-weight:400;"> / yr</span></div>
+      </div>
+    </div>
+    <div style="background:rgba(45,212,160,0.08);border:1px solid rgba(45,212,160,0.2);border-radius:var(--radius);padding:12px 16px;">
+      <div class="bridge-ratio">1 ${currency.symbol} AI cost → ~${Math.round(ratio)} ${currency.symbol} capacity value</div>
+      <div class="bridge-label">Every unit of AI operating cost corresponds to approximately ${Math.round(ratio)}× in modelled capacity impact — at ${pct}% efficiency improvement across ${maxEmployees} affected employees.</div>
+    </div>`;
 }
 
 function updateConclusion() {
@@ -1353,6 +1476,8 @@ function update() {
   updateTaskBreakdown(model);
   updateSavings();
   updateROI();
+  updateVariance();
+  updateBridge();
   updateRecommendedModel();
   updateChart();
   updateSmartCTA(monthly,active);
