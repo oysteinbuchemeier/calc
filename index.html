@@ -289,7 +289,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .config-bar-label{font-size:11px;font-family:var(--mono);color:var(--text3);white-space:nowrap;}
 .config-bar-items{font-size:12px;color:var(--text2);flex:1;font-family:var(--mono);}
 .config-bar-edit{font-size:11px;font-family:var(--mono);color:var(--accent2);white-space:nowrap;margin-left:auto;}
-.bridge-ratio{font-size:22px;font-weight:500;font-family:var(--mono);color:var(--green);margin-bottom:4px}
+.bridge-ratio{font-size:14px;font-weight:500;font-family:var(--mono);color:var(--green);margin-bottom:4px}
 .bridge-label{font-size:12px;color:var(--text3);line-height:1.5}
 .bridge-inputs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
 .bridge-input-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px}
@@ -472,9 +472,9 @@ footer a:hover{color:var(--text2)}
 
 <div class="hero">
   <div class="hero-eyebrow">AI Operating Cost Estimator</div>
-  <h1>What does AI actually cost<br><strong>your organisation?</strong></h1>
-  <p>Translate AI from abstract hype to operational economics. Configure your use case and get a cost breakdown across models, workflows and scale.</p>
-  <div class="hero-pov">Most AI cost problems are architecture problems, not model pricing problems.</div>
+  <h1>What does AI actually cost?</h1>
+  <p>Model AI usage across workflows, volume and model selection to estimate operational cost at scale.</p>
+  <div class="hero-pov">AI cost is driven by workflows, volume and model choice.</div>
 </div>
 
 <div class="steps-wrap">
@@ -746,31 +746,16 @@ footer a:hover{color:var(--text2)}
         <div style="padding:1rem 1.5rem;display:flex;flex-direction:column;gap:8px;" id="bridge-body"></div>
       </div>
 
-      <div class="conclusion-panel" id="conclusion-panel">
-        <div class="conclusion-header">
-          <div class="conclusion-eyebrow">Estimate breakdown</div>
-          <div class="conclusion-summary" id="conclusion-summary">Configure your tasks in step 1 to see your personalised assessment.</div>
-        </div>
-        <div class="conclusion-body" id="conclusion-body"></div>
-        <div class="conclusion-cta" onclick="openModal()" id="conclusion-cta" style="display:none;">
-          <div class="conclusion-cta-text" id="conclusion-cta-text"></div>
-          <span class="conclusion-cta-arrow">→</span>
-        </div>
-      </div>
 
       <!-- SYSTEM SUMMARY -->
       <div class="panel" id="system-summary-panel" style="display:none;">
-        <div class="panel-title">System summary</div>
+        <div class="panel-title">System configuration snapshot</div>
         <div id="system-summary-body" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
       </div>
 
-      <!-- INTERPRETATION & NEXT STEP -->
-      <div style="background:rgba(108,164,171,0.06);border:1px solid rgba(108,164,171,0.2);border-radius:var(--radius-lg);padding:1.5rem;display:flex;flex-direction:column;gap:14px;" id="interp-panel">
-        <div>
-          <div style="font-size:11px;font-family:var(--sans);font-weight:600;color:var(--accent2);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px;">Next step</div>
-          <div style="font-size:13px;color:var(--text2);" id="interp-text">Complete the estimate above.</div>
-        </div>
-        <button onclick="openModal()" style="background:var(--accent);color:#fff;border:none;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:500;font-family:var(--sans);cursor:pointer;width:100%;transition:opacity 0.15s;" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">Book a free 30-minute session →</button>
+      <!-- NEXT STEP -->
+      <div style="background:rgba(108,164,171,0.06);border:1px solid rgba(108,164,171,0.2);border-radius:var(--radius-lg);padding:1.5rem;">
+        <button onclick="openModal()" style="background:var(--accent);color:#fff;border:none;padding:13px 20px;border-radius:8px;font-size:14px;font-weight:500;font-family:var(--sans);cursor:pointer;width:100%;transition:opacity 0.15s;" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">Book a free 30-minute session →</button>
       </div>
 
       <div class="step-nav">
