@@ -157,8 +157,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .cmp-card.cheaper{border-color:var(--green)}
 .cmp-card.cheaper .cmp-card-val{color:var(--green)}
 .cmp-saving{grid-column:1/-1;background:rgba(45,212,160,0.08);border:1px solid rgba(45,212,160,0.2);border-radius:var(--radius);padding:8px 12px;font-size:12px;font-family:var(--mono);color:var(--green);text-align:center}
-.methodology-panel{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);overflow:hidden}
-.methodology-toggle{width:100%;background:none;border:none;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer;color:var(--text);font-size:13px;font-weight:500;font-family:var(--sans);text-align:left}
+.methodology-panel{background:var(--bg2);border:1px solid rgba(108,164,171,0.25);border-radius:var(--radius-lg);overflow:hidden}
+.methodology-toggle{width:100%;background:none;border:none;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer;color:var(--accent2);font-size:13px;font-weight:500;font-family:var(--sans);text-align:left}
 .methodology-toggle:hover{color:var(--text)}
 .methodology-toggle-icon{font-size:16px;color:var(--text3);transition:transform 0.2s}
 .methodology-toggle.open .methodology-toggle-icon{transform:rotate(180deg)}
@@ -512,6 +512,21 @@ footer a:hover{color:var(--text2)}
       <div class="panel">
         <div class="panel-title">Select tasks &amp; set daily volume</div>
         <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.5;">Enter the number of employees using AI for each task and how many times per day. The calculator works out daily volume automatically. <strong style="color:var(--text2)">One "run" = one AI request</strong> — e.g. one document summarised, one email drafted, one question answered.</p>
+        <div class="methodology-panel" style="margin-bottom:12px;">
+          <button class="methodology-toggle" id="meth-toggle" onclick="toggleMethodology()">
+            <span>Assumptions &amp; calculations</span>
+            <span class="methodology-toggle-icon">▾</span>
+          </button>
+          <div class="methodology-body" id="meth-body">
+            <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6;">Token estimates are based on typical enterprise usage patterns. Your actual costs will vary. Use this as a directional guide, not a contract.</p>
+            <div style="margin-bottom:12px;padding:10px 12px;background:rgba(108,164,171,0.06);border:1px solid rgba(108,164,171,0.15);border-radius:6px;font-size:12px;color:var(--text2);line-height:1.7;">
+              <strong style="color:var(--accent2);">What's included in each input estimate:</strong> system prompt + instructions + user content (document, question or data). Every AI request carries this overhead — the system prompt alone is typically 200–800 tokens per call.<br><br>
+              <strong style="color:var(--amber);">Everyday tasks</strong> — one API call per run. Input = system prompt + content. Output = the response.<br>
+              <strong style="color:var(--amber);">Automated workflows</strong> — multiple API calls per trigger. Simple: 3–4 calls (~18k tokens total). Complex: 8–10 calls (~80k tokens total). Context accumulates across steps.
+            </div>
+            <div id="meth-task-list"></div>
+          </div>
+        </div>
         <div class="task-grid" id="task-grid"></div>
       </div>
       <div class="panel">
@@ -705,23 +720,6 @@ footer a:hover{color:var(--text2)}
       <button class="action-btn reset" onclick="resetAll()">↺ Reset</button>
     </div>
     <div class="copy-confirm" id="copy-confirm"></div>
-
-    <!-- METHODOLOGY -->
-    <div class="methodology-panel">
-      <button class="methodology-toggle" id="meth-toggle" onclick="toggleMethodology()">
-        <span>Assumptions &amp; calculations</span>
-        <span class="methodology-toggle-icon">▾</span>
-      </button>
-      <div class="methodology-body" id="meth-body">
-        <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6;">Token estimates are based on typical enterprise usage patterns. Your actual costs will vary. Use this as a directional guide, not a contract.</p>
-        <div style="margin-bottom:12px;padding:10px 12px;background:rgba(108,164,171,0.06);border:1px solid rgba(108,164,171,0.15);border-radius:6px;font-size:12px;color:var(--text2);line-height:1.7;">
-          <strong style="color:var(--accent2);">What's included in each input estimate:</strong> system prompt + instructions + user content (document, question or data). Every AI request carries this overhead — the system prompt alone is typically 200–800 tokens per call.<br><br>
-          <strong style="color:var(--amber);">Everyday tasks</strong> — one API call per run. Input = system prompt + content. Output = the response.<br>
-          <strong style="color:var(--amber);">Automated workflows</strong> — multiple API calls per trigger. Simple: 3–4 calls (~18k tokens total). Complex: 8–10 calls (~80k tokens total). Context accumulates across steps.
-        </div>
-        <div id="meth-task-list"></div>
-      </div>
-    </div>
 
     <!-- LIVE SNAPSHOT: ECONOMY -->
     <div class="metric-big">
@@ -1557,7 +1555,7 @@ function updateSavings() {
         <div style="font-size:18px;font-weight:500;font-family:var(--mono);color:var(--text)">${cx(total)}</div>
       </div>
       <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
-        <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">Estimated AI operating cost</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">Estimated AI modelled spend</div>
         <div style="font-size:18px;font-weight:500;font-family:var(--mono);color:var(--accent2)">${cx(opt)}</div>
       </div>
       <div style="grid-column:1/-1;${diff>0?'background:rgba(45,212,160,0.08);border:1px solid rgba(45,212,160,0.25);':'background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);'}border-radius:var(--radius);padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
@@ -1655,9 +1653,9 @@ function updateCompare() {
   TASKS.forEach(t=>{const r=taskRuns[t.id]||0;if(!r)return;a+=calcCost(t,mA,sel.ctx,sel.batch,sel.cachePct).runCost*r*sel.days;b+=calcCost(t,mB,sel.ctx,sel.batch,sel.cachePct).runCost*r*sel.days;});
   const diff=Math.abs(a-b),pct=Math.max(a,b)>0?Math.round(diff/Math.max(a,b)*100):0;
   document.getElementById('compare-result').innerHTML=`
-    <div class="cmp-card${a<=b?' cheaper':''}"><div class="cmp-card-name">${mA.name}</div><div class="cmp-card-val">${usd(a)}</div><div class="cmp-card-sub">per month</div></div>
-    <div class="cmp-card${b<a?' cheaper':''}"><div class="cmp-card-name">${mB.name}</div><div class="cmp-card-val">${usd(b)}</div><div class="cmp-card-sub">per month</div></div>
-    ${diff>0?`<div class="cmp-saving">${a<=b?mA.name:mB.name} is ${pct}% cheaper — saves ${usd(diff)}/month</div>`:''}`;
+    <div class="cmp-card${a<=b?' cheaper':''}"><div class="cmp-card-name">${mA.name}</div><div class="cmp-card-val">${cx(a)}</div><div class="cmp-card-sub">per month</div></div>
+    <div class="cmp-card${b<a?' cheaper':''}"><div class="cmp-card-name">${mB.name}</div><div class="cmp-card-val">${cx(b)}</div><div class="cmp-card-sub">per month</div></div>
+    ${diff>0?`<div class="cmp-saving">${a<=b?mA.name:mB.name} is ${pct}% cheaper — saves ${cx(diff)}/month</div>`:''}`;
 }
 
 function pick(type,val) {
