@@ -559,7 +559,7 @@ footer a:hover{color:var(--text2)}
         <div class="toggle-row" onclick="toggleOpt('batch')">
           <div>
             <div class="toggle-name">Batch API <span class="toggle-badge">−50% input cost</span></div>
-            <div class="toggle-desc">Async batch processing — ideal for non-real-time tasks</div>
+            <div class="toggle-desc">Async batch processing — non-real-time tasks</div>
             <div style="font-size:12px;font-family:var(--mono);color:var(--green);margin-top:4px;min-height:16px;" id="batch-saving-label"></div>
           </div>
           <div class="toggle-switch" id="tog-batch"><div class="toggle-knob"></div></div>
@@ -731,11 +731,6 @@ footer a:hover{color:var(--text2)}
         <div class="chart-bars" id="chart-bars"></div>
       </div>
 
-      <div class="smart-cta" id="smart-cta" style="display:none;">
-        <div class="smart-cta-text" id="smart-cta-text"></div>
-        <button onclick="openModal()">Book a free 30-minute session →</button>
-      </div>
-
       <div class="bridge-panel" id="bridge-panel" style="display:none;">
         <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--border);">
           <div style="font-size:13px;font-weight:500;color:var(--text2);display:flex;align-items:center;gap:8px;">
@@ -754,7 +749,8 @@ footer a:hover{color:var(--text2)}
       </div>
 
       <!-- NEXT STEP -->
-      <div style="background:rgba(108,164,171,0.06);border:1px solid rgba(108,164,171,0.2);border-radius:var(--radius-lg);padding:1.5rem;">
+      <div style="background:rgba(108,164,171,0.06);border:1px solid rgba(108,164,171,0.2);border-radius:var(--radius-lg);padding:1.5rem;display:flex;flex-direction:column;gap:12px;">
+        <div style="font-size:14px;color:var(--text2);line-height:1.5;">Ready to go from estimate to decision?</div>
         <button onclick="openModal()" style="background:var(--accent);color:#fff;border:none;padding:13px 20px;border-radius:8px;font-size:14px;font-weight:500;font-family:var(--sans);cursor:pointer;width:100%;transition:opacity 0.15s;" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">Book a free 30-minute session →</button>
       </div>
 
@@ -855,11 +851,6 @@ footer a:hover{color:var(--text2)}
       <div class="email-feedback" id="email-feedback"></div>
     </div>
 
-    <div class="cta-banner">
-      <p>The numbers are a starting point. The real question is whether your AI investment will deliver — and what it takes to get there without accumulating technical and financial risk.</p>
-      <button onclick="openModal()">Book a free 30-minute session →</button>
-      <p class="cta-sub">No commitment. No pitch deck. Real questions.</p>
-    </div>
   </div>
 </div>
 
