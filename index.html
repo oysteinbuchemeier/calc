@@ -284,7 +284,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .smart-cta-text{font-size:13px;color:var(--text2);line-height:1.5;flex:1}
 .smart-cta button{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;white-space:nowrap;transition:opacity 0.15s;flex-shrink:0}
 .smart-cta button:hover{opacity:0.85}
-.bridge-panel{background:var(--bg2);border:1px solid rgba(45,212,160,0.2);border-radius:var(--radius-lg);overflow:hidden}
+.config-bar{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:border-color 0.15s;flex-wrap:wrap;}
+.config-bar:hover{border-color:var(--border2);}
+.config-bar-label{font-size:11px;font-family:var(--mono);color:var(--text3);white-space:nowrap;}
+.config-bar-items{font-size:12px;color:var(--text2);flex:1;font-family:var(--mono);}
+.config-bar-edit{font-size:11px;font-family:var(--mono);color:var(--accent2);white-space:nowrap;margin-left:auto;}
 .bridge-ratio{font-size:22px;font-weight:500;font-family:var(--mono);color:var(--green);margin-bottom:4px}
 .bridge-label{font-size:12px;color:var(--text3);line-height:1.5}
 .bridge-inputs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
@@ -533,6 +537,11 @@ footer a:hover{color:var(--text2)}
 
     <!-- STEP 2 -->
     <div class="step-panel" id="step-2">
+      <div class="config-bar" id="config-bar-2" onclick="goToStep(1)">
+        <span class="config-bar-label">←</span>
+        <span class="config-bar-items" id="config-summary-2">—</span>
+        
+      </div>
       <div class="panel">
         <div class="panel-title">Model</div>
         <div class="model-row" id="model-row"></div>
@@ -551,6 +560,7 @@ footer a:hover{color:var(--text2)}
           <div>
             <div class="toggle-name">Batch API <span class="toggle-badge">−50% input cost</span></div>
             <div class="toggle-desc">Async batch processing — ideal for non-real-time tasks</div>
+            <div style="font-size:12px;font-family:var(--mono);color:var(--green);margin-top:4px;min-height:16px;" id="batch-saving-label"></div>
           </div>
           <div class="toggle-switch" id="tog-batch"><div class="toggle-knob"></div></div>
         </div>
@@ -566,6 +576,7 @@ footer a:hover{color:var(--text2)}
             <span style="font-family:var(--mono);font-size:12px;color:var(--accent2);min-width:80px;text-align:right;" id="cache-saving-label">0% static</span>
           </div>
           <div style="margin-top:6px;font-size:13px;color:var(--text3);font-family:var(--mono);" id="cache-desc-text">Drag right to model how much of your input context is reused across requests.</div>
+          <div style="font-size:12px;font-family:var(--mono);color:var(--green);margin-top:4px;min-height:16px;" id="cache-money-label"></div>
         </div>
       </div>
       <div class="panel">
@@ -645,6 +656,11 @@ footer a:hover{color:var(--text2)}
 
     <!-- STEP 3 -->
     <div class="step-panel" id="step-3">
+      <div class="config-bar" id="config-bar-3" onclick="goToStep(2)">
+        <span class="config-bar-label">←</span>
+        <span class="config-bar-items" id="config-summary-3">—</span>
+        
+      </div>
       <div class="roi-panel">
         <div class="roi-panel-header">
           <div class="roi-panel-title">Productivity impact estimate</div>
@@ -695,7 +711,8 @@ footer a:hover{color:var(--text2)}
 
       <div class="panel" id="variance-panel" style="display:none;">
         <div class="panel-title">Cost range — optimised to unoptimised</div>
-        <p style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.5;">Your current configuration sits in the middle. The range shows what this could cost with full optimisation vs. no optimisation.</p>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:8px;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;font-family:var(--mono);" id="variance-settings"></div>
+        <p style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.5;">The range shows what this configuration could cost fully optimised vs. completely unoptimised.</p>
         <div id="variance-body"></div>
       </div>
 
@@ -934,6 +951,7 @@ function goToStep(n) {
     document.getElementById('step-num-'+i).textContent = i<n ? '✓' : i;
   });
   if (n===3) { updateConclusion(); updateROI(); updateSavings(); updateChart(); updateBridge(); updateVariance(); }
+  updateConfigSummary();
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
@@ -1092,6 +1110,16 @@ function updateVariance() {
   if (!active.length) { panel.style.display='none'; return; }
   panel.style.display='block';
 
+  // Settings summary
+  const settingsEl = document.getElementById('variance-settings');
+  if (settingsEl) {
+    const parts = [];
+    parts.push('Model: ' + (MODELS.find(m=>m.id===sel.model)?.name || sel.model));
+    parts.push('Batch: ' + (sel.batch ? 'on ✓' : 'off'));
+    parts.push('Cache: ' + (sel.cachePct > 0 ? sel.cachePct+'% static ✓' : 'off'));
+    settingsEl.textContent = 'Current settings — ' + parts.join(' · ');
+  }
+
   const model = MODELS.find(m => m.id === sel.model);
 
   // Low: batch=true, cache=80%
@@ -1238,6 +1266,39 @@ function updateConclusion() {
   if (hasAgents) ctaEl.textContent = 'Your setup includes agent workflows — let\'s talk about what production-ready looks like for your organisation.';
   else if (monthlyLocal > 30000) ctaEl.textContent = `At ${cx(monthly)}/month, the decisions you make now will compound. Let's talk about your AI investment.`;
   else ctaEl.textContent = 'Ready to move from estimate to investment decision? Book a free 30-minute session.';
+}
+
+function updateConfigSummary() {
+  const active = TASKS.filter(t => (taskRuns[t.id]||0) > 0);
+  const totalRuns = active.reduce((s,t) => s + taskRuns[t.id], 0);
+  const maxEmp = Math.max(0, ...TASKS.map(t => taskVol[t.id]?.employees || 0));
+  const model = MODELS.find(m => m.id === sel.model);
+
+  // Step 2 bar — shows step 1 config
+  const s2 = document.getElementById('config-summary-2');
+  if (s2) {
+    if (!active.length) {
+      s2.textContent = 'No tasks selected yet';
+    } else {
+      const parts = [];
+      if (maxEmp > 0) parts.push(maxEmp + ' employees');
+      parts.push(active.length + ' task' + (active.length !== 1 ? 's' : ''));
+      parts.push(totalRuns.toLocaleString() + ' runs/day');
+      parts.push(sel.days + ' working days');
+      s2.textContent = parts.join('  ·  ');
+    }
+  }
+
+  // Step 3 bar — shows step 1 + 2 config
+  const s3 = document.getElementById('config-summary-3');
+  if (s3) {
+    const parts = [];
+    if (active.length) parts.push(active.length + ' task' + (active.length !== 1 ? 's' : '') + ', ' + totalRuns.toLocaleString() + ' runs/day');
+    if (model) parts.push(model.name);
+    parts.push('Batch: ' + (sel.batch ? 'on' : 'off'));
+    parts.push('Cache: ' + (sel.cachePct > 0 ? sel.cachePct + '%' : 'off'));
+    s3.textContent = parts.join('  ·  ');
+  }
 }
 
 function toggleCostDrivers() {
@@ -1473,6 +1534,24 @@ function update() {
   document.getElementById('b-vol').textContent=tRuns>0?tRuns.toLocaleString()+' runs':'—';
   document.getElementById('b-day').textContent=cx(daily);
   document.getElementById('b-total').textContent=cx(monthly);
+  // Live batch/cache savings labels
+  const model2 = model; // already defined above
+  const baseMonthly = TASKS.reduce((s,t)=>{const r=taskRuns[t.id]||0;if(!r)return s;return s+calcCost(t,model2,sel.ctx,false,0).runCost*r*sel.days;},0);
+  const batchLabel = document.getElementById('batch-saving-label');
+  const cacheMoneyLabel = document.getElementById('cache-money-label');
+  if (batchLabel) {
+    if (tRuns > 0) {
+      const batchSave = baseMonthly - TASKS.reduce((s,t)=>{const r=taskRuns[t.id]||0;if(!r)return s;return s+calcCost(t,model2,sel.ctx,true,0).runCost*r*sel.days;},0);
+      batchLabel.textContent = sel.batch ? `Saving ${cx(batchSave)}/month at current volume` : `Would save ${cx(batchSave)}/month at current volume`;
+    } else { batchLabel.textContent = ''; }
+  }
+  if (cacheMoneyLabel) {
+    if (tRuns > 0 && sel.cachePct > 0) {
+      const cacheSave = baseMonthly - monthly;
+      cacheMoneyLabel.textContent = `Saving ${cx(cacheSave)}/month at ${sel.cachePct}% static context`;
+    } else { cacheMoneyLabel.textContent = ''; }
+  }
+
   updateTaskBreakdown(model);
   updateSavings();
   updateROI();
@@ -1484,6 +1563,7 @@ function update() {
   updateReadiness();
   updateComplexityWarning();
   updateConclusion();
+  updateConfigSummary();
 }
 
 function updateCompare() {
