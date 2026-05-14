@@ -230,9 +230,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .savings-panel-sub{font-size:12px;color:var(--text3)}
 .savings-tools{padding:0.85rem 1.25rem;display:flex;flex-direction:column;gap:8px}
 .savings-tool-row{display:flex;align-items:center;gap:8px}
-.savings-tool-name{font-size:12px;color:var(--text2);flex:1}
+.savings-tool-name{font-size:13px;color:var(--text);flex:1;font-weight:400}
 .savings-tool-amount{display:flex;align-items:center;gap:4px;flex-shrink:0}
-.savings-tool-input{width:80px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:14px;font-family:var(--mono);color:var(--text);outline:none;text-align:right;transition:border-color 0.15s}
+.savings-tool-input{width:90px;background:var(--bg);border:2px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:14px;font-family:var(--mono);color:var(--text);outline:none;text-align:right;transition:border-color 0.15s}
 .savings-tool-input:focus{border-color:var(--accent)}
 .savings-tool-unit{font-size:13px;color:var(--text3);white-space:nowrap}
 .savings-custom-row{display:flex;gap:12px;padding:1rem 1.25rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);align-items:center;background:rgba(108,99,255,0.04)}
@@ -492,19 +492,14 @@ footer a:hover{color:var(--text2)}
     <!-- STEP 1 -->
     <div class="step-panel active" id="step-1">
       <div class="panel">
-        <div class="panel-title">Start with an industry preset</div>
-        <p style="font-size:13px;color:var(--text3);margin-bottom:12px;line-height:1.5;">Select a starting point based on your industry. These are <strong style="color:var(--text2)">illustrative defaults only</strong> — adjust the task volumes to match your actual usage before drawing conclusions.</p>
-        <div class="preset-row">
-          <button class="preset-btn" onclick="applyPreset('finance',event)">Finance &amp; Legal</button>
-          <button class="preset-btn" onclick="applyPreset('hr',event)">HR &amp; Recruitment</button>
-          <button class="preset-btn" onclick="applyPreset('tech',event)">Tech &amp; Engineering</button>
-          <button class="preset-btn" onclick="applyPreset('cs',event)">Customer Service</button>
-          <button class="preset-btn" onclick="applyPreset('sales',event)">Sales &amp; Marketing</button>
-          <button class="preset-btn" onclick="applyPreset('industry',event)">Industry &amp; Energy</button>
-          <button class="preset-btn" onclick="applyPreset('public',event)">Public Sector</button>
-          <button class="preset-btn" onclick="applyPreset('health',event)">Health &amp; Care</button>
+        <div class="panel-title">How big is your organisation?</div>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:14px;line-height:1.5;">This scales the daily volume across your selected tasks. You can adjust individual task volumes below.</p>
+        <div class="preset-row" id="size-row">
+          <button class="preset-btn" onclick="applySize('small',event)">1–20 people</button>
+          <button class="preset-btn" onclick="applySize('medium',event)">20–100 people</button>
+          <button class="preset-btn" onclick="applySize('large',event)">100–500 people</button>
+          <button class="preset-btn" onclick="applySize('enterprise',event)">500+ people</button>
         </div>
-        <div class="preset-desc" id="preset-desc"></div>
       </div>
       <div class="panel">
         <div class="panel-title">Select tasks &amp; set daily volume</div>
@@ -512,24 +507,16 @@ footer a:hover{color:var(--text2)}
         <div class="task-grid" id="task-grid"></div>
       </div>
       <div class="panel">
-        <div class="panel-title">Context &amp; volume</div>
+        <div class="panel-title">Working days / month</div>
         <div class="slider-block">
           <div class="slider-top">
-            <span class="slider-name">Document / context size</span>
-            <span class="slider-value" id="sv-ctx">Medium</span>
-          </div>
-          <input type="range" id="sl-ctx" min="0.5" max="6" step="0.5" value="1">
-          <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:12px;font-family:var(--mono);color:var(--text3);">
-            <span>Short</span><span>Medium</span><span>Long</span><span>Very long</span>
-          </div>
-          <div id="ctx-desc" style="margin-top:8px;font-size:13px;color:var(--text3);line-height:1.5;font-family:var(--mono);"></div>
-        </div>
-        <div class="slider-block">
-          <div class="slider-top">
-            <span class="slider-name">Working days / month</span>
+            <span class="slider-name">How many days per month does your team work?</span>
             <span class="slider-value" id="sv-days">22</span>
           </div>
           <input type="range" id="sl-days" min="1" max="31" step="1" value="22">
+          <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:12px;color:var(--text3);">
+            <span>1</span><span>22 (typical)</span><span>31</span>
+          </div>
         </div>
       </div>
       <div class="step-nav">
@@ -636,6 +623,11 @@ footer a:hover{color:var(--text2)}
         </button>
         <div class="methodology-body" id="meth-body">
           <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6;">Token estimates are based on typical enterprise usage patterns. Your actual costs will vary. Use this as a directional guide, not a contract.</p>
+          <div style="margin-bottom:12px;padding:10px 12px;background:rgba(108,99,255,0.06);border:1px solid rgba(108,99,255,0.15);border-radius:6px;font-size:12px;color:var(--text2);line-height:1.7;">
+            <strong style="color:var(--accent2);">What's included in each input estimate:</strong> system prompt + instructions + user content (document, question or data). Every AI request carries this overhead — the system prompt alone is typically 200–800 tokens per call.<br><br>
+            <strong style="color:var(--amber);">Everyday tasks</strong> — one API call per run. Input = system prompt + content. Output = the response.<br>
+            <strong style="color:var(--amber);">Automated workflows</strong> — multiple API calls per trigger. Simple: 3–4 calls (~18k tokens total). Complex: 8–10 calls (~80k tokens total). Context accumulates across steps.
+          </div>
           <div id="meth-task-list"></div>
         </div>
       </div>
@@ -649,8 +641,8 @@ footer a:hover{color:var(--text2)}
     <div class="step-panel" id="step-3">
       <div class="roi-panel">
         <div class="roi-panel-header">
-          <div class="roi-panel-title">Freed capacity calculator</div>
-          <div class="roi-panel-sub">How much is the time saving worth in salary?</div>
+          <div class="roi-panel-title">Productivity impact estimate</div>
+          <div class="roi-panel-sub">What level of workflow efficiency improvement do you expect from AI adoption?</div>
         </div>
         <div class="roi-inputs">
           <div class="roi-input-row">
@@ -659,19 +651,19 @@ footer a:hover{color:var(--text2)}
             <span class="roi-unit">people</span>
           </div>
           <div class="roi-input-row">
-            <span class="roi-input-label">Avg. hourly rate</span>
-            <input class="roi-input" id="roi-rate" type="number" min="1" value="650" oninput="updateROI()">
-            <span class="roi-unit" id="roi-rate-unit">kr / hr</span>
+            <span class="roi-input-label">Avg. fully-loaded cost per person</span>
+            <input class="roi-input" id="roi-rate" type="number" min="1" value="750000" oninput="updateROI()">
+            <span class="roi-unit" id="roi-rate-unit">kr / yr</span>
           </div>
-          <div class="roi-input-row">
-            <span class="roi-input-label">Time saved per person</span>
-            <input class="roi-input" id="roi-minutes" type="number" min="1" value="45" oninput="updateROI()">
-            <span class="roi-unit">min/day</span>
-          </div>
-          <div class="roi-input-row">
-            <span class="roi-input-label">Review &amp; QA time per person</span>
-            <input class="roi-input" id="roi-review" type="number" min="0" value="10" oninput="updateROI()">
-            <span class="roi-unit">min/day</span>
+          <div style="padding:4px 0 8px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+              <span style="font-size:13px;color:var(--text2);">Estimated efficiency improvement</span>
+              <span style="font-family:var(--mono);font-size:14px;color:var(--accent2);font-weight:500;" id="roi-pct-label">10%</span>
+            </div>
+            <input type="range" id="roi-pct" min="5" max="40" step="5" value="10" oninput="updateROI()">
+            <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:12px;color:var(--text3);">
+              <span>5% — limited assistance</span><span>20% — integrated into workflows</span><span>40% — highly automated</span>
+            </div>
           </div>
         </div>
         <div class="roi-result" id="roi-result"></div>
@@ -679,61 +671,19 @@ footer a:hover{color:var(--text2)}
 
       <div class="savings-panel">
         <div class="savings-panel-header">
-          <div class="savings-panel-title">What are you paying today?</div>
-          <div class="savings-panel-sub">Enter your current tool costs — we'll show you the potential saving.</div>
+          <div class="savings-panel-title">Current AI cost (monthly)</div>
+          <div class="savings-panel-sub">Your current total spend on AI tools and subscriptions.</div>
         </div>
-        <div class="savings-tools">
-          <div class="savings-tool-row">
-            <span class="savings-tool-name">GitHub Copilot</span>
-            <div class="savings-tool-amount">
-              <input class="savings-tool-input" id="cost-copilot" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
-              <span class="savings-tool-unit">per user / mo</span>
-            </div>
+        <div style="padding:1.25rem 1.5rem;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+            <span style="font-size:14px;color:var(--text2);flex:1;">Existing AI tools (total monthly spend)</span>
+            <input class="savings-tool-input" id="cost-custom" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()" style="width:120px;font-size:15px;padding:9px 12px;">
+            <span style="font-size:13px;color:var(--text3);white-space:nowrap;" id="savings-currency-label">kr / mo</span>
           </div>
-          <div class="savings-tool-row">
-            <span class="savings-tool-name">ChatGPT Team</span>
-            <div class="savings-tool-amount">
-              <input class="savings-tool-input" id="cost-chatgpt" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
-              <span class="savings-tool-unit">per user / mo</span>
-            </div>
-          </div>
-          <div class="savings-tool-row">
-            <span class="savings-tool-name">Microsoft Copilot</span>
-            <div class="savings-tool-amount">
-              <input class="savings-tool-input" id="cost-mscopilot" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
-              <span class="savings-tool-unit">per user / mo</span>
-            </div>
-          </div>
-          <div class="savings-tool-row">
-            <span class="savings-tool-name">Google Gemini for Workspace</span>
-            <div class="savings-tool-amount">
-              <input class="savings-tool-input" id="cost-gemini" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
-              <span class="savings-tool-unit">per user / mo</span>
-            </div>
-          </div>
-          <div class="savings-tool-row">
-            <span class="savings-tool-name">Notion AI</span>
-            <div class="savings-tool-amount">
-              <input class="savings-tool-input" id="cost-notion" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
-              <span class="savings-tool-unit">per user / mo</span>
-            </div>
-          </div>
-        </div>
-        <div style="padding:10px 1.25rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.02);">
-          <span style="font-size:12px;color:var(--text2);flex:1;">How many users have these tools?</span>
-          <input class="savings-tool-input" id="cost-users" type="number" min="1" value="10" placeholder="10" oninput="updateSavings()">
-          <span style="font-size:13px;color:var(--text3);white-space:nowrap;">users</span>
-        </div>
-        <div class="savings-custom-row">
-          <div style="flex:1;">
-            <div style="font-size:13px;font-weight:500;color:var(--text2);margin-bottom:3px;">Other AI tools — total monthly spend</div>
-            <div style="font-size:12px;color:var(--text3);">Grammarly, Salesforce Einstein, Zendesk AI, Adobe AI, internal tools, anything else</div>
-          </div>
-          <input class="savings-custom-input" id="cost-custom" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()">
-          <span style="font-size:13px;color:var(--text3);white-space:nowrap">/ mo total</span>
+          <div style="font-size:12px;color:var(--text3);line-height:1.5;">Includes ChatGPT, Copilot, Gemini, Notion AI, GitHub Copilot, internal tools, etc.</div>
         </div>
         <div class="savings-result" id="savings-result">
-          <div style="font-size:12px;color:var(--text3);text-align:center;padding:4px 0;">Enter your current costs above to see potential savings.</div>
+          <div style="font-size:13px;color:var(--text3);text-align:center;padding:4px 0 12px;">Enter your current spend above to see the comparison.</div>
         </div>
       </div>
 
@@ -974,11 +924,11 @@ const TASKS = [
   {id:'feedback', name:'Analyse and categorise responses', desc:'Surveys, reviews, tickets, candidate responses', explain:'Find patterns across large volumes of surveys, support tickets or candidate responses.', inTok:2000, outTok:600},
   {id:'translate', name:'Translate content', desc:'Documents or messages to another language', explain:'Translate documents while preserving tone and formatting.', inTok:3000, outTok:2800},
   {id:'screen', name:'Screen or compare', desc:'CVs, supplier offers, product options', explain:'Compare multiple CVs or supplier offers against a set of criteria. Get a ranked shortlist in seconds.', inTok:5000, outTok:700},
-  {id:'agent-simple', name:'AI agent — simple task', desc:'2–4 steps: read, look up, respond', explain:'An AI that completes a multi-step task — read an email, look up the customer in your CRM, draft a reply.', inTok:18000, outTok:2400},
-  {id:'agent-complex', name:'AI agent — complex workflow', desc:'6–10 steps: analyse, cross-check, draft, review', explain:'An AI that handles an entire workflow — analyse a contract, check against company policy, flag risks, draft a response.', inTok:80000, outTok:8000},
+  {id:'agent-simple', name:'Automated workflow — simple', desc:'3–4 automatic steps, no manual input', explain:'An automated process that handles a task end-to-end — e.g. receives an invoice, extracts the data, and logs it in your system. Or: reads an incoming request, looks up the customer record, and sends a personalised reply.', inTok:18000, outTok:2400},
+  {id:'agent-complex', name:'Automated workflow — complex', desc:'Full process automation, multiple systems', explain:'A complete workflow running without human input — e.g. screens job applicants against criteria, sends status emails, and flags borderline cases for review. Or: monitors contracts for renewal dates, drafts renewal proposals and routes them for approval.', inTok:80000, outTok:8000},
   {id:'code', name:'Generate or review code', desc:'Write, analyse or fix code', explain:'Write new code from a description, review existing code for bugs, or explain what a piece of code does.', inTok:5000, outTok:1200},
   {id:'sql', name:'SQL / data query', desc:'Natural language to SQL queries', explain:'Describe what data you need in plain English and get a ready-to-run SQL query.', inTok:800, outTok:400},
-  {id:'rag', name:'RAG / knowledge base Q&A', desc:'Answer over a large knowledge base', explain:'Instead of loading entire documents into every prompt, RAG retrieves only the most relevant chunks first — dramatically reducing token usage at scale. The architectural choice between this and "Answer a question" has significant cost implications for large document volumes.', inTok:6000, outTok:700},
+  {id:'rag', name:'RAG / knowledge base Q&A', desc:'Answer questions over a large document library', explain:'Instead of loading entire documents into every prompt, RAG retrieves only the most relevant chunks first — dramatically reducing token usage at scale. The architectural choice between this and "Answer a question" has significant cost implications for large document volumes.', inTok:6000, outTok:700},
   {id:'apidoc', name:'API documentation', desc:'Generate docs from code or OpenAPI spec', explain:'Automatically generate technical documentation from your codebase or API specification.', inTok:4000, outTok:2000},
 ];
 
@@ -992,16 +942,8 @@ const MODELS = [
   {id:'g-pro',   name:'Gemini Pro',    full:'Google Gemini 2.5 Pro',   inP:1.25,  outP:10.00, note:'$1.25 / $10.00 per 1M tokens',  badge:null},
 ];
 
-const CTX_DESCRIPTIONS = [
-  {max:0.5, label:'Very short', desc:'e.g. a short email, a single question (~500 words)'},
-  {max:1.0, label:'Medium',     desc:'e.g. a 1–2 page document, a support ticket (~2 000 words)'},
-  {max:2.0, label:'Long',       desc:'e.g. a 5–10 page report, a meeting transcript (~5 000 words)'},
-  {max:4.0, label:'Very long',  desc:'e.g. a 20+ page contract, a large codebase (~15 000 words)'},
-  {max:99,  label:'Massive',    desc:'e.g. entire document libraries, large RAG contexts (30 000+ words)'},
-];
-function getCtxMeta(val) { return CTX_DESCRIPTIONS.find(c=>val<=c.max)||CTX_DESCRIPTIONS[CTX_DESCRIPTIONS.length-1]; }
 
-let sel = {model:'sonnet', ctx:1.0, days:22, batch:false, cachePct:0};
+let sel = {model:'sonnet', ctx:1.0, days:22, batch:false, cachePct:0}; // ctx fixed at 1.0
 const taskRuns = {}, taskVol = {};
 TASKS.forEach(t => { taskRuns[t.id]=0; taskVol[t.id]={employees:0, usesPerDay:1}; });
 
@@ -1034,7 +976,9 @@ function setCurrency(code, symbol) {
   currency={code, symbol, rate:CURRENCY_RATES[code]};
   document.querySelectorAll('.currency-btn').forEach(b=>b.classList.toggle('active', b.textContent===code));
   const ru = document.getElementById('roi-rate-unit');
-  if(ru) ru.textContent=symbol+' / hr';
+  if(ru) ru.textContent=symbol+' / yr';
+  const sl = document.getElementById('savings-currency-label');
+  if(sl) sl.textContent=symbol+' / mo';
   update(); updateCompare(); updateROI(); updateSavings();
 }
 
@@ -1075,33 +1019,25 @@ async function fetchExchangeRates() {
   }
 }
 
-const INDUSTRY_PRESETS = {
-  finance:{name:'Finance & Legal',desc:'Automating contract review, invoice processing and document screening.',tasks:{summarise:200,invoice:300,screen:50,answer:100,'agent-simple':20},vol:{summarise:{e:20,u:2},invoice:{e:30,u:2},screen:{e:10,u:1},answer:{e:50,u:2},'agent-simple':{e:10,u:2}}},
-  hr:{name:'HR & Recruitment',desc:'CV screening, drafting job descriptions, translating documents.',tasks:{screen:150,email:200,draft:50,answer:80,feedback:60},vol:{screen:{e:5,u:5},email:{e:10,u:4},draft:{e:5,u:2},answer:{e:20,u:4},feedback:{e:10,u:2}}},
-  tech:{name:'Tech & Engineering',desc:'Code review, SQL generation, documentation and technical agents.',tasks:{code:100,sql:80,apidoc:30,'agent-simple':40,rag:60},vol:{code:{e:20,u:1},sql:{e:15,u:1},apidoc:{e:5,u:1},'agent-simple':{e:10,u:1},rag:{e:20,u:1}}},
-  cs:{name:'Customer Service',desc:'Automated responses, sentiment analysis, summarising case documentation.',tasks:{answer:500,email:300,feedback:100,summarise:50,translate:80},vol:{answer:{e:20,u:5},email:{e:15,u:4},feedback:{e:10,u:2},summarise:{e:5,u:2},translate:{e:8,u:2}}},
-  sales:{name:'Sales & Marketing',desc:'Email drafts, customer feedback analysis, translation, screening.',tasks:{email:400,draft:100,feedback:150,screen:60,translate:50},vol:{email:{e:20,u:4},draft:{e:10,u:2},feedback:{e:15,u:2},screen:{e:6,u:2},translate:{e:5,u:2}}},
-  industry:{name:'Industry & Energy',desc:'HSE documentation, technical specifications, compliance reporting.',tasks:{summarise:150,draft:100,invoice:200,screen:80,answer:120,'agent-simple':30},vol:{summarise:{e:15,u:2},draft:{e:10,u:2},invoice:{e:20,u:2},screen:{e:8,u:2},answer:{e:30,u:2},'agent-simple':{e:10,u:1}}},
-  public:{name:'Public Sector',desc:'Case processing, citizen communication, policy documentation.',tasks:{summarise:200,draft:150,answer:300,email:200,translate:60},vol:{summarise:{e:20,u:2},draft:{e:15,u:2},answer:{e:50,u:2},email:{e:20,u:2},translate:{e:10,u:1}}},
-  health:{name:'Health & Care',desc:'Clinical documentation summaries, patient communication, compliance.',tasks:{summarise:300,draft:100,answer:200,email:150,invoice:100},vol:{summarise:{e:30,u:2},draft:{e:10,u:2},answer:{e:40,u:2},email:{e:15,u:2},invoice:{e:10,u:2}}},
+const SIZE_PRESETS = {
+  small:      { label:'1–20 people',   employees:3,  usesPerDay:2 },
+  medium:     { label:'20–100 people', employees:10, usesPerDay:3 },
+  large:      { label:'100–500 people',employees:30, usesPerDay:4 },
+  enterprise: { label:'500+ people',  employees:80, usesPerDay:5 },
 };
 
-let activePreset=null;
-function applyPreset(id,e) {
-  activePreset=id;
+let activeSize=null;
+function applySize(id, e) {
+  activeSize=id;
   document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
   if(e&&e.target) e.target.classList.add('active');
-  const p=INDUSTRY_PRESETS[id];
-  TASKS.forEach(t=>{taskRuns[t.id]=0;taskVol[t.id]={employees:0,usesPerDay:1};});
-  Object.entries(p.tasks).forEach(([tid,runs])=>{
-    if(!taskRuns.hasOwnProperty(tid)) return;
-    taskRuns[tid]=runs;
-    const v=p.vol[tid]||{e:10,u:1};
-    taskVol[tid]={employees:v.e,usesPerDay:v.u};
+  const s=SIZE_PRESETS[id];
+  const techIds=['code','sql','rag','apidoc'];
+  TASKS.forEach(t=>{
+    if(techIds.includes(t.id)) return; // never auto-fill tech tasks
+    taskVol[t.id]={employees:s.employees, usesPerDay:s.usesPerDay};
+    taskRuns[t.id]=Math.round(s.employees*s.usesPerDay);
   });
-  const d=document.getElementById('preset-desc');
-  d.innerHTML=`${p.desc} <span style="color:var(--amber);font-size:12px;font-family:var(--mono);">↓ Illustrative defaults — adjust volumes below to match your organisation.</span>`;
-  d.classList.add('visible');
   renderTasks(); update(); updateCompare(); updateRecommendedModel();
 }
 
@@ -1220,20 +1156,20 @@ function toggleMethodology() {
 }
 
 const TASK_METHODOLOGY = {
-  summarise:{basis:'~8 000 input tokens',note:'Avg. 6-page document + system prompt'},
-  draft:{basis:'~600 in / 1 200 out',note:'Brief input, full document output'},
-  email:{basis:'~400 in / 350 out',note:'Short context, professional reply'},
-  answer:{basis:'~4 000 input tokens',note:'Retrieved context + question'},
-  invoice:{basis:'~3 000 input tokens',note:'Document + extraction instructions'},
-  feedback:{basis:'~2 000 in / 600 out',note:'Batch responses + pattern analysis'},
-  translate:{basis:'~3 000 in / 2 800 out',note:'Input and output tokens roughly equal'},
-  screen:{basis:'~5 000 input tokens',note:'Multiple documents vs criteria'},
-  'agent-simple':{basis:'~18 000 tokens total',note:'3–4 LLM calls × ~4 500 tokens each'},
-  'agent-complex':{basis:'~80 000 tokens total',note:'8–10 LLM calls × ~8 000 tokens each'},
-  code:{basis:'~5 000 in / 1 200 out',note:'Code file + instructions, diff output'},
-  sql:{basis:'~800 in / 400 out',note:'Schema + question, SQL output'},
-  rag:{basis:'~6 000 input tokens',note:'Retrieved document chunks + query'},
-  apidoc:{basis:'~4 000 in / 2 000 out',note:'Code or spec input, docs output'},
+  summarise:      {basis:'~8 000 input tokens',  note:'System prompt ~500 + document ~7 000 + instruction ~200'},
+  draft:          {basis:'~600 in / 1 200 out',  note:'System prompt ~300 + brief ~200 → full draft output'},
+  email:          {basis:'~400 in / 350 out',    note:'System prompt ~200 + bullet points ~150 → email output'},
+  answer:         {basis:'~4 000 input tokens',  note:'System prompt ~400 + retrieved context ~3 000 + question ~200'},
+  invoice:        {basis:'~3 000 input tokens',  note:'System prompt ~400 + document ~2 400 + extraction instructions ~200'},
+  feedback:       {basis:'~2 000 in / 600 out',  note:'System prompt ~300 + response batch ~1 500 + instructions ~200'},
+  translate:      {basis:'~3 000 in / 2 800 out',note:'System prompt ~200 + source text ~2 800 → translated output'},
+  screen:         {basis:'~5 000 input tokens',  note:'System prompt ~500 + documents ~4 000 + criteria ~300'},
+  'agent-simple': {basis:'~18 000 tokens total', note:'3–4 API calls × ~4 500 tokens — system prompt repeated each call'},
+  'agent-complex':{basis:'~80 000 tokens total', note:'8–10 API calls × ~8 000 tokens — context accumulates across steps'},
+  code:           {basis:'~5 000 in / 1 200 out',note:'System prompt ~500 + code file ~4 000 + instructions ~400'},
+  sql:            {basis:'~800 in / 400 out',    note:'System prompt ~200 + schema ~400 + question ~150'},
+  rag:            {basis:'~6 000 input tokens',  note:'System prompt ~400 + retrieved chunks ~5 000 + query ~200'},
+  apidoc:         {basis:'~4 000 in / 2 000 out',note:'System prompt ~300 + code/spec ~3 500 → documentation output'},
 };
 
 function renderMethodology() {
@@ -1305,50 +1241,83 @@ function updateROI() {
   const maxEmployees = Math.max(0, ...TASKS.map(t => taskVol[t.id]?.employees || 0));
   const dispEl = document.getElementById('roi-employees-display');
   if (dispEl) dispEl.textContent = maxEmployees || '—';
+
+  const pctEl = document.getElementById('roi-pct');
+  const pctLabelEl = document.getElementById('roi-pct-label');
+  const pct = pctEl ? parseFloat(pctEl.value) : 10;
+  if (pctLabelEl) pctLabelEl.textContent = pct + '%';
+
   const emp = maxEmployees;
-  const rate=parseFloat(document.getElementById('roi-rate').value)||0;
-  const min=parseFloat(document.getElementById('roi-minutes').value)||0;
-  const review=parseFloat(document.getElementById('roi-review').value)||0;
-  const el=document.getElementById('roi-result');
-  if(!emp||!rate||!min){el.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:8px 0;">Add tasks with employees in step 1 to see capacity freed.</div>';return;}
-  const netMin=Math.max(0,min-review);
-  const monthSave=(netMin/60)*rate*emp/currency.rate*sel.days;
-  const grossSave=(min/60)*rate*emp/currency.rate*sel.days;
-  const annSave=monthSave*12;
-  const aiCost=totalMonthly();
-  const ratio=aiCost>0?Math.round(monthSave/aiCost*100):0;
-  const reviewPct=min>0?Math.round(review/min*100):0;
-  el.innerHTML=`
+  const annualCost = parseFloat(document.getElementById('roi-rate').value) || 0;
+  const el = document.getElementById('roi-result');
+
+  if (!emp || !annualCost) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--text3);text-align:center;padding:8px 0;">Add tasks with employees in step 1 to see operational impact.</div>';
+    return;
+  }
+
+  const totalAnnualCost = annualCost * emp / currency.rate;
+  const monthlyCapacity = totalAnnualCost * (pct / 100) / 12;
+  const annualCapacity = totalAnnualCost * (pct / 100);
+  const fteCap = (pct / 100) * emp;
+  const aiMonthly = totalMonthly();
+  const aiAnnual = aiMonthly * 12;
+  const aiAsPctCapacity = annualCapacity > 0 ? Math.round(aiAnnual / annualCapacity * 100) : 0;
+  const paybackMonths = monthlyCapacity > 0 ? Math.ceil(aiMonthly / monthlyCapacity) : 0;
+
+  el.innerHTML = `
     <div class="roi-highlight">
-      <div class="roi-highlight-label">Net freed capacity / month</div>
-      <div class="roi-highlight-val">${cx(monthSave)}</div>
+      <div class="roi-highlight-label">Estimated annual capacity impact</div>
+      <div class="roi-highlight-val">${cx(annualCapacity)}</div>
     </div>
     <div class="roi-sub-grid">
-      <div class="roi-sub-card"><div class="roi-sub-label">Annual capacity</div><div class="roi-sub-val">${cx(annSave)}</div></div>
-      <div class="roi-sub-card"><div class="roi-sub-label">Capacity vs AI cost</div><div class="roi-sub-val" style="color:${ratio>=100?'var(--green)':'var(--text2)'}">${ratio}%</div></div>
+      <div class="roi-sub-card">
+        <div class="roi-sub-label">Monthly capacity value</div>
+        <div class="roi-sub-val">${cx(monthlyCapacity)}</div>
+      </div>
+      <div class="roi-sub-card">
+        <div class="roi-sub-label">Equivalent operational capacity</div>
+        <div class="roi-sub-val" style="color:var(--green)">~${(fteCap*0.7).toFixed(1)}–${(fteCap*1.0).toFixed(1)} FTE</div>
+      </div>
+      <div class="roi-sub-card" style="grid-column:1/-1">
+        <div class="roi-sub-label">AI operating cost as % of capacity value</div>
+        <div class="roi-sub-val" style="color:${aiAsPctCapacity<20?'var(--green)':aiAsPctCapacity<50?'var(--amber)':'#f87171'}">${aiAsPctCapacity}%</div>
+      </div>
     </div>
-    ${review>0?`<div style="margin-top:8px;padding:7px 10px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:6px;font-size:13px;color:var(--text3);font-family:var(--mono);">Review &amp; QA absorbs ${reviewPct}% of gross saving (${cx(grossSave-monthSave)}/mo)</div>`:''}
-    <div style="margin-top:8px;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;font-size:13px;color:var(--text3);line-height:1.6;font-family:var(--mono);">Reflects salary value of time freed up. Actual return also depends on integration costs, process change and organisational adoption.</div>`;
+    <div style="margin-top:10px;padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:6px;font-size:12px;color:var(--text3);line-height:1.7;">
+      Assumes <strong style="color:var(--text2)">${pct}% efficiency improvement</strong> across ${emp} affected employees at ${cx(annualCost/currency.rate)}/yr fully-loaded cost. Excludes implementation cost, integration work, governance, process redesign and organisational adoption effort.
+    </div>`;
 }
 
 function updateSavings() {
-  const cop=parseFloat(document.getElementById('cost-copilot').value)||0;
-  const gpt=parseFloat(document.getElementById('cost-chatgpt').value)||0;
-  const ms=parseFloat(document.getElementById('cost-mscopilot').value)||0;
-  const gem=parseFloat(document.getElementById('cost-gemini').value)||0;
-  const not=parseFloat(document.getElementById('cost-notion').value)||0;
-  const usr=parseFloat(document.getElementById('cost-users').value)||1;
-  const cust=parseFloat(document.getElementById('cost-custom').value)||0;
-  const total=(cop+gpt+ms+gem+not)*usr+cust;
-  const opt=totalMonthly();
-  const el=document.getElementById('savings-result');
-  if(total===0){el.innerHTML=`<div style="font-size:12px;color:var(--text3);text-align:center;padding:4px 0;">Enter your current costs above to see potential savings.</div>`;return;}
-  const saving=total-opt,pct=Math.round(Math.abs(saving)/total*100);
-  if(saving>0){
-    el.innerHTML=`<div class="savings-vs-row"><div class="savings-vs-item"><div class="savings-vs-label">Current spend</div><div class="savings-vs-val current">${usd(total)}</div></div><div class="savings-vs-sep">→</div><div class="savings-vs-item"><div class="savings-vs-label">With custom AI</div><div class="savings-vs-val optimised">${usd(opt)}</div></div></div><div class="savings-highlight"><div class="savings-highlight-left"><div class="savings-highlight-label">Potential monthly saving</div><div class="savings-highlight-sub">${pct}% reduction in AI spend</div></div><div class="savings-highlight-val">${usd(saving)}</div></div>`;
-  } else {
-    el.innerHTML=`<div class="savings-vs-row"><div class="savings-vs-item"><div class="savings-vs-label">Current spend</div><div class="savings-vs-val current">${usd(total)}</div></div><div class="savings-vs-sep">→</div><div class="savings-vs-item"><div class="savings-vs-label">With custom AI</div><div class="savings-vs-val optimised">${usd(opt)}</div></div></div><div class="savings-negative">Your current setup is ${pct}% cheaper for this config — try enabling Batch API or Caching above.</div>`;
+  const totalLocal = parseFloat(document.getElementById('cost-custom').value)||0;
+  const total = totalLocal / currency.rate; // convert to USD
+  const opt = totalMonthly();
+  const el = document.getElementById('savings-result');
+  if(totalLocal===0){
+    el.innerHTML=`<div style="font-size:13px;color:var(--text3);text-align:center;padding:4px 0 12px;">Enter your current spend above to see the comparison.</div>`;
+    return;
   }
+  const diff = total - opt;
+  const pct = Math.round(Math.abs(diff)/total*100);
+  el.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 1.5rem 1.25rem;">
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">Current monthly spend</div>
+        <div style="font-size:18px;font-weight:500;font-family:var(--mono);color:var(--text)">${cx(total)}</div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">Estimated AI operating cost</div>
+        <div style="font-size:18px;font-weight:500;font-family:var(--mono);color:var(--accent2)">${cx(opt)}</div>
+      </div>
+      <div style="grid-column:1/-1;${diff>0?'background:rgba(45,212,160,0.08);border:1px solid rgba(45,212,160,0.25);':'background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);'}border-radius:var(--radius);padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:13px;color:${diff>0?'var(--green)':'#f87171'};font-weight:500;">${diff>0?'Potential monthly difference':'Higher than current spend'}</div>
+          <div style="font-size:11px;color:${diff>0?'rgba(45,212,160,0.6)':'rgba(248,113,113,0.6)'};margin-top:2px;">${pct}% ${diff>0?'lower':'higher'} operating cost</div>
+        </div>
+        <div style="font-size:22px;font-weight:500;font-family:var(--mono);color:${diff>0?'var(--green)':'#f87171'};">${cx(Math.abs(diff))}</div>
+      </div>
+    </div>`;
 }
 
 function totalMonthly() {
@@ -1422,35 +1391,59 @@ function toggleOpt(key) {
 }
 
 function renderTasks() {
-  let html='';
+  let html='', techHtml='';
   TASKS.forEach(t=>{
-    if(t.id==='agent-simple') html+=`<div style="grid-column:1/-1;margin:6px 0 2px;display:flex;align-items:center;gap:10px;"><span style="font-size:12px;font-family:var(--mono);color:var(--amber);white-space:nowrap;">AI agents — multi-step workflows</span><div style="flex:1;height:1px;background:var(--border);"></div></div>`;
-    if(t.id==='code') html+=`<div style="grid-column:1/-1;margin:6px 0 2px;display:flex;align-items:center;gap:10px;"><span style="font-size:12px;font-family:var(--mono);color:var(--text3);white-space:nowrap;">Technical tasks</span><div style="flex:1;height:1px;background:var(--border);"></div></div>`;
-    const runs=taskRuns[t.id]||0, vol=taskVol[t.id], isAgent=t.id.startsWith('agent');
+    const runs=taskRuns[t.id]||0, vol=taskVol[t.id];
+    const isAgent=t.id.startsWith('agent');
     const isTech=['code','sql','rag','apidoc'].includes(t.id);
-    const isPreset = activePreset && INDUSTRY_PRESETS[activePreset] && INDUSTRY_PRESETS[activePreset].tasks[t.id] > 0;
-    html+=`<div class="task-btn${runs>0?' active':''}${isAgent?' agent-task':''}">
-      <div class="task-btn-name">${t.name}${isAgent?`<span class="agent-badge">multi-step</span>`:''}${isPreset&&runs>0?`<span style="font-size:10px;font-family:var(--mono);color:var(--amber);margin-left:auto;font-weight:400;">preset</span>`:''}</div>
+    const card=`<div class="task-btn${runs>0?' active':''}${isAgent?' agent-task':''}">
+      <div class="task-btn-name">${t.name}${isAgent?'<span class="agent-badge">automated</span>':''}</div>
       <div class="task-btn-desc">${t.desc}</div>
       <div class="task-btn-explain">${t.explain}</div>
       <div class="task-vol-row">
-        <div class="task-vol-field"><label class="task-vol-label">${isAgent ? 'Triggers' : isTech ? 'Developers' : 'Employees'}</label><input class="task-vol-input" type="number" min="0" value="${vol.employees}" oninput="setTaskVol('${t.id}','employees',this.value)"></div>
-        <div class="task-vol-sep">×</div>
-        <div class="task-vol-field"><label class="task-vol-label">${isAgent ? 'Per day' : isTech ? 'Queries/day' : 'Times/day'}</label><input class="task-vol-input" type="number" min="0" step="0.5" value="${vol.usesPerDay}" oninput="setTaskVol('${t.id}','usesPerDay',this.value)"></div>
+        <div class="task-vol-field"><label class="task-vol-label">${isAgent?'Triggers':isTech?'Developers':'Employees'}</label><input class="task-vol-input" type="number" min="0" value="${vol.employees}" oninput="setTaskVol('${t.id}','employees',this.value)"></div>
+        <div class="task-vol-sep">x</div>
+        <div class="task-vol-field"><label class="task-vol-label">${isAgent?'Per day':isTech?'Queries/day':'Times/day'}</label><input class="task-vol-input" type="number" min="0" step="0.5" value="${vol.usesPerDay}" oninput="setTaskVol('${t.id}','usesPerDay',this.value)"></div>
         <div class="task-vol-sep">=</div>
-        <div class="task-vol-result"><span class="task-runs-val" id="rv-${t.id}">${runs===0?'off':runs+(isAgent?' triggers/day':'/day')}</span></div>
+        <div class="task-vol-result"><span class="task-runs-val" id="rv-${t.id}">${runs===0?'off':runs+'/day'}</span></div>
       </div>
       <div class="task-btn-tokens">~${fmt(t.inTok)} in · ~${fmt(t.outTok)} out per run</div>
     </div>`;
+    if(isTech) { techHtml+=card; }
+    else {
+      if(t.id==='agent-simple') html+=`<div style="grid-column:1/-1;margin:8px 0 4px;display:flex;align-items:center;gap:10px;"><span style="font-size:12px;font-family:var(--sans);font-weight:600;color:var(--amber);">Automated workflows</span><div style="flex:1;height:1px;background:var(--border);"></div></div>`;
+      html+=card;
+    }
   });
+  const techActive=['code','sql','rag','apidoc'].some(id=>(taskRuns[id]||0)>0);
+  const techCount=['code','sql','rag','apidoc'].filter(id=>(taskRuns[id]||0)>0).length;
+  html+=`<div style="grid-column:1/-1;margin:8px 0 0;">
+    <button id="tech-toggle-btn" onclick="toggleTechTasks()" style="width:100%;background:none;border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;color:var(--text3);font-size:13px;font-family:var(--sans);">
+      <span>Developer &amp; technical tasks${techActive?' <span style=\"font-size:11px;font-family:var(--mono);color:var(--accent2);\">'+techCount+' active</span>':''}</span>
+      <span id="tech-toggle-icon">▾</span>
+    </button>
+    <div id="tech-tasks-panel" style="display:${techActive?'block':'none'};">
+      <p style="font-size:12px;color:var(--text3);padding:8px 0 8px;line-height:1.5;">These require developer involvement. Add them if your technical team uses AI in their day-to-day work.</p>
+      <div class="task-grid">${techHtml}</div>
+    </div>
+  </div>`;
   document.getElementById('task-grid').innerHTML=html;
+  if(techActive){const icon=document.getElementById('tech-toggle-icon');if(icon)icon.style.transform='rotate(180deg)';}
+}
+
+function toggleTechTasks() {
+  const panel=document.getElementById('tech-tasks-panel');
+  const icon=document.getElementById('tech-toggle-icon');
+  const open=panel.style.display==='none';
+  panel.style.display=open?'block':'none';
+  if(icon) icon.style.transform=open?'rotate(180deg)':'';
 }
 
 function setTaskVol(id,field,val) {
   taskVol[id][field]=parseFloat(val)||0;
   const runs=Math.round(taskVol[id].employees*taskVol[id].usesPerDay);
   taskRuns[id]=runs;
-  activePreset=null;
+  activeSize=null;
   document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
   const v=document.getElementById('rv-'+id);
   const isAgent=id.startsWith('agent');
@@ -1480,7 +1473,6 @@ function loadFromURL() {
   const p=new URLSearchParams(window.location.search);
   if(!p.has('model')) return;
   sel.model=p.get('model')||sel.model;
-  sel.ctx=parseFloat(p.get('ctx'))||1.0;
   sel.days=parseInt(p.get('days'))||22;
   sel.batch=p.get('batch')==='1';
   sel.cachePct=parseInt(p.get('cpct'))||0;
@@ -1488,32 +1480,17 @@ function loadFromURL() {
   document.getElementById('tog-batch').classList.toggle('on',sel.batch);
   const sc=document.getElementById('sl-cache');
   if(sc){sc.value=sel.cachePct;setCacheLevel(sel.cachePct);}
-  document.getElementById('sl-ctx').value=sel.ctx;
   document.getElementById('sl-days').value=sel.days;
   document.getElementById('sv-days').textContent=sel.days;
-  const meta=getCtxMeta(sel.ctx);
-  document.getElementById('sv-ctx').textContent=meta.label;
-  document.getElementById('ctx-desc').textContent=meta.desc;
 }
 
 function resetAll() {
   TASKS.forEach(t=>{taskRuns[t.id]=0;taskVol[t.id]={employees:0,usesPerDay:1};});
   document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
-  const d=document.getElementById('preset-desc');
-  if(d){d.textContent='';d.classList.remove('visible');}
-  const roiSrc=document.getElementById('roi-emp-source');
-  if(roiSrc) roiSrc.textContent='(from tasks)';
+  activeSize=null;
   renderTasks(); update(); updateCompare(); updateROI(); goToStep(1);
 }
 
-document.getElementById('sl-ctx').addEventListener('input',e=>{
-  sel.ctx=parseFloat(e.target.value);
-  const m=getCtxMeta(sel.ctx);
-  document.getElementById('sv-ctx').textContent=m.label;
-  document.getElementById('ctx-desc').textContent=m.desc;
-  update(); updateCompare();
-});
-document.getElementById('ctx-desc').textContent=getCtxMeta(1.0).desc;
 document.getElementById('sl-days').addEventListener('input',e=>{
   sel.days=parseInt(e.target.value);
   document.getElementById('sv-days').textContent=sel.days;
@@ -1532,7 +1509,7 @@ sB.value = 'g-flash';
 loadFromURL();
 renderTasks();
 renderModels();
-document.getElementById('roi-rate-unit').textContent = currency.symbol + ' / hr';
+document.getElementById('roi-rate-unit').textContent = currency.symbol + ' / yr';
 update();
 updateCompare();
 updateROI();
@@ -1550,14 +1527,8 @@ function buildEstimateParams(toEmail) {
   const monthly=totalMonthly(),daily=monthly/sel.days;
   const active=TASKS.filter(t=>(taskRuns[t.id]||0)>0);
   const totalRuns=active.reduce((s,t)=>s+taskRuns[t.id],0);
-  const cop=parseFloat(document.getElementById('cost-copilot').value)||0;
-  const gpt=parseFloat(document.getElementById('cost-chatgpt').value)||0;
-  const ms=parseFloat(document.getElementById('cost-mscopilot').value)||0;
-  const gem=parseFloat(document.getElementById('cost-gemini').value)||0;
-  const not=parseFloat(document.getElementById('cost-notion').value)||0;
-  const usr=parseFloat(document.getElementById('cost-users').value)||1;
-  const cust=parseFloat(document.getElementById('cost-custom').value)||0;
-  const curr=(cop+gpt+ms+gem+not)*usr+cust;
+  const curr=parseFloat(document.getElementById('cost-custom').value)||0;
+  const currSaving=curr>0?curr/currency.rate-monthly:null;
   const saving=curr>0?curr-monthly:null;
   return {
     to_email:toEmail,
@@ -1570,7 +1541,7 @@ function buildEstimateParams(toEmail) {
     batch_enabled:sel.batch?'Yes (−50% input)':'No',
     cache_enabled:sel.cachePct>0?`Yes (${sel.cachePct}% static context)`:'No',
     current_spend:curr>0?cx(curr)+'/mo':'Not provided',
-    potential_saving:saving&&saving>0?cx(saving)+'/mo':'N/A',
+    potential_saving:currSaving&&currSaving>0?cx(currSaving)+'/mo':'N/A',
   };
 }
 
