@@ -473,8 +473,7 @@ footer a:hover{color:var(--text2)}
 <div class="hero">
   <div class="hero-eyebrow">AI Operating Cost Estimator</div>
   <h1>What does AI actually cost?</h1>
-  <p>Model AI usage across workflows, volume and model selection to estimate operational cost at scale.</p>
-  <div class="hero-pov">AI cost is driven by workflows, volume and model choice.</div>
+  <p>Configure workflows, volume and model to estimate your monthly AI spend.</p>
 </div>
 
 <div class="steps-wrap">
@@ -589,54 +588,6 @@ footer a:hover{color:var(--text2)}
         </div>
         <div class="compare-result" id="compare-result"></div>
       </div>
-      <div class="cost-drivers-panel">
-        <button class="cost-drivers-toggle" id="cost-drivers-toggle" onclick="toggleCostDrivers()">
-          <span>What actually drives your AI costs</span>
-          <span class="cost-drivers-toggle-icon">▾</span>
-        </button>
-        <div class="cost-drivers-body" id="cost-drivers-body">
-          <div class="cost-driver-row">
-            <div class="cost-driver-icon">📄</div>
-            <div><div class="cost-driver-name">Context size</div><div class="cost-driver-desc">The single biggest lever. Doubling the amount of text you send per request doubles your input cost. This is why RAG architectures and caching strategies matter so much.</div></div>
-          </div>
-          <div class="cost-driver-row">
-            <div class="cost-driver-icon">🤖</div>
-            <div><div class="cost-driver-name">Agent depth &amp; orchestration</div><div class="cost-driver-desc">Each step in a multi-step agent is a separate API call. A 6-step workflow is 6× the token cost of a single call — plus context accumulates across steps.</div></div>
-          </div>
-          <div class="cost-driver-row">
-            <div class="cost-driver-icon">🔄</div>
-            <div><div class="cost-driver-name">Retrieval strategy</div><div class="cost-driver-desc">Full-document retrieval vs. chunk-based RAG can change your input cost by 10–50×. How you fetch context matters as much as what model you use.</div></div>
-          </div>
-          <div class="cost-driver-row">
-            <div class="cost-driver-icon">📝</div>
-            <div><div class="cost-driver-name">Output length</div><div class="cost-driver-desc">Output tokens cost 4–5× more per token than input tokens on most models. Tasks that generate long documents hit this hard — drafting and documentation especially.</div></div>
-          </div>
-          <div class="cost-driver-row">
-            <div class="cost-driver-icon">⚡</div>
-            <div><div class="cost-driver-name">Workflow volume &amp; frequency</div><div class="cost-driver-desc">Cost scales linearly with volume. 500 runs/day is 10× the cost of 50/day — but also 10× the productivity gain. The ratio matters more than the absolute number.</div></div>
-          </div>
-          <div class="cost-driver-row">
-            <div class="cost-driver-icon">🧠</div>
-            <div><div class="cost-driver-name">Model selection per task</div><div class="cost-driver-desc">Most enterprise deployments use 2–3 models. Haiku for classification and routing, Sonnet for reasoning and drafting, Opus for high-stakes decisions. Routing correctly reduces cost 40–70%.</div></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="methodology-panel">
-        <button class="methodology-toggle" id="meth-toggle" onclick="toggleMethodology()">
-          <span>How we calculate these estimates</span>
-          <span class="methodology-toggle-icon">▾</span>
-        </button>
-        <div class="methodology-body" id="meth-body">
-          <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6;">Token estimates are based on typical enterprise usage patterns. Your actual costs will vary. Use this as a directional guide, not a contract.</p>
-          <div style="margin-bottom:12px;padding:10px 12px;background:rgba(108,164,171,0.06);border:1px solid rgba(108,164,171,0.15);border-radius:6px;font-size:12px;color:var(--text2);line-height:1.7;">
-            <strong style="color:var(--accent2);">What's included in each input estimate:</strong> system prompt + instructions + user content (document, question or data). Every AI request carries this overhead — the system prompt alone is typically 200–800 tokens per call.<br><br>
-            <strong style="color:var(--amber);">Everyday tasks</strong> — one API call per run. Input = system prompt + content. Output = the response.<br>
-            <strong style="color:var(--amber);">Automated workflows</strong> — multiple API calls per trigger. Simple: 3–4 calls (~18k tokens total). Complex: 8–10 calls (~80k tokens total). Context accumulates across steps.
-          </div>
-          <div id="meth-task-list"></div>
-        </div>
-      </div>
       <div class="step-nav">
         <button class="step-nav-btn" onclick="goToStep(1)">← Your use case</button>
         <button class="step-nav-btn primary" onclick="goToStep(3)">See your estimate →</button>
@@ -730,6 +681,22 @@ footer a:hover{color:var(--text2)}
       <div class="panel" id="system-summary-panel" style="display:none;">
         <div class="panel-title">System configuration snapshot</div>
         <div id="system-summary-body" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+      </div>
+
+      <div class="methodology-panel">
+        <button class="methodology-toggle" id="meth-toggle" onclick="toggleMethodology()">
+          <span>How we calculate these estimates</span>
+          <span class="methodology-toggle-icon">▾</span>
+        </button>
+        <div class="methodology-body" id="meth-body">
+          <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6;">Token estimates are based on typical enterprise usage patterns. Your actual costs will vary. Use this as a directional guide, not a contract.</p>
+          <div style="margin-bottom:12px;padding:10px 12px;background:rgba(108,164,171,0.06);border:1px solid rgba(108,164,171,0.15);border-radius:6px;font-size:12px;color:var(--text2);line-height:1.7;">
+            <strong style="color:var(--accent2);">What's included in each input estimate:</strong> system prompt + instructions + user content (document, question or data). Every AI request carries this overhead — the system prompt alone is typically 200–800 tokens per call.<br><br>
+            <strong style="color:var(--amber);">Everyday tasks</strong> — one API call per run. Input = system prompt + content. Output = the response.<br>
+            <strong style="color:var(--amber);">Automated workflows</strong> — multiple API calls per trigger. Simple: 3–4 calls (~18k tokens total). Complex: 8–10 calls (~80k tokens total). Context accumulates across steps.
+          </div>
+          <div id="meth-task-list"></div>
+        </div>
       </div>
 
       <!-- NEXT STEP -->
