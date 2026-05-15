@@ -1196,7 +1196,7 @@ function updateVariance() {
       <div style="position:absolute;left:0;top:0;height:100%;width:${lowPct}%;background:var(--green);border-radius:6px;transition:width 0.4s;"></div>
     </div>
     <div style="font-size:12px;color:var(--text3);line-height:1.6;">
-      Optimisation could reduce your cost by <strong style="color:var(--green)">${Math.round((1-low/high)*100)}%</strong> — from ${cx(high)} down to ${cx(low)}/month. Your current config is ${Math.round((mid-low)/(high-low)*100)}% of the way between optimised and unoptimised.
+      Optimisation could reduce your cost by <strong style="color:var(--green)">${Math.round((1-low/high)*100)}%</strong> — from ${cx(high)} down to ${cx(low)}/month. Your current config has captured <strong>${Math.round((high-mid)/(high-low)*100)}%</strong> of the available optimisation potential.
     </div>`;
 }
 
@@ -2200,8 +2200,8 @@ document.getElementById('sl-days').addEventListener('input',e=>{
 
 const sA=document.getElementById('cmp-a'),sB=document.getElementById('cmp-b');
 MODELS.forEach(m=>{
-  sA.innerHTML+=`<option value="${m.id}">${m.full}</option>`;
-  sB.innerHTML+=`<option value="${m.id}">${m.full}</option>`;
+  sA.innerHTML+=`<option value="${m.id}">${m.name}</option>`;
+  sB.innerHTML+=`<option value="${m.id}">${m.name}</option>`;
 });
 // Default: current model vs cheapest
 sA.value = sel.model || 'sonnet';
