@@ -724,23 +724,6 @@ footer a:hover{color:var(--text2)}
         <div class="roi-result" id="roi-result"></div>
       </div>
 
-      <div class="savings-panel">
-        <div class="savings-panel-header">
-          <div class="savings-panel-title">Current AI cost (monthly)</div>
-          <div class="savings-panel-sub">Your current total spend on AI tools and subscriptions.</div>
-        </div>
-        <div style="padding:1.25rem 1.5rem;">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
-            <span style="font-size:14px;color:var(--text2);flex:1;">Existing AI tools (total monthly spend)</span>
-            <input class="savings-tool-input" id="cost-custom" type="number" min="0" value="0" placeholder="0" oninput="updateSavings()" style="width:120px;font-size:15px;padding:9px 12px;">
-            <span style="font-size:13px;color:var(--text3);white-space:nowrap;" id="savings-currency-label">kr / mo</span>
-          </div>
-          <div style="font-size:12px;color:var(--text3);line-height:1.5;">Includes ChatGPT, Copilot, Gemini, Notion AI, GitHub Copilot, internal tools, etc.</div>
-        </div>
-        <div class="savings-result" id="savings-result">
-          <div style="font-size:13px;color:var(--text3);text-align:center;padding:4px 0 12px;">Enter your current spend above to see the comparison.</div>
-        </div>
-      </div>
 
       <div class="panel" id="variance-panel" style="display:none;">
         <div class="panel-title">Cost range — optimised to unoptimised</div>
@@ -1561,7 +1544,6 @@ function updateBridge() {
   if (!panel || !body) return;
 
   const aiMonthly   = totalMonthly();
-  const currentSpend = (parseFloat(document.getElementById('cost-custom').value)||0) / currency.rate;
   const pctEl       = document.getElementById('roi-pct');
   const pct         = pctEl ? parseFloat(pctEl.value) : 10;
   const annualCostEl= document.getElementById('roi-rate');
@@ -1577,19 +1559,14 @@ function updateBridge() {
   const aiAnnual  = aiMonthly * 12;
   const ratio     = annualCapacity > 0 ? (annualCapacity / aiAnnual) : 0;
   const aiAsPct   = annualCapacity > 0 ? Math.round(aiAnnual / annualCapacity * 100) : 0;
-  const hasCurrentSpend = currentSpend > 0;
 
   body.innerHTML = `
     <div class="bridge-inputs">
-      ${hasCurrentSpend ? `<div class="bridge-input-card">
-        <div class="bridge-input-label">Current AI cost</div>
-        <div class="bridge-input-val">${cx(currentSpend)}<span style="font-size:11px;color:var(--text3);font-weight:400;"> / mo</span></div>
-      </div>` : ''}
-      <div class="bridge-input-card" ${hasCurrentSpend?'':'style="grid-column:1/2"'}>
+      <div class="bridge-input-card" style="grid-column:1/2">
         <div class="bridge-input-label">Modelled AI cost</div>
         <div class="bridge-input-val">${cx(aiMonthly)}<span style="font-size:11px;color:var(--text3);font-weight:400;"> / mo</span></div>
       </div>
-      <div class="bridge-input-card" ${hasCurrentSpend?'':'style="grid-column:2/-1"'}>
+      <div class="bridge-input-card" style="grid-column:2/-1">
         <div class="bridge-input-label">Capacity impact</div>
         <div class="bridge-input-val" style="color:var(--green)">${cx(annualCapacity)}<span style="font-size:11px;color:var(--text3);font-weight:400;"> / yr</span></div>
       </div>
@@ -1859,36 +1836,7 @@ function updateROI() {
     </div>`;
 }
 
-function updateSavings() {
-  const totalLocal = parseFloat(document.getElementById('cost-custom').value)||0;
-  const total = totalLocal / currency.rate; // convert to USD
-  const opt = totalMonthly();
-  const el = document.getElementById('savings-result');
-  if(totalLocal===0){
-    el.innerHTML=`<div style="font-size:13px;color:var(--text3);text-align:center;padding:4px 0 12px;">Enter your current spend above to see the comparison.</div>`;
-    return;
-  }
-  const diff = total - opt;
-  const pct = Math.round(Math.abs(diff)/total*100);
-  el.innerHTML=`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 1.5rem 1.25rem;">
-      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
-        <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">Current monthly spend</div>
-        <div style="font-size:18px;font-weight:500;font-family:var(--mono);color:var(--text)">${cx(total)}</div>
-      </div>
-      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
-        <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">Estimated monthly AI spend</div>
-        <div style="font-size:18px;font-weight:500;font-family:var(--mono);color:var(--accent2)">${cx(opt)}</div>
-      </div>
-      <div style="grid-column:1/-1;${diff>0?'background:rgba(45,212,160,0.08);border:1px solid rgba(45,212,160,0.25);':'background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);'}border-radius:var(--radius);padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
-        <div>
-          <div style="font-size:13px;color:${diff>0?'var(--green)':'#f87171'};font-weight:500;">${diff>0?'Difference vs current spend':'Difference vs current spend'}</div>
-          <div style="font-size:11px;color:${diff>0?'rgba(45,212,160,0.6)':'rgba(248,113,113,0.6)'};margin-top:2px;">${diff>0?'−':'+'} ${pct}% vs current spend</div>
-        </div>
-        <div style="font-size:22px;font-weight:500;font-family:var(--mono);color:${diff>0?'var(--green)':'#f87171'};">${cx(Math.abs(diff))}</div>
-      </div>
-    </div>`;
-}
+function updateSavings() {}
 
 function totalMonthly() {
   if (!sel.model) return 0;
@@ -2163,8 +2111,8 @@ function buildEstimateParams(toEmail) {
   const monthly=totalMonthly(),daily=monthly/sel.days;
   const active=TASKS.filter(t=>(taskRuns[t.id]||0)>0);
   const totalRuns=active.reduce((s,t)=>s+taskRuns[t.id],0);
-  const curr=parseFloat(document.getElementById('cost-custom').value)||0;
-  const currSaving=curr>0?curr/currency.rate-monthly:null;
+  const curr=0;
+  const currSaving=null;
   const maxUsers=Math.max(0,...TASKS.map(t=>taskVol[t.id]?.employees||0));
   const isHybrid=window._hybridModels&&Object.keys(window._hybridModels).some(id=>window._hybridModels[id]!==sel.model&&(taskRuns[id]||0)>0);
   const hasAgents=active.some(t=>t.id==='agent-complex');
