@@ -1350,6 +1350,7 @@ function updateTopDrivers() {
   panel.style.display='block';
 
   const model = MODELS.find(m => m.id === sel.model);
+  if (!model) { body.innerHTML='<div style="font-size:13px;color:var(--text3);">Select a model in step 2 to see cost drivers.</div>'; return; }
   const taskCosts = active.map(t => ({
     name: t.name,
     cost: calcCost(t, model, sel.ctx, sel.batch, sel.cachePct).runCost * taskRuns[t.id] * sel.days,
@@ -1378,15 +1379,16 @@ function updateTopDrivers() {
 
   body.innerHTML = `
     <div style="margin-bottom:14px;">
-      ${taskCosts.slice(0,5).map((t,i) => {
+      ${taskCosts.map((t,i) => {
         const pct = Math.round(t.cost/total*100);
+        const pctLabel = pct === 0 ? '<1%' : pct + '%';
         const task = TASKS.find(x=>x.name===t.name);
         const tokLabel = task ? `~${fmt(Math.round(task.inTok * sel.ctx))} tokens/run` : '';
         return `<div style="padding:8px 0;border-bottom:1px solid var(--border);">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
             <span style="font-size:12px;color:var(--text3);font-family:var(--mono);min-width:16px;">${i+1}</span>
             <span style="font-size:13px;color:var(--text2);flex:1;">${t.name}</span>
-            <span style="font-size:12px;font-family:var(--mono);color:var(--accent2);min-width:32px;text-align:right;">${pct}%</span>
+            <span style="font-size:12px;font-family:var(--mono);color:var(--accent2);min-width:32px;text-align:right;">${pctLabel}</span>
             <span style="font-size:12px;font-family:var(--mono);color:var(--text2);min-width:70px;text-align:right;">${cx(t.cost)}</span>
           </div>
           <div style="display:flex;align-items:center;gap:10px;">
