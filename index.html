@@ -701,7 +701,7 @@ footer a:hover{color:var(--text2)}
         </div>
         <div class="roi-inputs">
           <div class="roi-input-row">
-            <span class="roi-input-label">Active AI users <span style="font-size:11px;color:var(--text3);font-family:var(--mono);">(from tasks)</span></span>
+            <span class="roi-input-label">Active AI users</span>
             <span class="roi-input" id="roi-employees-display" style="display:inline-flex;align-items:center;justify-content:flex-end;background:var(--bg3);border:1px solid var(--border);cursor:default;color:var(--accent2);">0</span>
             <span class="roi-unit">people</span>
           </div>
@@ -789,7 +789,7 @@ footer a:hover{color:var(--text2)}
 
       <!-- NEXT STEP -->
       <div style="background:rgba(108,164,171,0.06);border:1px solid rgba(108,164,171,0.2);border-radius:var(--radius-lg);padding:1.5rem;display:flex;flex-direction:column;gap:12px;">
-        <button onclick="openModal()" style="background:var(--accent);color:#fff;border:none;padding:13px 20px;border-radius:8px;font-size:14px;font-weight:500;font-family:var(--sans);cursor:pointer;width:100%;transition:opacity 0.15s;" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">Book a free 30-minute session →</button>
+        <button onclick="openModal()" style="background:var(--accent);color:#fff;border:none;padding:13px 20px;border-radius:8px;font-size:14px;font-weight:500;font-family:var(--sans);cursor:pointer;width:100%;transition:opacity 0.15s;" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">Book an AI Cost & Architecture Review · 30 min →</button>
       </div>
 
       <div class="step-nav">
@@ -826,6 +826,10 @@ footer a:hover{color:var(--text2)}
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:12px;color:var(--text3);">Model</span>
         <span style="font-size:12px;font-family:var(--mono);color:var(--accent2);" id="m-model-label">Claude Sonnet 4.6</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:var(--text3);">Active AI users</span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-users">—</span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:12px;color:var(--text3);">Workflows</span>
@@ -916,9 +920,10 @@ footer a:hover{color:var(--text2)}
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">×</button>
     <div id="modal-form-wrap">
-      <div class="modal-eyebrow">Free 30-minute session</div>
-      <h2>Let's talk about <strong>your AI investment</strong></h2>
-      <p class="modal-sub">Tell us about your setup and we'll come prepared with a real assessment — costs, risks and what a production deployment looks like for your organisation.</p>
+      <div class="modal-eyebrow">AI Cost &amp; Architecture Review · 30 min</div>
+      <h2>Review your AI cost simulation and workflow setup</h2>
+      <p class="modal-sub">You share your use case — we review the generated model together. We walk through cost drivers, workflow structure, and what would change in a production-grade setup.</p>
+      <p class="modal-sub" style="margin-top:6px;font-size:12px;color:var(--text3);">This is not a sales call. It is a structured review of your AI usage model and assumptions.</p>
       <div class="modal-estimate-box" id="modal-estimate-box"></div>
       <div class="form-row">
         <div class="form-field">
@@ -935,10 +940,10 @@ footer a:hover{color:var(--text2)}
         <input class="form-input" id="cf-email" type="email" placeholder="ola@acme.no">
       </div>
       <div class="form-field">
-        <label class="form-label">Tell us about your use case</label>
-        <textarea class="form-input" id="cf-message" placeholder="We're looking to automate document processing for ~500 contracts/day..."></textarea>
+        <label class="form-label">Describe your use case</label>
+        <textarea class="form-input" id="cf-message" placeholder="Briefly describe your workflows, volume, and where AI is being used today."></textarea>
       </div>
-      <button class="modal-submit" id="modal-submit-btn" onclick="submitContact()">Send — book a free session →</button>
+      <button class="modal-submit" id="modal-submit-btn" onclick="submitContact()">Book an AI Cost &amp; Architecture Review · 30 min →</button>
       <div class="modal-feedback" id="modal-feedback"></div>
     </div>
     <div class="modal-success" id="modal-success">
@@ -1289,6 +1294,7 @@ function updateSystemSummary() {
 
   body.innerHTML =
     card('Total workflows', active.length + ' active', totalRuns.toLocaleString() + ' runs/day') +
+    card('Active AI users', maxEmp > 0 ? maxEmp + ' users' : '—') +
     card('Model', modelDisplay, modelNote) +
     card('Model intensity', intensity) +
     card('Architecture class', archClass) +
@@ -1926,6 +1932,11 @@ function update() {
   if (runsDay) runsDay.textContent = tRuns > 0 ? tRuns.toLocaleString() : '—';
   const workflowsEl = document.getElementById('m-workflows');
   if (workflowsEl) workflowsEl.textContent = active > 0 ? active : '—';
+  const usersEl = document.getElementById('m-users');
+  if (usersEl) {
+    const maxUsers = Math.max(0, ...TASKS.map(t => taskVol[t.id]?.employees || 0));
+    usersEl.textContent = maxUsers > 0 ? maxUsers : '—';
+  }
   const daysLabel = document.getElementById('m-days-label');
   if (daysLabel) daysLabel.textContent = sel.days;
   const batchStatusEl = document.getElementById('m-batch-label');
@@ -2186,9 +2197,18 @@ function openModal() {
   const model=MODELS.find(m=>m.id===sel.model);
   const active=TASKS.filter(t=>(taskRuns[t.id]||0)>0);
   const totalRuns=active.reduce((s,t)=>s+taskRuns[t.id],0);
+  const maxUsers=Math.max(0,...TASKS.map(t=>taskVol[t.id]?.employees||0));
+  const isHybrid=window._hybridModels&&Object.keys(window._hybridModels).some(id=>window._hybridModels[id]!==sel.model&&(taskRuns[id]||0)>0);
   document.getElementById('modal-estimate-box').innerHTML=
+    `<div style="font-size:11px;font-weight:600;color:var(--accent2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">We will review</div>`+
+    `<div style="font-size:12px;color:var(--text2);line-height:2;font-family:var(--mono);">`+
     `Tasks: <span class="est-val">${active.length?active.map(t=>t.name).join(', '):'No tasks selected'}</span><br>`+
-    `Model: <span class="est-val">${model.full}</span> &nbsp;·&nbsp; Runs/day: <span class="est-val">${totalRuns.toLocaleString()}</span> &nbsp;·&nbsp; Monthly: <span class="est-val">${cx(totalMonthly())}</span>`;
+    `Model: <span class="est-val">${model?model.full:'Not selected'}${isHybrid?' · Hybrid routing configured':''}</span><br>`+
+    `Active AI users: <span class="est-val">${maxUsers||'—'}</span><br>`+
+    `Workflow complexity: <span class="est-val">${active.some(t=>t.id==='agent-complex')?'Includes agentic workflows':active.some(t=>t.id==='agent-simple')?'Includes simple automation':'Everyday tasks only'}</span><br>`+
+    `Estimated monthly cost: <span class="est-val">${cx(totalMonthly())}</span><br>`+
+    `Runs / day: <span class="est-val">${totalRuns.toLocaleString()}</span>`+
+    `</div>`;
   document.getElementById('modal-form-wrap').style.display='';
   document.getElementById('modal-success').style.display='none';
   document.getElementById('modal-feedback').textContent='';
@@ -2213,7 +2233,7 @@ async function submitContact() {
     document.getElementById('modal-success').style.display='block';
   }catch(err){
     fb.className='modal-feedback err';fb.textContent='Could not send — check your EmailJS config.';
-    btn.disabled=false;btn.textContent='Send — book a free session →';
+    btn.disabled=false;btn.textContent='Book an AI Cost &amp; Architecture Review · 30 min →';
   }
 }
 </script>
