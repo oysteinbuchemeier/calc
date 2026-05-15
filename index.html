@@ -969,20 +969,20 @@ function goToStep(n) {
 }
 
 const TASKS = [
-  {id:'summarise', name:'Summarise a document', desc:'Reports, contracts, meeting notes', explain:'Upload a report or contract and get a concise summary. Useful when you need the key points without reading everything.', inTok:8000, outTok:600},
-  {id:'draft', name:'Write a first draft', desc:'Proposals, reports, presentations', explain:'Generate a first version of a report or proposal based on a brief. You review and refine, AI does the heavy lifting.', inTok:600, outTok:1200},
-  {id:'email', name:'Draft an email or message', desc:'Internal or external communication', explain:'Turn a few bullet points into a professional email or message. Works for client follow-ups and formal letters.', inTok:400, outTok:350},
-  {id:'answer', name:'Answer a question', desc:'From internal docs, policies, FAQs', explain:'Ask questions about your own documents or policies and get instant answers. The entire relevant document is included in each prompt — suitable for smaller document sets.', inTok:4000, outTok:500},
-  {id:'invoice', name:'Process a document or form', desc:'Invoices, applications, structured forms', explain:'Extract structured data from invoices or applications automatically. Eliminates manual data entry.', inTok:3000, outTok:400},
-  {id:'feedback', name:'Analyse and categorise responses', desc:'Surveys, reviews, tickets, candidate responses', explain:'Find patterns across large volumes of surveys, support tickets or candidate responses.', inTok:2000, outTok:600},
-  {id:'translate', name:'Translate content', desc:'Documents or messages to another language', explain:'Translate documents while preserving tone and formatting.', inTok:3000, outTok:2800},
-  {id:'screen', name:'Screen or compare', desc:'CVs, supplier offers, product options', explain:'Compare multiple CVs or supplier offers against a set of criteria. Get a ranked shortlist in seconds.', inTok:5000, outTok:700},
-  {id:'agent-simple', name:'Automated workflow — simple', desc:'3–4 automatic steps, no manual input', explain:'An automated process that handles a task end-to-end — e.g. receives an invoice, extracts the data, and logs it in your system. Or: reads an incoming request, looks up the customer record, and sends a personalised reply.', inTok:18000, outTok:2400},
-  {id:'agent-complex', name:'Automated workflow — complex', desc:'Full process automation, multiple systems', explain:'A complete workflow running without human input — e.g. screens job applicants against criteria, sends status emails, and flags borderline cases for review. Or: monitors contracts for renewal dates, drafts renewal proposals and routes them for approval.', inTok:80000, outTok:8000},
-  {id:'code', name:'Generate or review code', desc:'Write, analyse or fix code', explain:'Write new code from a description, review existing code for bugs, or explain what a piece of code does.', inTok:5000, outTok:1200},
-  {id:'sql', name:'SQL / data query', desc:'Natural language to SQL queries', explain:'Describe what data you need in plain English and get a ready-to-run SQL query.', inTok:800, outTok:400},
-  {id:'rag', name:'RAG / knowledge base Q&A', desc:'Answer questions over a large document library', explain:'Instead of loading entire documents into every prompt, RAG retrieves only the most relevant chunks first — dramatically reducing token usage at scale. The architectural choice between this and "Answer a question" has significant cost implications for large document volumes.', inTok:6000, outTok:700},
-  {id:'apidoc', name:'API documentation', desc:'Generate docs from code or OpenAPI spec', explain:'Automatically generate technical documentation from your codebase or API specification.', inTok:4000, outTok:2000},
+  {id:'summarise', name:'Summarise a document', desc:'Reports, contracts, meeting notes', explain:'Extract key information from long-form content and produce structured summaries.', inTok:8000, outTok:600},
+  {id:'draft', name:'Write a first draft', desc:'Proposals, reports, presentations', explain:'Generate an initial version of structured business content from a brief or outline.', inTok:600, outTok:1200},
+  {id:'email', name:'Draft an email or message', desc:'Internal or external communication', explain:'Turn input notes into structured written communication.', inTok:400, outTok:350},
+  {id:'answer', name:'Answer a question', desc:'Internal knowledge, policies, documentation', explain:'Query documents or knowledge bases to retrieve relevant information and explanations.', inTok:4000, outTok:500},
+  {id:'invoice', name:'Process a document or form', desc:'Invoices, forms, structured data', explain:'Extract and structure information from unstructured inputs.', inTok:3000, outTok:400},
+  {id:'feedback', name:'Analyse and categorise responses', desc:'Surveys, feedback, support tickets', explain:'Identify patterns and group structured or unstructured response data.', inTok:2000, outTok:600},
+  {id:'translate', name:'Translate content', desc:'Documents or messages', explain:'Translate text while preserving meaning and structure.', inTok:3000, outTok:2800},
+  {id:'screen', name:'Screen or compare', desc:'Multiple documents or options against criteria', explain:'Evaluate and rank inputs based on defined comparison rules.', inTok:5000, outTok:700},
+  {id:'agent-simple', name:'Automated workflow — simple', desc:'3–4-step automated process, no manual input', explain:'A linear workflow that executes predefined steps end-to-end, such as extracting data, enriching it, and writing to a system.', inTok:18000, outTok:2400},
+  {id:'agent-complex', name:'Automated workflow — complex (agentic)', desc:'Multi-step autonomous workflow with decision-making and tool use', explain:'An iterative process that can plan, execute, and adapt across multiple systems and steps before completing a task.', inTok:80000, outTok:8000},
+  {id:'code', name:'Code generation & review', desc:'Write, analyse, debug or explain code', explain:'Generate new code from requirements, review existing code for issues, or interpret code behaviour.', inTok:5000, outTok:1200},
+  {id:'sql', name:'Structured data queries (SQL / NL → query)', desc:'Convert natural language into structured queries', explain:'Generate SQL or similar queries from plain language requests.', inTok:800, outTok:400},
+  {id:'rag', name:'Retrieval-augmented Q&A (RAG)', desc:'Answer questions using large document sets', explain:'Retrieve relevant context from external knowledge sources before generating responses, reducing full-context load.', inTok:6000, outTok:700},
+  {id:'apidoc', name:'Technical documentation generation', desc:'Generate documentation from code or specifications', explain:'Produce API docs, system documentation or technical descriptions from structured inputs.', inTok:4000, outTok:2000},
 ];
 
 const MODELS = [
