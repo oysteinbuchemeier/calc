@@ -424,8 +424,20 @@ footer a:hover{color:var(--text2)}
   .bridge-input-card{border:1px solid #eee!important;padding:6px 8px!important;display:block!important}
   .bridge-ratio{font-size:12pt!important;color:#1a7a5e!important;margin-bottom:4px!important}
 
-  /* ROI */
-  .roi-panel{display:block!important}
+  /* Force show all step 3 panels regardless of inline style */
+  #step-3 .panel,
+  #step-3 .roi-panel,
+  #step-3 #variance-panel,
+  #step-3 #bridge-panel,
+  #step-3 #top-drivers-panel,
+  #step-3 #system-summary-panel,
+  #step-3 #next-step-panel,
+  #variance-body,
+  #bridge-body,
+  #top-drivers-body,
+  #system-summary-body,
+  #roi-result,
+  .roi-result{display:block!important}
   .roi-result{display:block!important}
   .roi-highlight{background:#f0f9f5!important;border:1px solid #b2dfdb!important;border-radius:4px!important;padding:8px 12px!important;margin-bottom:8px!important;display:block!important}
   .roi-sub-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:6px!important}
@@ -847,7 +859,7 @@ footer a:hover{color:var(--text2)}
     <span id="m-run" style="display:none"></span>
     <span id="m-daily" style="display:none"></span>
 
-    <button class="pdf-btn" onclick="window.print()">⬇ Download as PDF</button>
+    <button class="pdf-btn" onclick="printReport()">⬇ Download as PDF</button>
 
     <div class="email-panel">
       <div class="email-panel-title">Send estimate to yourself</div>
@@ -1505,6 +1517,13 @@ function updateDataStatus() {
   }
 
   el.innerHTML = lines.join('<br>');
+}
+
+function printReport() {
+  // Navigate to step 3 to ensure all panels are rendered
+  goToStep(3);
+  // Wait for panels to render then print
+  setTimeout(() => window.print(), 400);
 }
 
 function updateBridge() {
