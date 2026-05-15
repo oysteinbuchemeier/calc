@@ -1968,10 +1968,14 @@ function updateCompare() {
   let a=0,b=0;
   TASKS.forEach(t=>{const r=taskRuns[t.id]||0;if(!r)return;a+=calcCost(t,mA,sel.ctx,sel.batch,sel.cachePct).runCost*r*sel.days;b+=calcCost(t,mB,sel.ctx,sel.batch,sel.cachePct).runCost*r*sel.days;});
   const diff=Math.abs(a-b),pct=Math.max(a,b)>0?Math.round(diff/Math.max(a,b)*100):0;
+  const orA = mA.orId || '';
+  const orB = mB.orId || '';
+  const orLink = orA && orB ? `https://openrouter.ai/compare?models=${orA},${orB}` : '';
   document.getElementById('compare-result').innerHTML=`
     <div class="cmp-card${a<=b?' cheaper':''}"><div class="cmp-card-name">${mA.name}</div><div class="cmp-card-val">${cx(a)}</div><div class="cmp-card-sub">per month</div></div>
     <div class="cmp-card${b<a?' cheaper':''}"><div class="cmp-card-name">${mB.name}</div><div class="cmp-card-val">${cx(b)}</div><div class="cmp-card-sub">per month</div></div>
-    ${diff>0?`<div class="cmp-saving">${a<=b?mA.name:mB.name} is ${pct}% cheaper — saves ${cx(diff)}/month</div>`:''}`;
+    ${diff>0?`<div class="cmp-saving">${a<=b?mA.name:mB.name} is ${pct}% cheaper — saves ${cx(diff)}/month</div>`:''}
+    <div style="grid-column:1/-1;margin-top:2px;border-top:1px solid var(--border);padding-top:10px;font-size:12px;font-family:var(--mono);color:var(--text3);">In-depth model comparison — latency, context window, benchmarks and pricing: <a href="https://openrouter.ai/compare" target="_blank" rel="noopener" style="color:var(--accent2);text-decoration:none;">Open in OpenRouter ↗</a></div>`;
 }
 
 function pick(type,val) {
