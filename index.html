@@ -787,6 +787,7 @@ footer a:hover{color:var(--text2)}
       <button class="action-btn reset" onclick="resetAll()">↺ Reset</button>
     </div>
     <div class="copy-confirm" id="copy-confirm"></div>
+    <div id="data-status" style="font-size:11px;font-family:var(--mono);color:var(--text3);line-height:1.8;padding:8px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);">⏳ Loading prices and rates…</div>
 
     <!-- LIVE SNAPSHOT: ECONOMY -->
     <div class="metric-big">
@@ -975,32 +976,35 @@ const MODELS = [
 async function fetchModelPrices() {
   try {
     const res = await fetch('https://openrouter.ai/api/v1/models');
-    if (!res.ok) return;
+    if (!res.ok) throw new Error('not ok');
     const data = await res.json();
     const orModels = data.data || [];
     let updated = 0;
+    const matched = [], unmatched = [];
     MODELS.forEach(m => {
       if (!m.orId) return;
       const or = orModels.find(o => o.id === m.orId);
-      if (!or || !or.pricing) return;
-      const inP  = parseFloat(or.pricing.prompt)  * 1e6; // OR gives price per token → convert to per 1M
+      if (!or || !or.pricing) { unmatched.push(m.name + ' (' + m.orId + ')'); return; }
+      const inP  = parseFloat(or.pricing.prompt)  * 1e6;
       const outP = parseFloat(or.pricing.completion) * 1e6;
       if (!isNaN(inP) && inP > 0) {
         m.inP  = Math.round(inP  * 1000) / 1000;
         m.outP = Math.round(outP * 1000) / 1000;
         m.note = `$${m.inP} / $${m.outP} per 1M tokens`;
-        updated++;
-      }
+        matched.push(m.name); updated++;
+      } else { unmatched.push(m.name + ' (no price data)'); }
     });
-    if (updated > 0) {
-      // Badges removed — price-agnostic UI
-      renderModels();
-      update();
-      const el = document.getElementById('rates-updated');
-      const d2=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});if(el) el.textContent='Prices updated: '+d2;
-    }
+    window._priceStatus = {
+      live: updated, total: MODELS.filter(m=>m.orId).length,
+      matched, unmatched,
+      date: new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})
+    };
+    if (updated > 0) { renderModels(); update(); }
+    if (unmatched.length > 0) console.warn('OpenRouter unmatched:', unmatched);
+    updateDataStatus();
   } catch(e) {
-    // Silent fail — static prices remain
+    window._priceStatus = { live: 0, total: MODELS.filter(m=>m.orId).length, matched: [], unmatched: MODELS.map(m=>m.name), date: null };
+    updateDataStatus();
   }
 }
 
@@ -1072,14 +1076,14 @@ async function fetchExchangeRates() {
     if(data.result!=='success') throw new Error('no success');
     CURRENCY_RATES={USD:1.0, EUR:data.rates.EUR, NOK:data.rates.NOK};
     currency.rate=CURRENCY_RATES[currency.code];
+    window._rateStatus = { live: true, date: new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}) };
     update(); updateCompare(); updateROI(); updateSavings();
-    const el=document.getElementById('rates-updated');
-    const d=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});if(el) el.textContent='Prices updated: '+d;
+    updateDataStatus();
   } catch(e) {
     CURRENCY_RATES={USD:1.0, EUR:0.92, NOK:10.5};
     currency.rate=CURRENCY_RATES[currency.code];
-    const el=document.getElementById('rates-updated');
-    if(el) el.textContent='Prices last updated: 14 May 2026';
+    window._rateStatus = { live: false, date: '14 May 2026' };
+    updateDataStatus();
   }
 }
 
@@ -1491,6 +1495,34 @@ function setHybridModel(taskId, modelId) {
   if (!window._hybridModels) window._hybridModels = {};
   window._hybridModels[taskId] = modelId;
   updateHybridRouting();
+}
+
+function updateDataStatus() {
+  const el = document.getElementById('data-status');
+  if (!el) return;
+  const p = window._priceStatus;
+  const r = window._rateStatus;
+  const parts = [];
+  if (p) {
+    const pDot = p.live === p.total ? '🟢' : p.live > 0 ? '🟡' : '🔴';
+    parts.push(`${pDot} Prices: ${p.live}/${p.total} live${p.date ? ' · '+p.date : ''}`);
+    if (p.unmatched && p.unmatched.length) {
+      parts.push(`<span style="color:var(--amber);">⚠ Unmatched: ${p.unmatched.join(', ')}</span>`);
+    }
+  } else {
+    parts.push('⏳ Prices: loading…');
+  }
+  if (r) {
+    parts.push(`${r.live ? '🟢' : '🟡'} Rates: ${r.live ? 'live' : 'fallback · '+r.date}`);
+  } else {
+    parts.push('⏳ Rates: loading…');
+  }
+  // Also update footer
+  const footer = document.getElementById('rates-updated');
+  if (footer && p && r) {
+    footer.textContent = `Prices: ${p.live}/${p.total} live · Rates: ${r.live ? 'live' : 'fallback'} · ${p.date || r.date}`;
+  }
+  el.innerHTML = parts.join('<br>');
 }
 
 function updateBridge() {
