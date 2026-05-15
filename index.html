@@ -1,3 +1,4 @@
+<!-- © 2026 Büchemeier Consulting. All rights reserved. buchemeierconsulting.com -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -593,6 +594,8 @@ footer a:hover{color:var(--text2)}
 
             <div style="font-size:11px;color:var(--text3);padding:8px 10px;background:rgba(255,255,255,0.02);border-radius:4px;line-height:1.6;">All input estimates include system prompt overhead (typically 200–800 tokens/call). Actual costs vary with prompt design, document length and retry frequency.</div>
 
+            <div style="font-size:11px;color:var(--text3);padding:8px 10px;background:rgba(255,255,255,0.02);border-radius:4px;line-height:1.6;margin-top:8px;">This simulator models active workflow-driven AI usage and inference consumption. Seat-based AI subscriptions (e.g. Copilot, ChatGPT Team, Gemini Workspace) may include bundled usage and are therefore not fully reflected in inference-based estimates.</div>
+
           </div>
         </div>
         <div class="task-grid" id="task-grid"></div>
@@ -945,6 +948,7 @@ footer a:hover{color:var(--text2)}
 </div>
 
 <script>
+// © 2026 Büchemeier Consulting. All rights reserved.
 let currentStep = 1;
 function goToStep(n) {
   currentStep = n;
