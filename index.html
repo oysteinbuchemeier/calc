@@ -628,7 +628,8 @@ footer a:hover{color:var(--text2)}
         <div style="margin-top:8px;font-size:12px;color:var(--text3);font-family:var(--mono);line-height:1.6;">Model selection affects inference cost only. Output quality, latency and data residency vary by provider.</div>
       </div>
       <div class="rec-model-panel" id="rec-model-panel">
-        <div class="rec-model-label">Model match</div>
+        <div class="rec-model-label">Lowest cost model for this volume</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.6;">Automatically selects the cheapest available model for the selected workload. Always shows cost vs selected model. No capability or quality evaluation.</div>
         <div class="rec-model-name" id="rec-model-name">—</div>
         <div class="rec-model-reason" id="rec-model-reason">—</div>
         <div class="rec-model-saving" id="rec-model-saving"></div>
@@ -660,6 +661,7 @@ footer a:hover{color:var(--text2)}
       </div>
       <div class="panel">
         <div class="panel-title">Compare two models</div>
+        <p style="font-size:11px;color:var(--text3);margin-bottom:14px;line-height:1.6;">Side-by-side cost comparison of two models. Price-only scenario modelling. Opens OpenRouter for deeper benchmarking, including context window, latency, and capability data.</p>
         <div class="compare-row">
           <div class="compare-col">
             <div class="section-label" style="margin-bottom:6px">Model A</div>
@@ -677,7 +679,7 @@ footer a:hover{color:var(--text2)}
       <!-- HYBRID MODEL ROUTING -->
       <div class="panel" id="hybrid-panel" style="display:none;">
         <div class="panel-title">Hybrid model routing</div>
-        <p style="font-size:12px;color:var(--text3);margin-bottom:6px;line-height:1.5;">Price-only scenario modelling. Does not evaluate quality or architectural fit.</p>
+        <p style="font-size:11px;color:var(--text3);margin-bottom:6px;line-height:1.6;">Simulates different models per task based on configuration. Price-only scenario modelling. Does not reflect real-world capability, latency, or suitability.</p>
         <p style="font-size:12px;color:var(--text3);margin-bottom:6px;line-height:1.5;">Shows the cost effect of assigning different models per workflow. Monthly cost estimate is based on the single model selected above.</p>
         <p style="font-size:12px;font-family:var(--mono);color:var(--amber);margin-bottom:14px;">Defaults based on lowest-cost model assumptions per task category.</p>
         <div id="hybrid-task-list"></div>
@@ -1135,56 +1137,28 @@ function updateRecommendedModel() {
   const active=TASKS.filter(t=>(taskRuns[t.id]||0)>0);
   if(!active.length){panel.classList.remove('visible');return;}
 
-  const totalRuns=active.reduce((s,t)=>s+taskRuns[t.id],0);
-  const agentPct=active.filter(t=>t.id.startsWith('agent')).reduce((s,t)=>s+taskRuns[t.id],0)/totalRuns;
-  const avgInTok=active.reduce((s,t)=>s+t.inTok*taskRuns[t.id],0)/totalRuns;
-
-  // Price-agnostic recommendation: pick cheapest model that fits complexity
-  // Sort models by input price ascending
+  // Price-only: find cheapest model by input price
   const sorted = [...MODELS].sort((a,b) => a.inP - b.inP);
+  const cheapest = sorted[0];
 
-  let recId, reason;
-  if (agentPct > 0.3 || avgInTok > 8000) {
-    // Complex — recommend mid-range by price (skip bottom 2)
-    const midRange = sorted.filter(m => m.inP >= 0.5 && m.inP <= 5.0);
-    const rec = midRange.length ? midRange[0] : sorted[Math.floor(sorted.length/2)];
-    recId = rec.id;
-    reason = `Complex workflows and high context volume. Recommended based on lowest cost model with sufficient capability for this task mix.`;
-  } else if (avgInTok < 1500 && agentPct === 0) {
-    // Simple — recommend cheapest
-    recId = sorted[0].id;
-    reason = `Short, high-volume tasks. Recommended based on lowest cost model for this task mix.`;
-  } else {
-    // Balanced — recommend second cheapest
-    const affordable = sorted.filter(m => m.inP >= 0.3);
-    recId = (affordable[0] || sorted[0]).id;
-    reason = `Balanced task mix. Recommended based on lowest cost model suitable for this combination.`;
-  }
-
-  const rec=MODELS.find(m=>m.id===recId);
-  const cur=sel.model ? MODELS.find(m=>m.id===sel.model) : null;
-  const recMonthly=TASKS.reduce((s,t)=>{const r=taskRuns[t.id]||0;if(!r)return s;return s+calcCost(t,rec,sel.ctx,sel.batch,sel.cachePct).runCost*r*sel.days;},0);
+  const cheapestMonthly=TASKS.reduce((s,t)=>{const r=taskRuns[t.id]||0;if(!r)return s;return s+calcCost(t,cheapest,sel.ctx,sel.batch,sel.cachePct).runCost*r*sel.days;},0);
   const curMonthly=totalMonthly();
-  const saving=curMonthly-recMonthly;
+  const saving=curMonthly-cheapestMonthly;
 
-  document.getElementById('rec-model-name').textContent=rec.full;
-  document.getElementById('rec-model-reason').textContent=reason;
+  document.getElementById('rec-model-name').textContent=cheapest.full;
+  document.getElementById('rec-model-reason').textContent='Lowest cost model available. Does not account for capability, quality or architectural fit.';
 
   const savingEl=document.getElementById('rec-model-saving');
   savingEl.style.color='var(--accent2)';
   if (!sel.model) {
     savingEl.textContent='';
-  } else if(recId===sel.model) {
-    savingEl.textContent='You\'re on the recommended model';
+  } else if(cheapest.id===sel.model) {
+    savingEl.textContent='You\'re on the lowest cost model';
     savingEl.style.color='var(--green)';
+  } else if(saving>0.01) {
+    savingEl.textContent=`Switching to ${cheapest.name} saves ${cx(saving)}/month`;
   } else {
-    const diff=Math.abs(saving);
-    const cheaper=saving>0.01;
-    savingEl.textContent=cheaper
-      ? `Switching to ${rec.name} saves ${cx(diff)}/month`
-      : saving<-0.01
-        ? `${cur ? cur.name : 'Current model'} costs ${cx(diff)}/month more than recommended`
-        : 'Similar cost to recommended model';
+    savingEl.textContent='Similar cost to current model';
   }
   panel.classList.add('visible');
 }
