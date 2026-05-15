@@ -473,6 +473,7 @@ footer a:hover{color:var(--text2)}
   <div class="hero-eyebrow">AI Operating Cost Estimator</div>
   <h1>What does AI actually cost?</h1>
   <p>Configure workflows, volume and model to estimate your monthly AI spend.</p>
+  <p style="font-size:12px;color:var(--text3);margin-top:10px;font-family:var(--mono);">Models inference cost only. Model selection, quality and architectural fit require context beyond what this tool provides.</p>
 </div>
 
 <div class="steps-wrap">
@@ -604,7 +605,7 @@ footer a:hover{color:var(--text2)}
         <div class="panel-title">Model</div>
         <div class="model-row" id="model-row"></div>
         <div id="model-desc" style="font-size:12px;color:var(--text3);margin-top:10px;font-family:var(--mono);"></div>
-        <div style="margin-top:8px;padding:8px 10px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:6px;font-size:12px;color:var(--text3);font-family:var(--mono);">⚠ Model prices change frequently — last updated May 2026. Verify current pricing at provider documentation before budgeting.</div>
+        <div style="margin-top:8px;font-size:12px;color:var(--text3);font-family:var(--mono);line-height:1.6;">Model selection affects inference cost only. Output quality, latency and data residency vary by provider.</div>
       </div>
       <div class="rec-model-panel" id="rec-model-panel">
         <div class="rec-model-label">Model match</div>
@@ -656,7 +657,8 @@ footer a:hover{color:var(--text2)}
       <!-- HYBRID MODEL ROUTING -->
       <div class="panel" id="hybrid-panel" style="display:none;">
         <div class="panel-title">Hybrid model routing</div>
-        <p style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.5;">Assign a different model to each workflow. Most deployments use cheaper models for simple tasks and reserve powerful models for complex ones.</p>
+        <p style="font-size:12px;color:var(--text3);margin-bottom:6px;line-height:1.5;">A price-only "what if" — shows the cost effect of assigning different models per workflow. Does not account for quality, capability or suitability.</p>
+        <div style="font-size:12px;font-family:var(--mono);color:var(--amber);margin-bottom:14px;">Defaults based on price only. Adjust to match your actual architecture.</div>
         <div id="hybrid-task-list"></div>
         <div id="hybrid-result" style="margin-top:12px;"></div>
       </div>
@@ -884,7 +886,6 @@ footer a:hover{color:var(--text2)}
 <footer>
   <span>© 2026 Büchemeier Consulting · <a href="https://www.linkedin.com/in/oystein-buchemeier/" target="_blank">LinkedIn</a></span>
   <span>Exchange rates &amp; model prices updated live · <span id="rates-updated">Loading…</span></span>
-  <span>For simulation purposes only. Not financial advice.</span>
 </footer>
 
 <!-- MODAL -->
@@ -961,14 +962,14 @@ const TASKS = [
 ];
 
 const MODELS = [
-  {id:'haiku',    name:'Claude Haiku',  full:'Claude Haiku 4.5',        inP:1.00,  outP:5.00,  note:'$1.00 / $5.00 per 1M tokens',   badge:'Fast',     orId:'anthropic/claude-haiku-4-5'},
-  {id:'sonnet',   name:'Claude Sonnet', full:'Claude Sonnet 4.6',       inP:3.00,  outP:15.00, note:'$3.00 / $15.00 per 1M tokens',  badge:'Balanced', orId:'anthropic/claude-sonnet-4-6'},
-  {id:'opus',     name:'Claude Opus',   full:'Claude Opus 4.7',         inP:5.00,  outP:25.00, note:'$5.00 / $25.00 per 1M tokens',  badge:'Powerful', orId:'anthropic/claude-opus-4-7'},
+  {id:'haiku',    name:'Claude Haiku',  full:'Claude Haiku 4.5',        inP:1.00,  outP:5.00,  note:'$1.00 / $5.00 per 1M tokens', badge:null,     orId:'anthropic/claude-haiku-4-5'},
+  {id:'sonnet',   name:'Claude Sonnet', full:'Claude Sonnet 4.6',       inP:3.00,  outP:15.00, note:'$3.00 / $15.00 per 1M tokens', badge:null, orId:'anthropic/claude-sonnet-4-6'},
+  {id:'opus',     name:'Claude Opus',   full:'Claude Opus 4.7',         inP:5.00,  outP:25.00, note:'$5.00 / $25.00 per 1M tokens', badge:null, orId:'anthropic/claude-opus-4-7'},
   {id:'gpt55',    name:'GPT-5.5',       full:'OpenAI GPT-5.5',          inP:5.00,  outP:30.00, note:'$5.00 / $30.00 per 1M tokens',  badge:null,       orId:'openai/gpt-5.5'},
   {id:'mini',     name:'GPT-4o mini',   full:'OpenAI GPT-4o mini',      inP:0.15,  outP:0.60,  note:'$0.15 / $0.60 per 1M tokens',   badge:null,       orId:'openai/gpt-4o-mini'},
   {id:'g-flash',  name:'Gemini Flash',  full:'Google Gemini 2.5 Flash', inP:0.30,  outP:2.50,  note:'$0.30 / $2.50 per 1M tokens',   badge:null,       orId:'google/gemini-2.5-flash'},
   {id:'g-pro',    name:'Gemini Pro',    full:'Google Gemini 3.1 Pro',   inP:2.00,  outP:12.00, note:'$2.00 / $12.00 per 1M tokens',  badge:null,       orId:'google/gemini-3.1-pro'},
-  {id:'deepseek', name:'DeepSeek V4',   full:'DeepSeek V4 Flash',       inP:0.14,  outP:0.28,  note:'$0.14 / $0.28 per 1M tokens',   badge:'Cheapest', orId:'deepseek/deepseek-v4-flash'},
+  {id:'deepseek', name:'DeepSeek V4',   full:'DeepSeek V4 Flash',       inP:0.14,  outP:0.28,  note:'$0.14 / $0.28 per 1M tokens', badge:null, orId:'deepseek/deepseek-v4-flash'},
 ];
 
 async function fetchModelPrices() {
@@ -992,10 +993,7 @@ async function fetchModelPrices() {
       }
     });
     if (updated > 0) {
-      // Find cheapest and update badge
-      const cheapest = MODELS.reduce((min, m) => m.inP < min.inP ? m : min, MODELS[0]);
-      MODELS.forEach(m => { if (m.badge === 'Cheapest') m.badge = null; });
-      cheapest.badge = 'Cheapest';
+      // Badges removed — price-agnostic UI
       renderModels();
       update();
       const el = document.getElementById('rates-updated');
@@ -1007,7 +1005,7 @@ async function fetchModelPrices() {
 }
 
 
-let sel = {model:'sonnet', ctx:1.0, days:22, batch:false, cachePct:0}; // ctx fixed at 1.0
+let sel = {model:null, ctx:1.0, days:22, batch:false, cachePct:0}; // ctx fixed at 1.0
 const taskRuns = {}, taskVol = {};
 TASKS.forEach(t => { taskRuns[t.id]=0; taskVol[t.id]={employees:0, usesPerDay:1}; });
 
@@ -1111,25 +1109,35 @@ function updateRecommendedModel() {
   const panel=document.getElementById('rec-model-panel');
   const active=TASKS.filter(t=>(taskRuns[t.id]||0)>0);
   if(!active.length){panel.classList.remove('visible');return;}
+
   const totalRuns=active.reduce((s,t)=>s+taskRuns[t.id],0);
   const agentPct=active.filter(t=>t.id.startsWith('agent')).reduce((s,t)=>s+taskRuns[t.id],0)/totalRuns;
   const avgInTok=active.reduce((s,t)=>s+t.inTok*taskRuns[t.id],0)/totalRuns;
 
-  // Recommend based on task complexity
+  // Price-agnostic recommendation: pick cheapest model that fits complexity
+  // Sort models by input price ascending
+  const sorted = [...MODELS].sort((a,b) => a.inP - b.inP);
+
   let recId, reason;
-  if(agentPct>0.3||avgInTok>8000) {
-    recId='sonnet';
-    reason='Complex workflows and large context. Sonnet balances capability and cost for this mix.';
-  } else if(avgInTok<1500&&agentPct===0) {
-    recId='haiku';
-    reason='Short, high-volume tasks. Claude Haiku handles these well at lower cost.';
+  if (agentPct > 0.3 || avgInTok > 8000) {
+    // Complex — recommend mid-range by price (skip bottom 2)
+    const midRange = sorted.filter(m => m.inP >= 0.5 && m.inP <= 5.0);
+    const rec = midRange.length ? midRange[0] : sorted[Math.floor(sorted.length/2)];
+    recId = rec.id;
+    reason = `Complex workflows and high context volume. Recommended based on lowest cost model with sufficient capability for this task mix.`;
+  } else if (avgInTok < 1500 && agentPct === 0) {
+    // Simple — recommend cheapest
+    recId = sorted[0].id;
+    reason = `Short, high-volume tasks. Recommended based on lowest cost model for this task mix.`;
   } else {
-    recId='sonnet';
-    reason='Balanced task mix. Claude Sonnet offers strong quality-to-cost ratio for this combination.';
+    // Balanced — recommend second cheapest
+    const affordable = sorted.filter(m => m.inP >= 0.3);
+    recId = (affordable[0] || sorted[0]).id;
+    reason = `Balanced task mix. Recommended based on lowest cost model suitable for this combination.`;
   }
 
   const rec=MODELS.find(m=>m.id===recId);
-  const cur=MODELS.find(m=>m.id===sel.model);
+  const cur=sel.model ? MODELS.find(m=>m.id===sel.model) : null;
   const recMonthly=TASKS.reduce((s,t)=>{const r=taskRuns[t.id]||0;if(!r)return s;return s+calcCost(t,rec,sel.ctx,sel.batch,sel.cachePct).runCost*r*sel.days;},0);
   const curMonthly=totalMonthly();
   const saving=curMonthly-recMonthly;
@@ -1139,7 +1147,9 @@ function updateRecommendedModel() {
 
   const savingEl=document.getElementById('rec-model-saving');
   savingEl.style.color='var(--accent2)';
-  if(recId===sel.model) {
+  if (!sel.model) {
+    savingEl.textContent='';
+  } else if(recId===sel.model) {
     savingEl.textContent='You\'re on the recommended model';
     savingEl.style.color='var(--green)';
   } else {
@@ -1148,7 +1158,7 @@ function updateRecommendedModel() {
     savingEl.textContent=cheaper
       ? `Switching to ${rec.name} saves ${cx(diff)}/month`
       : saving<-0.01
-        ? `${cur.name} costs ${cx(diff)}/month more than recommended`
+        ? `${cur ? cur.name : 'Current model'} costs ${cx(diff)}/month more than recommended`
         : 'Similar cost to recommended model';
   }
   panel.classList.add('visible');
@@ -1239,8 +1249,8 @@ function updateSystemSummary() {
 
   const isHybrid = window._hybridModels &&
     Object.keys(window._hybridModels).some(id => window._hybridModels[id] !== sel.model && (taskRuns[id]||0) > 0);
-  const modelDisplay = isHybrid ? 'Hybrid routing' : (model ? model.name : sel.model);
-  const modelNote = isHybrid ? 'Per-task model assignment' : (model ? model.note : '');
+  const modelDisplay = model ? model.name : sel.model;
+  const modelNote = isHybrid ? model.note + ' · Hybrid routing configured in step 2' : (model ? model.note : '');
 
   // Architecture class
   let archClass = 'Single-workflow integration';
@@ -1394,15 +1404,20 @@ function updateTopDrivers() {
 }
 
 function getDefaultHybridModel(taskId) {
-  // Intelligent defaults based on task complexity
-  if (taskId === 'agent-complex') return 'sonnet';
-  if (taskId === 'agent-simple') return 'sonnet';
-  if (taskId === 'rag') return 'sonnet';
-  if (taskId === 'code') return 'sonnet';
-  if (taskId === 'sql') return 'haiku';
-  if (taskId === 'apidoc') return 'sonnet';
-  // All everyday tasks → haiku
-  return 'haiku';
+  // Price-agnostic defaults: cheapest suitable model per task type
+  const sorted = [...MODELS].sort((a,b) => a.inP - b.inP);
+  const cheapest = sorted[0].id;  // DeepSeek or similar
+  const midRange = sorted.filter(m => m.inP >= 0.5 && m.inP <= 5.0);
+  const midId = midRange.length ? midRange[0].id : sorted[Math.floor(sorted.length/2)].id;
+
+  // Complex tasks need mid-range capability
+  if (taskId === 'agent-complex') return midId;
+  if (taskId === 'agent-simple') return midId;
+  if (taskId === 'rag') return midId;
+  if (taskId === 'code') return midId;
+  if (taskId === 'apidoc') return midId;
+  // All other tasks → cheapest model
+  return cheapest;
 }
 
 function updateHybridRouting() {
@@ -1411,7 +1426,7 @@ function updateHybridRouting() {
   const result= document.getElementById('hybrid-result');
   if (!panel || !list) return;
   const active = TASKS.filter(t => (taskRuns[t.id]||0) > 0);
-  if (!active.length) { panel.style.display='none'; return; }
+  if (!active.length || !sel.model) { panel.style.display='none'; return; }
   panel.style.display='block';
 
   // Init hybrid models with intelligent defaults if not set
@@ -1446,13 +1461,18 @@ function updateHybridRouting() {
     const m = MODELS.find(x=>x.id===mid) || MODELS.find(x=>x.id===sel.model);
     return s + calcCost(t, m, sel.ctx, sel.batch, sel.cachePct).runCost * taskRuns[t.id] * sel.days;
   }, 0);
-  const singleCost = totalMonthly();
+  // singleCost always uses sel.model (ignore hybrid routing)
+  const singleModel = MODELS.find(m=>m.id===sel.model);
+  const singleCost = active.reduce((s,t) => {
+    return s + calcCost(t, singleModel, sel.ctx, sel.batch, sel.cachePct).runCost * taskRuns[t.id] * sel.days;
+  }, 0);
   const diff = singleCost - hybridCost;
   const pct = singleCost > 0 ? Math.round(Math.abs(diff)/singleCost*100) : 0;
 
-  result.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+  result.innerHTML = `<div style="font-size:12px;color:var(--text3);margin-bottom:10px;font-family:var(--mono);">Baseline estimate uses ${MODELS.find(m=>m.id===sel.model)?.name} across all tasks. Hybrid routing shows potential savings from per-task model assignment.</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;text-align:center;">
-      <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Single model (${MODELS.find(m=>m.id===sel.model)?.name})</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Baseline (${MODELS.find(m=>m.id===sel.model)?.name})</div>
       <div style="font-size:16px;font-weight:500;font-family:var(--mono);color:var(--text)">${cx(singleCost)}</div>
     </div>
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;text-align:center;">
@@ -1786,16 +1806,29 @@ function updateSavings() {
 }
 
 function totalMonthly() {
+  if (!sel.model) return 0;
+  const model=MODELS.find(m=>m.id===sel.model);
+  if (!model) return 0;
   return TASKS.reduce((s,t)=>{
     const r=taskRuns[t.id]||0; if(!r) return s;
-    const mid=(window._hybridModels&&window._hybridModels[t.id])||sel.model;
-    const m=MODELS.find(x=>x.id===mid)||MODELS.find(x=>x.id===sel.model);
-    return s+calcCost(t,m,sel.ctx,sel.batch,sel.cachePct).runCost*r*sel.days;
+    return s+calcCost(t,model,sel.ctx,sel.batch,sel.cachePct).runCost*r*sel.days;
   },0);
 }
 
 function update() {
-  const model=MODELS.find(m=>m.id===sel.model);
+  const model=sel.model ? MODELS.find(m=>m.id===sel.model) : null;
+  if (!model) {
+    // No model selected yet — show placeholder
+    document.getElementById('m-monthly').textContent = cx(0);
+    const perRunEl = document.getElementById('m-per-run');
+    const perDayEl = document.getElementById('m-per-day');
+    if (perRunEl) perRunEl.textContent = '';
+    if (perDayEl) perDayEl.textContent = '';
+    const modelLabel = document.getElementById('m-model-label');
+    if (modelLabel) modelLabel.textContent = 'Select a model in step 2';
+    document.getElementById('m-monthly-sub') && (document.getElementById('m-monthly-sub').textContent = '');
+    return;
+  }
   let tIn=0,tOut=0,tInC=0,tOutC=0,tRuns=0,active=0;
   TASKS.forEach(t=>{
     const r=taskRuns[t.id]||0; if(!r) return;
@@ -1809,11 +1842,7 @@ function update() {
   if (perRunEl) perRunEl.textContent = tRuns>0 ? cx(monthly/(tRuns*sel.days))+' / run' : '';
   if (perDayEl) perDayEl.textContent = tRuns>0 ? cx(monthly/sel.days)+' / day' : '';
   const modelLabel = document.getElementById('m-model-label');
-  if (modelLabel) {
-    const isHybrid = window._hybridModels &&
-      Object.keys(window._hybridModels).some(id => window._hybridModels[id] !== sel.model && (taskRuns[id]||0) > 0);
-    modelLabel.textContent = isHybrid ? 'Hybrid routing' : model.full;
-  }
+  if (modelLabel) modelLabel.textContent = model.full;
   const runsDay = document.getElementById('m-runs-day');
   if (runsDay) runsDay.textContent = tRuns > 0 ? tRuns.toLocaleString() : '—';
   const workflowsEl = document.getElementById('m-workflows');
@@ -1962,9 +1991,9 @@ function setTaskVol(id,field,val) {
 }
 
 function renderModels() {
-  document.getElementById('model-row').innerHTML=MODELS.map(m=>`<button class="model-pill${m.id===sel.model?' active':''}" onclick="pick('model','${m.id}')">${m.name}${m.badge?`<span class="pill-badge">${m.badge}</span>`:''}</button>`).join('');
-  const m=MODELS.find(x=>x.id===sel.model);
-  document.getElementById('model-desc').textContent=m.full+' — '+m.note;
+  document.getElementById('model-row').innerHTML=MODELS.map(m=>`<button class="model-pill${m.id===sel.model?' active':''}" onclick="pick('model','${m.id}')">${m.name}</button>`).join('');
+  const m=sel.model ? MODELS.find(x=>x.id===sel.model) : null;
+  document.getElementById('model-desc').textContent = m ? m.full+' — '+m.note : 'Select a model above to see pricing details.';
 }
 
 function shareURL() {
@@ -2014,7 +2043,7 @@ MODELS.forEach(m=>{
   sB.innerHTML+=`<option value="${m.id}">${m.full}</option>`;
 });
 // Default: current model vs cheapest
-sA.value = sel.model;
+sA.value = sel.model || 'sonnet';
 sB.value = 'deepseek';
 
 loadFromURL();
