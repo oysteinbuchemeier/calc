@@ -678,7 +678,7 @@ footer a:hover{color:var(--text2)}
         </div>
         <div class="roi-inputs">
           <div class="roi-input-row">
-            <span class="roi-input-label">Users using AI <span style="font-size:11px;color:var(--text3);font-family:var(--mono);">(from tasks)</span></span>
+            <span class="roi-input-label">Active AI users <span style="font-size:11px;color:var(--text3);font-family:var(--mono);">(from tasks)</span></span>
             <span class="roi-input" id="roi-employees-display" style="display:inline-flex;align-items:center;justify-content:flex-end;background:var(--bg3);border:1px solid var(--border);cursor:default;color:var(--accent2);">0</span>
             <span class="roi-unit">people</span>
           </div>
@@ -766,7 +766,6 @@ footer a:hover{color:var(--text2)}
 
       <!-- NEXT STEP -->
       <div style="background:rgba(108,164,171,0.06);border:1px solid rgba(108,164,171,0.2);border-radius:var(--radius-lg);padding:1.5rem;display:flex;flex-direction:column;gap:12px;">
-        <div style="font-size:14px;color:var(--text2);line-height:1.5;">Ready to go from estimate to decision?</div>
         <button onclick="openModal()" style="background:var(--accent);color:#fff;border:none;padding:13px 20px;border-radius:8px;font-size:14px;font-weight:500;font-family:var(--sans);cursor:pointer;width:100%;transition:opacity 0.15s;" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">Book a free 30-minute session →</button>
       </div>
 
@@ -1404,7 +1403,7 @@ function updateTopDrivers() {
       <span style="font-size:13px;color:var(--text2);">${s.label}</span>
       <span style="font-size:13px;font-family:var(--mono);color:var(--green);">−${s.pct}% · ${cx(s.save)}/mo</span>
     </div>`).join('')}` : ''}
-    <div style="font-size:12px;color:var(--text3);padding:8px 10px;background:rgba(255,255,255,0.02);border-radius:6px;margin-top:4px;">Model routing optimisation — see <strong style="color:var(--text2);">Hybrid model routing</strong> in step 2.</div>`;
+    <div style="font-size:12px;color:var(--text3);padding:8px 10px;background:rgba(255,255,255,0.02);border-radius:6px;margin-top:4px;">Hybrid model routing configured in step 2 can further reduce inference cost.</div>`;
 }
 
 function getDefaultHybridModel(taskId) {
@@ -1502,27 +1501,45 @@ function updateDataStatus() {
   if (!el) return;
   const p = window._priceStatus;
   const r = window._rateStatus;
-  const parts = [];
+  const lines = [];
+
   if (p) {
-    const pDot = p.live === p.total ? '🟢' : p.live > 0 ? '🟡' : '🔴';
-    parts.push(`${pDot} Prices: ${p.live}/${p.total} live${p.date ? ' · '+p.date : ''}`);
-    if (p.unmatched && p.unmatched.length) {
-      parts.push(`<span style="color:var(--amber);">⚠ Unmatched: ${p.unmatched.join(', ')}</span>`);
+    if (p.live === p.total) {
+      lines.push(`🟢 ${p.live} model prices live · Updated ${p.date}`);
+    } else if (p.live > 0) {
+      lines.push(`🟡 ${p.live}/${p.total} model prices live · Updated ${p.date}`);
+      if (p.unmatched && p.unmatched.length) {
+        const names = p.unmatched.map(u => u.split(' (')[0]).join(', ');
+        lines.push(`<span style="color:var(--amber);">Unavailable: ${names} — using static values</span>`);
+      }
+    } else {
+      lines.push(`🔴 Live pricing unavailable — using static values`);
+      if (p.unmatched && p.unmatched.length) {
+        const names = p.unmatched.map(u => u.split(' (')[0]).join(', ');
+        lines.push(`<span style="color:#f87171;">Affected: ${names}</span>`);
+      }
     }
   } else {
-    parts.push('⏳ Prices: loading…');
+    lines.push('⏳ Loading model prices…');
   }
+
   if (r) {
-    parts.push(`${r.live ? '🟢' : '🟡'} Rates: ${r.live ? 'live' : 'fallback · '+r.date}`);
+    if (r.live) {
+      lines.push(`🟢 Exchange rates: live`);
+    } else {
+      lines.push(`🔴 Exchange rates unavailable — using fallback values`);
+    }
   } else {
-    parts.push('⏳ Rates: loading…');
+    lines.push('⏳ Loading exchange rates…');
   }
-  // Also update footer
+
+  // Update footer
   const footer = document.getElementById('rates-updated');
   if (footer && p && r) {
-    footer.textContent = `Prices: ${p.live}/${p.total} live · Rates: ${r.live ? 'live' : 'fallback'} · ${p.date || r.date}`;
+    footer.textContent = `${p.live}/${p.total} model prices live · Rates: ${r.live ? 'live' : 'fallback'} · ${p.date || r.date || ''}`;
   }
-  el.innerHTML = parts.join('<br>');
+
+  el.innerHTML = lines.join('<br>');
 }
 
 function updateBridge() {
@@ -1564,7 +1581,7 @@ function updateBridge() {
     </div>
     <div style="background:rgba(45,212,160,0.08);border:1px solid rgba(45,212,160,0.2);border-radius:var(--radius);padding:12px 16px;">
       <div class="bridge-ratio">1 ${currency.symbol} AI cost → ~${Math.round(ratio)} ${currency.symbol} capacity value</div>
-      <div class="bridge-label">Every unit of AI operating cost corresponds to approximately ${Math.round(ratio)}× in modelled capacity impact — at ${pct}% efficiency improvement across ${maxEmployees} affected employees.</div>
+      <div class="bridge-label">Based on current assumptions, each {cur_sym}1 of AI operating cost corresponds to ~{ratio}× in modelled annual capacity impact.</div>
     </div>`;
 }
 
@@ -1824,13 +1841,13 @@ function updateSavings() {
         <div style="font-size:18px;font-weight:500;font-family:var(--mono);color:var(--text)">${cx(total)}</div>
       </div>
       <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
-        <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">Estimated AI modelled spend</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">Estimated monthly AI spend</div>
         <div style="font-size:18px;font-weight:500;font-family:var(--mono);color:var(--accent2)">${cx(opt)}</div>
       </div>
       <div style="grid-column:1/-1;${diff>0?'background:rgba(45,212,160,0.08);border:1px solid rgba(45,212,160,0.25);':'background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);'}border-radius:var(--radius);padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
         <div>
-          <div style="font-size:13px;color:${diff>0?'var(--green)':'#f87171'};font-weight:500;">${diff>0?'Potential monthly difference':'Higher than current spend'}</div>
-          <div style="font-size:11px;color:${diff>0?'rgba(45,212,160,0.6)':'rgba(248,113,113,0.6)'};margin-top:2px;">${pct}% ${diff>0?'lower':'higher'} operating cost</div>
+          <div style="font-size:13px;color:${diff>0?'var(--green)':'#f87171'};font-weight:500;">${diff>0?'Difference vs current spend':'Difference vs current spend'}</div>
+          <div style="font-size:11px;color:${diff>0?'rgba(45,212,160,0.6)':'rgba(248,113,113,0.6)'};margin-top:2px;">${diff>0?'−':'+'} ${pct}% vs current spend</div>
         </div>
         <div style="font-size:22px;font-weight:500;font-family:var(--mono);color:${diff>0?'var(--green)':'#f87171'};">${cx(Math.abs(diff))}</div>
       </div>
