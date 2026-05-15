@@ -340,7 +340,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .pdf-btn:hover{border-color:var(--border2);color:var(--text);background:var(--bg3)}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:center;justify-content:center;padding:1rem}
 .modal-overlay.open{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);width:100%;max-width:460px;padding:2rem;position:relative}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);width:100%;max-width:460px;padding:2rem;position:relative;max-height:90vh;overflow-y:auto}
 .modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;line-height:1;padding:4px}
 .modal-close:hover{color:var(--text)}
 .modal-eyebrow{font-family:var(--mono);font-size:12px;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px}
@@ -2185,7 +2185,7 @@ function buildEstimateParams(toEmail) {
   return {
     to_email:toEmail,
     // Tasks
-    task:active.map(t=>`${t.name}: ${taskRuns[t.id]}/day`).join(', ')||'None',
+    task:active.map(t=>`${t.name}: ${taskRuns[t.id]}/day`).join('\n')||'None',
     task_count:active.length,
     active_users:maxUsers||'—',
     workflow_complexity:complexity,
