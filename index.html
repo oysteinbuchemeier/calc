@@ -707,7 +707,7 @@ footer a:hover{color:var(--text2)}
           </div>
           <div class="roi-input-row">
             <span class="roi-input-label">Avg. fully-loaded cost per person</span>
-            <input class="roi-input" id="roi-rate" type="number" min="1" value="750000" oninput="updateROI()">
+            <input class="roi-input" id="roi-rate" type="number" min="1" value="750000" oninput="updateROI();updateBridge();updateSystemSummary()">
             <span class="roi-unit" id="roi-rate-unit">kr / yr</span>
           </div>
           <div style="padding:4px 0 8px;">
@@ -715,7 +715,7 @@ footer a:hover{color:var(--text2)}
               <span style="font-size:13px;color:var(--text2);">Estimated efficiency improvement</span>
               <span style="font-family:var(--mono);font-size:14px;color:var(--accent2);font-weight:500;" id="roi-pct-label">10%</span>
             </div>
-            <input type="range" id="roi-pct" min="5" max="40" step="5" value="10" oninput="updateROI()">
+            <input type="range" id="roi-pct" min="5" max="40" step="5" value="10" oninput="updateROI();updateBridge();updateSystemSummary()">
             <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:12px;color:var(--text3);">
               <span>5% — limited assistance</span><span>20% — integrated into workflows</span><span>40% — highly automated</span>
             </div>
@@ -2165,19 +2165,56 @@ function buildEstimateParams(toEmail) {
   const totalRuns=active.reduce((s,t)=>s+taskRuns[t.id],0);
   const curr=parseFloat(document.getElementById('cost-custom').value)||0;
   const currSaving=curr>0?curr/currency.rate-monthly:null;
-  const saving=curr>0?curr-monthly:null;
+  const maxUsers=Math.max(0,...TASKS.map(t=>taskVol[t.id]?.employees||0));
+  const isHybrid=window._hybridModels&&Object.keys(window._hybridModels).some(id=>window._hybridModels[id]!==sel.model&&(taskRuns[id]||0)>0);
+  const hasAgents=active.some(t=>t.id==='agent-complex');
+  const hasSimple=active.some(t=>t.id==='agent-simple');
+  const complexity=hasAgents?'Includes agentic workflows':hasSimple?'Includes simple automation':'Everyday tasks only';
+  const archClass=hasAgents&&active.length>=4?'Multi-workflow AI operating layer':hasAgents?'Agent-enabled workflow integration':active.length>=5?'Multi-workflow integration':active.length>=2?'Focused multi-workflow integration':'Single-workflow integration';
+
+  // Capacity
+  const pct=parseFloat(document.getElementById('roi-pct')?.value)||10;
+  const annualCostPerPerson=(parseFloat(document.getElementById('roi-rate')?.value)||0)/currency.rate;
+  const annualCapacity=annualCostPerPerson*maxUsers*(pct/100);
+  const aiAnnual=monthly*12;
+  const ratio=annualCapacity>0?Math.round(annualCapacity/aiAnnual):null;
+  const fteLow=((pct/100)*maxUsers*0.7).toFixed(1);
+  const fteHigh=((pct/100)*maxUsers*1.0).toFixed(1);
+  const aiAsPct=annualCapacity>0?Math.round(aiAnnual/annualCapacity*100):null;
+
   return {
     to_email:toEmail,
+    // Tasks
     task:active.map(t=>`${t.name}: ${taskRuns[t.id]}/day`).join(', ')||'None',
-    model:model.full, runs_per_day:totalRuns.toLocaleString(), working_days:sel.days,
-    monthly_cost:cx(monthly), daily_cost:cx(daily),
+    task_count:active.length,
+    active_users:maxUsers||'—',
+    workflow_complexity:complexity,
+    architecture_class:archClass,
+    // Model
+    model:model?model.full:'Not selected',
+    hybrid_routing:isHybrid?'Yes — per-task model assignment configured':'No',
+    // Volume
+    runs_per_day:totalRuns.toLocaleString(),
+    working_days:sel.days,
+    // Cost
+    monthly_cost:cx(monthly),
+    daily_cost:cx(daily),
     cost_per_run:totalRuns>0?cx(daily/totalRuns):cx(0),
+    // Tokens
     input_tokens:fmt(active.reduce((s,t)=>s+Math.round(t.inTok*sel.ctx)*taskRuns[t.id],0))+' /day',
     output_tokens:fmt(active.reduce((s,t)=>s+Math.round(t.outTok*sel.ctx)*taskRuns[t.id],0))+' /day',
+    // Optimisations
     batch_enabled:sel.batch?'Yes (−50% input)':'No',
     cache_enabled:sel.cachePct>0?`Yes (${sel.cachePct}% static context)`:'No',
+    // Current spend
     current_spend:curr>0?cx(curr)+'/mo':'Not provided',
     potential_saving:currSaving&&currSaving>0?cx(currSaving)+'/mo':'N/A',
+    // Capacity
+    efficiency_assumption:pct+'%',
+    annual_capacity:annualCapacity>0?cx(annualCapacity)+'/yr':'Not configured',
+    fte_equivalent:annualCapacity>0?`~${fteLow}–${fteHigh} FTE`:'Not configured',
+    capacity_ratio:ratio?`${ratio}×`:'Not configured',
+    ai_as_pct_capacity:aiAsPct?aiAsPct+'%':'Not configured',
   };
 }
 
