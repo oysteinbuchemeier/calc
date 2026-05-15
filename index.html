@@ -859,7 +859,7 @@ footer a:hover{color:var(--text2)}
     <span id="m-run" style="display:none"></span>
     <span id="m-daily" style="display:none"></span>
 
-    <button class="pdf-btn" onclick="printReport()">⬇ Download as PDF</button>
+    <button class="pdf-btn" onclick="printReport()">⬇ Open as PDF</button>
 
     <div class="email-panel">
       <div class="email-panel-title">Send estimate to yourself</div>
@@ -1653,7 +1653,6 @@ ${varHTML?`<section>
 </footer>
 </body></html>`);
     win.document.close();
-    setTimeout(() => win.print(), 500);
   }, 400);
 }
 
