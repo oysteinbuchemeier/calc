@@ -1616,7 +1616,13 @@ function printReport() {
 
 <section>
   <h2>Configured workflows</h2>
-  ${active.map(t=>`<div class="task-row"><span class="task-name">${t.name}</span><span class="task-runs">${taskRuns[t.id]}/day</span></div>`).join('')}
+  ${active.map(t=>{
+    const vol = taskVol[t.id]||{employees:0,usesPerDay:1};
+    const isAgent = t.id.startsWith('agent');
+    const isTech = ['code','sql','rag','apidoc'].includes(t.id);
+    const label = isAgent ? `${vol.employees} triggers × ${vol.usesPerDay}/day` : isTech ? `${vol.employees} devs × ${vol.usesPerDay}/day` : `${vol.employees} users × ${vol.usesPerDay}/day`;
+    return `<div class="task-row"><span class="task-name">${t.name}</span><span class="task-runs">${label} = ${taskRuns[t.id]}/day</span></div>`;
+  }).join('')}
   <div style="margin-top:6px;font-size:8pt;color:#888">Architecture: ${archClass}</div>
 </section>
 
