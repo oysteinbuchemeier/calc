@@ -518,13 +518,63 @@ footer a:hover{color:var(--text2)}
             <span class="methodology-toggle-icon">▾</span>
           </button>
           <div class="methodology-body" id="meth-body">
-            <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6;">Token estimates are based on typical enterprise usage patterns. Your actual costs will vary. Use this as a directional guide, not a contract.</p>
-            <div style="margin-bottom:12px;padding:10px 12px;background:rgba(108,164,171,0.06);border:1px solid rgba(108,164,171,0.15);border-radius:6px;font-size:12px;color:var(--text2);line-height:1.7;">
-              <strong style="color:var(--accent2);">What's included in each input estimate:</strong> system prompt + instructions + user content (document, question or data). Every AI request carries this overhead — the system prompt alone is typically 200–800 tokens per call.<br><br>
-              <strong style="color:var(--amber);">Everyday tasks</strong> — one API call per run. Input = system prompt + content. Output = the response.<br>
-              <strong style="color:var(--amber);">Automated workflows</strong> — multiple API calls per trigger. Simple: 3–4 calls (~18k tokens total). Complex: 8–10 calls (~80k tokens total). Context accumulates across steps.
+
+            <!-- LEVEL 1: Short visible summary -->
+            <div style="margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.8;">
+              Token estimates are directional — based on typical enterprise usage patterns.<br>
+              <span style="color:var(--text3);">Cost is driven by:</span>
+              <div style="margin-top:6px;display:flex;flex-direction:column;gap:3px;">
+                <span style="color:var(--text3);">· Prompt size and document/context volume</span>
+                <span style="color:var(--text3);">· Number of API calls per workflow trigger</span>
+                <span style="color:var(--text3);">· Workflow complexity and orchestration depth</span>
+                <span style="color:var(--amber);">· Automated workflows generate significantly higher token usage than single AI requests</span>
+              </div>
             </div>
-            <div id="meth-task-list"></div>
+
+            <!-- LEVEL 2: Expandable task tables -->
+            <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Everyday tasks — single API call per run</div>
+            <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px;">
+              <tr style="border-bottom:1px solid var(--border);">
+                <th style="text-align:left;padding:5px 6px;color:var(--text3);font-weight:500;">Task</th>
+                <th style="text-align:right;padding:5px 6px;color:var(--text3);font-weight:500;">Input</th>
+                <th style="text-align:right;padding:5px 6px;color:var(--text3);font-weight:500;">Output</th>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 6px;color:var(--text2);">Summarise document</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~8k</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~600</td></tr>
+              <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 6px;color:var(--text2);">First draft</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~600</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~1.2k</td></tr>
+              <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 6px;color:var(--text2);">Email drafting</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~400</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~350</td></tr>
+              <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 6px;color:var(--text2);">Answer question</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~4k</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~500</td></tr>
+              <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 6px;color:var(--text2);">Invoice processing</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~3k</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~400</td></tr>
+              <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 6px;color:var(--text2);">Translate</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~3k</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~2.8k</td></tr>
+              <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 6px;color:var(--text2);">Screen / filter</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~5k</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~300</td></tr>
+              <tr><td style="padding:5px 6px;color:var(--text2);">Feedback analysis</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~2k</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~600</td></tr>
+            </table>
+
+            <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Automated workflows — multiple API calls per trigger</div>
+            <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px;">
+              <tr style="border-bottom:1px solid var(--border);">
+                <th style="text-align:left;padding:5px 6px;color:var(--text3);font-weight:500;">Workflow</th>
+                <th style="text-align:right;padding:5px 6px;color:var(--text3);font-weight:500;">API calls</th>
+                <th style="text-align:right;padding:5px 6px;color:var(--text3);font-weight:500;">Total tokens</th>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 6px;color:var(--text2);">Simple workflow</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">3–4 calls</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~18k</td></tr>
+              <tr><td style="padding:5px 6px;color:var(--text2);">Complex workflow</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">8–10 calls</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~80k</td></tr>
+            </table>
+
+            <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Developer tasks — single API call per run</div>
+            <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px;">
+              <tr style="border-bottom:1px solid var(--border);">
+                <th style="text-align:left;padding:5px 6px;color:var(--text3);font-weight:500;">Task</th>
+                <th style="text-align:right;padding:5px 6px;color:var(--text3);font-weight:500;">Input</th>
+                <th style="text-align:right;padding:5px 6px;color:var(--text3);font-weight:500;">Output</th>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 6px;color:var(--text2);">Code generation</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~5k</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~1.2k</td></tr>
+              <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 6px;color:var(--text2);">SQL query</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~800</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~400</td></tr>
+              <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 6px;color:var(--text2);">RAG Q&amp;A</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~6k</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~700</td></tr>
+              <tr><td style="padding:5px 6px;color:var(--text2);">API documentation</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~4k</td><td style="text-align:right;padding:5px 6px;color:var(--text3);font-family:var(--mono);">~2k</td></tr>
+            </table>
+
+            <div style="font-size:11px;color:var(--text3);padding:8px 10px;background:rgba(255,255,255,0.02);border-radius:4px;line-height:1.6;">All input estimates include system prompt overhead (typically 200–800 tokens/call). Actual costs vary with prompt design, document length and retry frequency.</div>
+
           </div>
         </div>
         <div class="task-grid" id="task-grid"></div>
@@ -1187,6 +1237,11 @@ function updateSystemSummary() {
   const monthly = totalMonthly();
   const avgInTok = active.reduce((s,t) => s+t.inTok*(taskRuns[t.id]||0), 0) / totalRuns;
 
+  const isHybrid = window._hybridModels &&
+    Object.keys(window._hybridModels).some(id => window._hybridModels[id] !== sel.model && (taskRuns[id]||0) > 0);
+  const modelDisplay = isHybrid ? 'Hybrid routing' : (model ? model.name : sel.model);
+  const modelNote = isHybrid ? 'Per-task model assignment' : (model ? model.note : '');
+
   // Architecture class
   let archClass = 'Single-workflow integration';
   if (hasAgents && active.length >= 4) archClass = 'Multi-workflow AI operating layer';
@@ -1756,9 +1811,6 @@ function update() {
   const modelLabel = document.getElementById('m-model-label');
   if (modelLabel) {
     const isHybrid = window._hybridModels &&
-    Object.keys(window._hybridModels).some(id => window._hybridModels[id] !== sel.model && (taskRuns[id]||0) > 0);
-  const modelDisplay = isHybrid ? 'Hybrid routing' : model.name;
-  const modelNote = isHybrid ? 'Per-task model assignment — see step 2' : model.note;
       Object.keys(window._hybridModels).some(id => window._hybridModels[id] !== sel.model && (taskRuns[id]||0) > 0);
     modelLabel.textContent = isHybrid ? 'Hybrid routing' : model.full;
   }
