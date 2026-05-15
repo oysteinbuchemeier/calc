@@ -1520,10 +1520,141 @@ function updateDataStatus() {
 }
 
 function printReport() {
-  // Navigate to step 3 to ensure all panels are rendered
   goToStep(3);
-  // Wait for panels to render then print
-  setTimeout(() => window.print(), 400);
+  setTimeout(() => {
+    const model = MODELS.find(m=>m.id===sel.model);
+    const active = TASKS.filter(t=>(taskRuns[t.id]||0)>0);
+    const totalRuns = active.reduce((s,t)=>s+taskRuns[t.id],0);
+    const monthly = totalMonthly();
+    const maxUsers = Math.max(0,...TASKS.map(t=>taskVol[t.id]?.employees||0));
+    const pct = parseFloat(document.getElementById('roi-pct')?.value)||10;
+    const annualCostPerPerson = (parseFloat(document.getElementById('roi-rate')?.value)||0)/currency.rate;
+    const annualCapacity = annualCostPerPerson*maxUsers*(pct/100);
+    const aiAnnual = monthly*12;
+    const ratio = annualCapacity>0?Math.round(annualCapacity/aiAnnual):null;
+    const fteLow = ((pct/100)*maxUsers*0.7).toFixed(1);
+    const fteHigh = ((pct/100)*maxUsers).toFixed(1);
+    const aiAsPct = annualCapacity>0?Math.round(aiAnnual/annualCapacity*100):null;
+    const isHybrid = window._hybridModels&&Object.keys(window._hybridModels).some(id=>window._hybridModels[id]!==sel.model&&(taskRuns[id]||0)>0);
+    const hasAgents = active.some(t=>t.id==='agent-complex');
+    const hasSimple = active.some(t=>t.id==='agent-simple');
+    const archClass = hasAgents&&active.length>=4?'Multi-workflow AI operating layer':hasAgents?'Agent-enabled workflow integration':active.length>=5?'Multi-workflow integration':active.length>=2?'Focused multi-workflow integration':'Single-workflow integration';
+
+    // Variance
+    const varPanel = document.getElementById('variance-body');
+    const varHTML = varPanel ? varPanel.innerHTML : '';
+
+    // Top drivers
+    const driversPanel = document.getElementById('top-drivers-body');
+    const driversHTML = driversPanel ? driversPanel.innerHTML : '';
+
+    // ROI result
+    const roiPanel = document.getElementById('roi-result');
+    const roiHTML = roiPanel ? roiPanel.innerHTML : '';
+
+    const win = window.open('', '_blank');
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
+<title>AI Cost & Operating Model Summary — Büchemeier Consulting</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;font-size:10pt;color:#111;background:white;padding:2cm}
+  @page{margin:2cm;size:A4}
+  h1{font-size:18pt;color:#1A2332;margin-bottom:4pt}
+  h2{font-size:11pt;color:#1A2332;margin:0 0 8pt 0;padding-bottom:4pt;border-bottom:1px solid #eee}
+  .eyebrow{font-size:8pt;font-weight:600;color:#4a8a91;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6pt}
+  .sub{font-size:9pt;color:#555;margin-bottom:4pt}
+  .disclaimer{font-size:8pt;color:#888;font-style:italic;margin-top:4pt}
+  header{padding-bottom:0.5cm;border-bottom:3px solid #1A2332;margin-bottom:0.5cm}
+  section{margin-bottom:0.5cm;padding:0.3cm 0.4cm;border:1px solid #ddd;border-radius:4px;page-break-inside:avoid}
+  .big-val{font-size:22pt;font-weight:600;color:#1a7a5e;font-family:'DM Mono',monospace}
+  .big-sub{font-size:9pt;color:#555;margin-top:2pt;font-family:'DM Mono',monospace}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .card{background:#f8f8f8;border:1px solid #eee;border-radius:3px;padding:6px 10px}
+  .card-label{font-size:8pt;color:#888;margin-bottom:2px}
+  .card-val{font-size:10pt;font-weight:500;font-family:'DM Mono',monospace;color:#1A2332}
+  .card-val.green{color:#1a7a5e}
+  .card-val.teal{color:#4a8a91}
+  .task-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f0f0;font-size:9pt}
+  .task-name{color:#333}
+  .task-runs{font-family:'DM Mono',monospace;color:#4a8a91}
+  .highlight{background:#f0f9f5;border:1px solid #b2dfdb;border-radius:4px;padding:10px 14px;margin-top:8px}
+  .highlight-label{font-size:9pt;color:#555;margin-bottom:4px}
+  .highlight-val{font-size:16pt;font-weight:600;color:#1a7a5e;font-family:'DM Mono',monospace}
+  .ratio-box{background:rgba(45,212,160,0.08);border:1px solid rgba(45,212,160,0.3);border-radius:4px;padding:10px 14px;margin-top:8px}
+  .ratio-val{font-size:14pt;font-weight:500;color:#1a7a5e;font-family:'DM Mono',monospace;margin-bottom:4px}
+  .ratio-label{font-size:9pt;color:#555}
+  footer{margin-top:0.5cm;padding-top:0.3cm;border-top:1px solid #ddd;font-size:7pt;color:#aaa}
+  .driver-row{padding:6px 0;border-bottom:1px solid #f0f0f0}
+  .driver-top{display:flex;justify-content:space-between;font-size:9pt;margin-bottom:3px}
+  .driver-bar-track{height:3px;background:#eee;border-radius:2px;flex:1;margin:0 8px}
+  .driver-bar{height:100%;background:#4a8a91;border-radius:2px}
+  .driver-tokens{font-size:8pt;color:#aaa;font-family:'DM Mono',monospace}
+  .var-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:9pt}
+</style>
+</head><body>
+<header>
+  <div class="eyebrow">AI Cost & Operating Model Summary</div>
+  <h1>What does AI actually cost in practice?</h1>
+  <p class="sub">Configure workflows, volume, and model to estimate monthly AI spend.</p>
+  <p class="disclaimer">Inference costs only. This is a simplified simulation based on configurable assumptions. Designed to explore, not predict.</p>
+</header>
+
+<section>
+  <h2>Monthly cost estimate</h2>
+  <div class="big-val">${cx(monthly)}</div>
+  <div class="big-sub">${cx(monthly/sel.days)} / day &nbsp;·&nbsp; ${cx(totalRuns>0?monthly/(totalRuns*sel.days):0)} / run</div>
+  <div class="grid2" style="margin-top:12px">
+    <div class="card"><div class="card-label">Model</div><div class="card-val teal">${model?model.full+(isHybrid?' · Hybrid routing':''):'Not selected'}</div></div>
+    <div class="card"><div class="card-label">Active AI users</div><div class="card-val">${maxUsers||'—'}</div></div>
+    <div class="card"><div class="card-label">Runs / day</div><div class="card-val">${totalRuns.toLocaleString()}</div></div>
+    <div class="card"><div class="card-label">Working days</div><div class="card-val">${sel.days}</div></div>
+    <div class="card"><div class="card-label">Batch</div><div class="card-val">${sel.batch?'On':'Off'}</div></div>
+    <div class="card"><div class="card-label">Cache</div><div class="card-val">${sel.cachePct>0?sel.cachePct+'%':'Off'}</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Configured workflows</h2>
+  ${active.map(t=>`<div class="task-row"><span class="task-name">${t.name}</span><span class="task-runs">${taskRuns[t.id]}/day</span></div>`).join('')}
+  <div style="margin-top:6px;font-size:8pt;color:#888">Architecture: ${archClass}</div>
+</section>
+
+${annualCapacity>0?`<section>
+  <h2>Productivity impact estimate</h2>
+  <div class="highlight">
+    <div class="highlight-label">Estimated annual capacity impact</div>
+    <div class="highlight-val">${cx(annualCapacity)}</div>
+  </div>
+  <div class="grid2">
+    <div class="card"><div class="card-label">FTE equivalent</div><div class="card-val green">~${fteLow}–${fteHigh} FTE</div></div>
+    <div class="card"><div class="card-label">Efficiency assumption</div><div class="card-val">${pct}%</div></div>
+  </div>
+  ${ratio?`<div class="ratio-box">
+    <div class="ratio-val">1 ${currency.symbol} AI cost → ~${ratio} ${currency.symbol} capacity value</div>
+    <div class="ratio-label">AI cost represents ${aiAsPct}% of modelled capacity value</div>
+  </div>`:''}
+</section>`:''}
+
+${driversHTML?`<section>
+  <h2>Top cost drivers</h2>
+  ${driversHTML}
+</section>`:''}
+
+${varHTML?`<section>
+  <h2>Cost range — optimised to unoptimised</h2>
+  ${varHTML}
+</section>`:''}
+
+<footer>
+  © 2026 Büchemeier Consulting &nbsp;·&nbsp; buchemeierconsulting.com &nbsp;·&nbsp;
+  Generated ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})} &nbsp;·&nbsp;
+  We take no responsibility for errors in pricing, calculations, or outputs. This tool is provided for indicative use only.
+</footer>
+</body></html>`);
+    win.document.close();
+    setTimeout(() => win.print(), 500);
+  }, 400);
 }
 
 function updateBridge() {
