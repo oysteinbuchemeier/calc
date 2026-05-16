@@ -500,32 +500,52 @@ footer a:hover{color:var(--text2)}
     <!-- STEP 1 -->
     <div class="step-panel active" id="step-1">
       <div class="panel">
-        <div class="panel-title">Organisation size preset</div>
-        <p style="font-size:13px;color:var(--text3);margin-bottom:14px;line-height:1.5;">Sets daily volume across all tasks based on organisation size and estimated adoption rate.</p>
-        <div class="preset-row" id="size-row">
-          <button class="preset-btn" onclick="applySize('small',event)">1–20 people</button>
-          <button class="preset-btn" onclick="applySize('medium',event)">20–100 people</button>
-          <button class="preset-btn" onclick="applySize('large',event)">100–500 people</button>
-          <button class="preset-btn" onclick="applySize('enterprise',event)">500+ people</button>
+        <div class="panel-title">Organisation size &amp; AI maturity</div>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:14px;line-height:1.5;">Select both to set task volumes. Size determines user count, maturity determines workflow mix.</p>
+
+        <div style="margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Organisation size</div>
+          <div class="preset-row" id="size-row">
+            <button class="preset-btn" onclick="selectSize('small',event)">1–20 people</button>
+            <button class="preset-btn" onclick="selectSize('medium',event)">20–100 people</button>
+            <button class="preset-btn" onclick="selectSize('large',event)">100–500 people</button>
+            <button class="preset-btn" onclick="selectSize('enterprise',event)">500+ people</button>
+          </div>
         </div>
+
+        <div style="margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">AI maturity</div>
+          <div class="preset-row" id="maturity-row">
+            <button class="preset-btn" onclick="selectMaturity('assistive',event)">Assistive</button>
+            <button class="preset-btn" onclick="selectMaturity('workflow',event)">Workflow</button>
+            <button class="preset-btn" onclick="selectMaturity('agentic',event)">Agentic</button>
+          </div>
+          <div style="display:flex;gap:0;margin-top:8px;">
+            <div style="flex:1;font-size:10px;color:var(--text3);text-align:center;">AI assists individuals</div>
+            <div style="flex:1;font-size:10px;color:var(--text3);text-align:center;">AI runs in processes</div>
+            <div style="flex:1;font-size:10px;color:var(--text3);text-align:center;">AI drives autonomously</div>
+          </div>
+        </div>
+
+        <div id="preset-status" style="font-size:12px;font-family:var(--mono);color:var(--text3);min-height:16px;margin-top:4px;"></div>
+
         <div style="margin-top:10px;">
           <button onclick="const d=this.nextElementSibling;const open=d.style.display==='block';d.style.display=open?'none':'block';this.textContent=open?'Adoption assumptions ▾':'Hide ▴'" style="background:none;border:none;font-size:12px;font-family:var(--mono);color:var(--text3);cursor:pointer;padding:0;">Adoption assumptions ▾</button>
           <div style="display:none;margin-top:10px;">
-            <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <table style="width:100%;border-collapse:collapse;font-size:11px;">
               <tr style="border-bottom:1px solid var(--border);">
-                <th style="text-align:left;padding:5px 6px;color:var(--text3);font-weight:500;">Size</th>
-                <th style="text-align:right;padding:5px 6px;color:var(--text3);font-weight:500;">AI users</th>
-                <th style="text-align:right;padding:5px 6px;color:var(--text3);font-weight:500;">Uses/day</th>
-                <th style="text-align:right;padding:5px 6px;color:var(--text3);font-weight:500;">Adoption</th>
-                <th style="text-align:right;padding:5px 6px;color:var(--text3);font-weight:500;">Simple workflow</th>
-                <th style="text-align:right;padding:5px 6px;color:var(--text3);font-weight:500;">Complex workflow</th>
+                <th style="text-align:left;padding:4px 6px;color:var(--text3);font-weight:500;">Size</th>
+                <th style="text-align:right;padding:4px 6px;color:var(--text3);font-weight:500;">AI users</th>
+                <th style="text-align:right;padding:4px 6px;color:var(--text3);font-weight:500;">Assistive</th>
+                <th style="text-align:right;padding:4px 6px;color:var(--text3);font-weight:500;">Workflow</th>
+                <th style="text-align:right;padding:4px 6px;color:var(--text3);font-weight:500;">Agentic</th>
               </tr>
-              <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 6px;color:var(--text2);">1–20 people</td><td style="text-align:right;padding:5px 6px;font-family:var(--mono);color:var(--text3);">12</td><td style="text-align:right;padding:5px 6px;font-family:var(--mono);color:var(--text3);">4</td><td style="text-align:right;padding:5px 6px;font-family:var(--mono);color:var(--text3);">~80%</td><td style="text-align:right;padding:5px 6px;font-family:var(--mono);color:var(--accent2);">3/day</td><td style="text-align:right;padding:5px 6px;font-family:var(--mono);color:var(--accent2);">1/day</td></tr>
-              <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 6px;color:var(--text2);">20–100 people</td><td style="text-align:right;padding:5px 6px;font-family:var(--mono);color:var(--text3);">45</td><td style="text-align:right;padding:5px 6px;font-family:var(--mono);color:var(--text3);">5</td><td style="text-align:right;padding:5px 6px;font-family:var(--mono);color:var(--text3);">~75%</td><td style="text-align:right;padding:5px 6px;font-family:var(--mono);color:var(--accent2);">8/day</td><td style="text-align:right;padding:5px 6px;font-family:var(--mono);color:var(--accent2);">3/day</td></tr>
-              <tr style="border-bottom:1px solid var(--border);"><td style="padding:5px 6px;color:var(--text2);">100–500 people</td><td style="text-align:right;padding:5px 6px;font-family:var(--mono);color:var(--text3);">200</td><td style="text-align:right;padding:5px 6px;font-family:var(--mono);color:var(--text3);">6</td><td style="text-align:right;padding:5px 6px;font-family:var(--mono);color:var(--text3);">~70%</td><td style="text-align:right;padding:5px 6px;font-family:var(--mono);color:var(--accent2);">20/day</td><td style="text-align:right;padding:5px 6px;font-family:var(--mono);color:var(--accent2);">8/day</td></tr>
-              <tr><td style="padding:5px 6px;color:var(--text2);">500+ people</td><td style="text-align:right;padding:5px 6px;font-family:var(--mono);color:var(--text3);">450</td><td style="text-align:right;padding:5px 6px;font-family:var(--mono);color:var(--text3);">7</td><td style="text-align:right;padding:5px 6px;font-family:var(--mono);color:var(--text3);">~65%</td><td style="text-align:right;padding:5px 6px;font-family:var(--mono);color:var(--accent2);">50/day</td><td style="text-align:right;padding:5px 6px;font-family:var(--mono);color:var(--accent2);">20/day</td></tr>
+              <tr style="border-bottom:1px solid var(--border);"><td style="padding:4px 6px;color:var(--text2);">1–20</td><td style="text-align:right;padding:4px 6px;font-family:var(--mono);color:var(--text3);">12</td><td style="text-align:right;padding:4px 6px;font-family:var(--mono);color:var(--text3);">everyday only</td><td style="text-align:right;padding:4px 6px;font-family:var(--mono);color:var(--text3);">+ 5 simple</td><td style="text-align:right;padding:4px 6px;font-family:var(--mono);color:var(--text3);">+ 3 complex</td></tr>
+              <tr style="border-bottom:1px solid var(--border);"><td style="padding:4px 6px;color:var(--text2);">20–100</td><td style="text-align:right;padding:4px 6px;font-family:var(--mono);color:var(--text3);">45</td><td style="text-align:right;padding:4px 6px;font-family:var(--mono);color:var(--text3);">everyday only</td><td style="text-align:right;padding:4px 6px;font-family:var(--mono);color:var(--text3);">+ 15 simple</td><td style="text-align:right;padding:4px 6px;font-family:var(--mono);color:var(--text3);">+ 8 complex</td></tr>
+              <tr style="border-bottom:1px solid var(--border);"><td style="padding:4px 6px;color:var(--text2);">100–500</td><td style="text-align:right;padding:4px 6px;font-family:var(--mono);color:var(--text3);">200</td><td style="text-align:right;padding:4px 6px;font-family:var(--mono);color:var(--text3);">everyday only</td><td style="text-align:right;padding:4px 6px;font-family:var(--mono);color:var(--text3);">+ 40 simple</td><td style="text-align:right;padding:4px 6px;font-family:var(--mono);color:var(--text3);">+ 20 complex</td></tr>
+              <tr><td style="padding:4px 6px;color:var(--text2);">500+</td><td style="text-align:right;padding:4px 6px;font-family:var(--mono);color:var(--text3);">450</td><td style="text-align:right;padding:4px 6px;font-family:var(--mono);color:var(--text3);">everyday only</td><td style="text-align:right;padding:4px 6px;font-family:var(--mono);color:var(--text3);">+ 80 simple</td><td style="text-align:right;padding:4px 6px;font-family:var(--mono);color:var(--text3);">+ 40 complex</td></tr>
             </table>
-            <div style="font-size:11px;color:var(--text3);margin-top:8px;line-height:1.6;">Everyday tasks scaled by users × uses/day. Automated workflows scaled by trigger volume. Developer tasks default to 0.</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:8px;line-height:1.6;">Everyday tasks always included. Workflow adds simple automation. Agentic adds complex autonomous workflows. Developer tasks default to 0.</div>
           </div>
         </div>
       </div>
@@ -1184,35 +1204,84 @@ async function fetchExchangeRates() {
 }
 
 const SIZE_PRESETS = {
-  small:      { label:'1–20 people',    employees:12,  usesPerDay:4, agentSimple:3,  agentComplex:1  },
-  medium:     { label:'20–100 people',  employees:45,  usesPerDay:5, agentSimple:8,  agentComplex:3  },
-  large:      { label:'100–500 people', employees:200, usesPerDay:6, agentSimple:20, agentComplex:8  },
-  enterprise: { label:'500+ people',   employees:450, usesPerDay:7, agentSimple:50, agentComplex:20 },
+  small:      { label:'1–20 people',    employees:12,  usesPerDay:4 },
+  medium:     { label:'20–100 people',  employees:45,  usesPerDay:5 },
+  large:      { label:'100–500 people', employees:200, usesPerDay:6 },
+  enterprise: { label:'500+ people',   employees:450, usesPerDay:7 },
 };
 
-let activeSize=null;
-function applySize(id, e) {
+const MATURITY_PRESETS = {
+  assistive: {
+    label:'Assistive',
+    agentSimple:0, agentComplex:0,
+    everydayMult:1.0, // full everyday tasks
+  },
+  workflow: {
+    label:'Workflow AI',
+    agentSimpleMult:0.04, agentComplexMult:0, // simple workflows proportional to users
+    everydayMult:0.8,
+  },
+  agentic: {
+    label:'Agentic AI',
+    agentSimpleMult:0.03, agentComplexMult:0.02,
+    everydayMult:0.5,
+  },
+};
+
+// Fixed workflow volumes per size+maturity
+const WORKFLOW_VOLUMES = {
+  assistive: { small:{simple:0,complex:0},   medium:{simple:0,complex:0},   large:{simple:0,complex:0},   enterprise:{simple:0,complex:0}   },
+  workflow:  { small:{simple:5,complex:0},   medium:{simple:15,complex:0},  large:{simple:40,complex:0},  enterprise:{simple:80,complex:0}  },
+  agentic:   { small:{simple:5,complex:3},   medium:{simple:15,complex:8},  large:{simple:40,complex:20}, enterprise:{simple:80,complex:40} },
+};
+
+let activeSize=null, activeMaturity=null;
+
+function selectSize(id, e) {
   activeSize=id;
-  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#size-row .preset-btn').forEach(b=>b.classList.remove('active'));
   if(e&&e.target) e.target.classList.add('active');
-  const s=SIZE_PRESETS[id];
-  const techIds=['code','sql','rag','apidoc'];
-  const agentIds=['agent-simple','agent-complex'];
-  TASKS.forEach(t=>{
-    if(techIds.includes(t.id)) return; // developer tasks always stay 0
-    if(t.id==='agent-simple') {
-      taskVol[t.id]={employees:s.agentSimple, usesPerDay:1};
-      taskRuns[t.id]=s.agentSimple;
-    } else if(t.id==='agent-complex') {
-      taskVol[t.id]={employees:s.agentComplex, usesPerDay:1};
-      taskRuns[t.id]=s.agentComplex;
+  applyPreset();
+}
+
+function selectMaturity(id, e) {
+  activeMaturity=id;
+  document.querySelectorAll('#maturity-row .preset-btn').forEach(b=>b.classList.remove('active'));
+  if(e&&e.target) e.target.classList.add('active');
+  applyPreset();
+}
+
+function applyPreset() {
+  const statusEl = document.getElementById('preset-status');
+  if (!activeSize || !activeMaturity) {
+    if (statusEl) statusEl.textContent = activeSize ? 'Select AI maturity →' : activeMaturity ? 'Select organisation size →' : '';
+    return;
+  }
+  if (statusEl) statusEl.textContent = '';
+
+  const s = SIZE_PRESETS[activeSize];
+  const wv = WORKFLOW_VOLUMES[activeMaturity][activeSize];
+  const m = MATURITY_PRESETS[activeMaturity];
+  const techIds = ['code','sql','rag','apidoc'];
+
+  TASKS.forEach(t => {
+    if (techIds.includes(t.id)) return;
+    if (t.id === 'agent-simple') {
+      taskVol[t.id] = {employees: wv.simple, usesPerDay: 1};
+      taskRuns[t.id] = wv.simple;
+    } else if (t.id === 'agent-complex') {
+      taskVol[t.id] = {employees: wv.complex, usesPerDay: 1};
+      taskRuns[t.id] = wv.complex;
     } else {
-      taskVol[t.id]={employees:s.employees, usesPerDay:s.usesPerDay};
-      taskRuns[t.id]=Math.round(s.employees*s.usesPerDay);
+      const emp = Math.round(s.employees * m.everydayMult);
+      taskVol[t.id] = {employees: emp, usesPerDay: s.usesPerDay};
+      taskRuns[t.id] = Math.round(emp * s.usesPerDay);
     }
   });
   renderTasks(); update(); updateCompare(); updateRecommendedModel();
 }
+
+function applySize(id, e) { selectSize(id, e); } // backwards compat
 
 function updateRecommendedModel() {
   const panel=document.getElementById('rec-model-panel');
