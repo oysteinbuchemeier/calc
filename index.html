@@ -515,15 +515,15 @@ footer a:hover{color:var(--text2)}
 
         <div style="margin-bottom:10px;">
           <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">AI maturity — select all that apply</div>
-          <div class="preset-row" id="maturity-row">
-            <button class="preset-btn" onclick="toggleMaturity('assistive',this)">Assistive</button>
-            <button class="preset-btn" onclick="toggleMaturity('workflow',this)">Workflow</button>
-            <button class="preset-btn" onclick="toggleMaturity('agentic',this)">Agentic</button>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;" id="maturity-row">
+            <button class="preset-btn" style="width:100%" onclick="toggleMaturity('assistive',this)">Assistive</button>
+            <button class="preset-btn" style="width:100%" onclick="toggleMaturity('workflow',this)">Workflow</button>
+            <button class="preset-btn" style="width:100%" onclick="toggleMaturity('agentic',this)">Agentic</button>
           </div>
-          <div style="display:flex;gap:0;margin-top:8px;">
-            <div style="flex:1;font-size:10px;color:var(--text3);text-align:center;">AI assists individuals</div>
-            <div style="flex:1;font-size:10px;color:var(--text3);text-align:center;">AI runs in processes</div>
-            <div style="flex:1;font-size:10px;color:var(--text3);text-align:center;">AI drives autonomously</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:5px;">
+            <div style="font-size:10px;color:var(--text3);text-align:center;">AI assists individuals</div>
+            <div style="font-size:10px;color:var(--text3);text-align:center;">AI runs in processes</div>
+            <div style="font-size:10px;color:var(--text3);text-align:center;">AI drives autonomously</div>
           </div>
         </div>
 
