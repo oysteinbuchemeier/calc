@@ -640,6 +640,55 @@ footer a:hover{color:var(--text2)}
           <div style="font-size:12px;font-family:var(--mono);color:var(--green);margin-top:4px;min-height:16px;" id="cache-money-label"></div>
         </div>
       </div>
+
+      <!-- SENSITIVITY SLIDERS -->
+      <div class="panel">
+        <div class="panel-title">Sensitivity parameters</div>
+        <p style="font-size:11px;color:var(--text3);margin-bottom:14px;line-height:1.6;">Adjust real-world factors that affect token consumption beyond base estimates. Agent and complex workflow costs are most sensitive to these parameters.</p>
+
+        <!-- Retry rate -->
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <div>
+              <div class="toggle-name">Retry rate <span class="toggle-badge" id="retry-badge">0%</span></div>
+              <div class="toggle-desc">How often workflows fail and re-execute. Each retry repeats full token usage.</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="range" id="sl-retry" min="0" max="50" step="5" value="0" oninput="setSensitivity('retryRate', this.value/100, 'retry-badge', v=>(v*100)+'%')" style="flex:1;">
+            <span style="font-family:var(--mono);font-size:12px;color:var(--accent2);min-width:80px;text-align:right;" id="retry-impact-label"></span>
+          </div>
+        </div>
+
+        <!-- Orchestration depth -->
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <div>
+              <div class="toggle-name">Orchestration depth <span class="toggle-badge" id="orch-badge">1×</span></div>
+              <div class="toggle-desc">Token multiplier for agent steps. A 3-step agent re-reads prior context at each step, amplifying token use.</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="range" id="sl-orch" min="1" max="3" step="0.5" value="1" oninput="setSensitivity('orchDepth', parseFloat(this.value), 'orch-badge', v=>v+'×')" style="flex:1;">
+            <span style="font-family:var(--mono);font-size:12px;color:var(--accent2);min-width:80px;text-align:right;" id="orch-impact-label"></span>
+          </div>
+        </div>
+
+        <!-- Context growth -->
+        <div style="margin-bottom:4px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <div>
+              <div class="toggle-name">Context growth <span class="toggle-badge" id="ctx-badge">1×</span></div>
+              <div class="toggle-desc">How much context accumulates in complex agentic workflows. Higher values model longer chains and tool outputs.</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="range" id="sl-ctx-growth" min="1" max="4" step="0.5" value="1" oninput="setSensitivity('ctxGrowth', parseFloat(this.value), 'ctx-badge', v=>v+'×')" style="flex:1;">
+            <span style="font-family:var(--mono);font-size:12px;color:var(--accent2);min-width:80px;text-align:right;" id="ctx-impact-label"></span>
+          </div>
+        </div>
+      </div>
+
       <div class="panel">
         <div class="panel-title">Compare two models</div>
         <p style="font-size:11px;color:var(--text3);margin-bottom:14px;line-height:1.6;">Side-by-side cost comparison of two models. Price-only scenario modelling. Opens OpenRouter for deeper benchmarking, including context window, latency, and capability data.</p>
@@ -738,6 +787,13 @@ footer a:hover{color:var(--text2)}
         <div style="padding:1rem 1.5rem;display:flex;flex-direction:column;gap:8px;" id="bridge-body"></div>
       </div>
 
+
+      <!-- ARCHITECTURE SENSITIVITY -->
+      <div class="panel" id="arch-sensitivity-panel" style="display:none;">
+        <div class="panel-title">Architecture sensitivity</div>
+        <p style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.5;">Same workload — different architecture. Shows how cost changes across model routing and caching strategies. Your current configuration is highlighted.</p>
+        <div id="arch-sensitivity-body"></div>
+      </div>
 
       <!-- TOP COST DRIVERS -->
       <div class="panel" id="top-drivers-panel" style="display:none;">
@@ -932,7 +988,7 @@ function goToStep(n) {
     document.getElementById('step-num-'+i).textContent = i<n ? '✓' : i;
   });
   if (n===2) { updateHybridRouting(); }
-  if (n===3) { updateConclusion(); updateROI(); updateSavings(); updateChart(); updateBridge(); updateVariance(); updateSystemSummary(); updateInterpretation(); updateTopDrivers(); }
+  if (n===3) { updateConclusion(); updateROI(); updateSavings(); updateChart(); updateBridge(); updateVariance(); updateSystemSummary(); updateInterpretation(); updateTopDrivers(); updateArchSensitivity(); }
   updateConfigSummary();
   window.scrollTo({top:0, behavior:'smooth'});
 }
@@ -1001,20 +1057,28 @@ async function fetchModelPrices() {
 }
 
 
-let sel = {model:null, ctx:1.0, days:22, batch:false, cachePct:0}; // ctx fixed at 1.0
+let sel = {model:null, ctx:1.0, days:22, batch:false, cachePct:0, retryRate:0.0, orchDepth:1.0, ctxGrowth:1.0}; // ctx fixed at 1.0
 const taskRuns = {}, taskVol = {};
 TASKS.forEach(t => { taskRuns[t.id]=0; taskVol[t.id]={employees:0, usesPerDay:1}; });
 
 function fmt(n) { if(n>=1e6) return (n/1e6).toFixed(2)+'M'; if(n>=1000) return (n/1000).toFixed(1)+'k'; return Math.round(n).toString(); }
 function usd(v) { if(v===0) return '$0.00'; if(v>=10000) return '$'+Math.round(v).toLocaleString(); if(v>=100) return '$'+v.toFixed(0); if(v>=1) return '$'+v.toFixed(2); if(v>=0.01) return '$'+v.toFixed(4); return '$'+v.toFixed(6); }
 
-function calcCost(task, model, ctx, batch, cachePct) {
-  const inTok=Math.round(task.inTok*ctx), outTok=Math.round(task.outTok*ctx);
+function calcCost(task, model, ctx, batch, cachePct, retryRate, orchDepth, ctxGrowth) {
+  const isAgent = task.id && task.id.startsWith('agent');
+  // Apply orchestration depth and context growth to agent tasks
+  const depthMult  = isAgent ? (orchDepth||1.0) : 1.0;
+  const growthMult = isAgent && task.id==='agent-complex' ? (ctxGrowth||1.0) : 1.0;
+  const retryMult  = 1.0 + (retryRate||0);
+
+  const inTok  = Math.round(task.inTok  * ctx * depthMult * growthMult);
+  const outTok = Math.round(task.outTok * ctx * depthMult);
   const bm = batch ? 0.5 : 1.0;
   const cs = (cachePct||0)/100;
-  const inCost = cs>0 ? (inTok*cs/1e6*model.inP*0.1 + inTok*(1-cs)/1e6*model.inP)*bm : inTok/1e6*model.inP*bm;
+  const inCost  = cs>0 ? (inTok*cs/1e6*model.inP*0.1 + inTok*(1-cs)/1e6*model.inP)*bm : inTok/1e6*model.inP*bm;
   const outCost = outTok/1e6*model.outP;
-  return {inTok, outTok, inCost, outCost, runCost:inCost+outCost};
+  const runCost = (inCost+outCost) * retryMult;
+  return {inTok, outTok, inCost, outCost, runCost};
 }
 
 let currency = {code:'NOK', symbol:'kr', rate:10.8};
@@ -1038,6 +1102,26 @@ function setCurrency(code, symbol) {
   const sl = document.getElementById('savings-currency-label');
   if(sl) sl.textContent=symbol+' / mo';
   update(); updateCompare(); updateROI(); updateSavings();
+}
+
+function setSensitivity(key, val, badgeId, formatter) {
+  sel[key] = val;
+  const badge = document.getElementById(badgeId);
+  if (badge) badge.textContent = formatter(val);
+  const impactLabels = {retryRate:'retry-impact-label', orchDepth:'orch-impact-label', ctxGrowth:'ctx-impact-label'};
+  const labelEl = document.getElementById(impactLabels[key]);
+  const baseMonthly = totalMonthly();
+  if (labelEl && baseMonthly > 0) {
+    const origVal = sel[key];
+    const defaults = {retryRate:0.0, orchDepth:1.0, ctxGrowth:1.0};
+    sel[key] = defaults[key];
+    const baseWithout = totalMonthly();
+    sel[key] = origVal;
+    const diff = baseMonthly - baseWithout;
+    labelEl.textContent = diff > 0.001 ? `+${cx(diff)}/mo` : diff < -0.001 ? `${cx(diff)}/mo` : 'no impact';
+    labelEl.style.color = diff > 0 ? '#f87171' : 'var(--green)';
+  } else if (labelEl) { labelEl.textContent = ''; }
+  update(); updateCompare(); updateArchSensitivity();
 }
 
 function setCacheLevel(val) {
@@ -1662,6 +1746,99 @@ ${varHTML?`<section>
   }, 400);
 }
 
+function updateArchSensitivity() {
+  const panel = document.getElementById('arch-sensitivity-panel');
+  const body  = document.getElementById('arch-sensitivity-body');
+  if (!panel || !body) return;
+  const active = TASKS.filter(t => (taskRuns[t.id]||0) > 0);
+  if (!active.length || !sel.model) { panel.style.display='none'; return; }
+  panel.style.display='block';
+
+  const model = MODELS.find(m=>m.id===sel.model);
+  const sorted = [...MODELS].sort((a,b)=>a.inP-b.inP);
+  const cheapest = sorted[0];
+  const midRange = sorted.filter(m=>m.inP>=0.5&&m.inP<=5.0);
+  const mid = midRange.length ? midRange[0] : sorted[Math.floor(sorted.length/2)];
+
+  // Calculate cost for a given architecture config
+  function calcArch(useHybrid, useBatch, cachePct) {
+    return active.reduce((s,t) => {
+      let m;
+      if (useHybrid) {
+        const isComplex = t.id==='agent-complex'||t.id==='agent-simple'||t.id==='rag'||t.id==='code'||t.id==='apidoc';
+        m = isComplex ? mid : cheapest;
+      } else {
+        m = model;
+      }
+      return s + calcCost(t, m, sel.ctx, useBatch, cachePct).runCost * taskRuns[t.id] * sel.days;
+    }, 0);
+  }
+
+  // Dynamic cache columns: 0%, current, 80%
+  const curCachePct = sel.cachePct;
+  const cacheOptions = curCachePct === 0 ? [0, 40, 80]
+    : curCachePct === 80 ? [0, 40, 80]
+    : [0, curCachePct, 80];
+
+  const cacheLabels = cacheOptions.map(c =>
+    c === curCachePct && c !== 0 && c !== 80 ? `${c}% cache (current)` : `${c}% cache`
+  );
+  const rows = [
+    { label: `Single model (${model.name})${sel.batch?' · batch':''} `, useHybrid: false, useBatch: sel.batch },
+    { label: `Hybrid routing`,                                            useHybrid: true,  useBatch: false  },
+    { label: `Batch + hybrid routing`,                                    useHybrid: true,  useBatch: true   },
+  ];
+
+  // Find current config cell
+  const curCache = sel.cachePct;
+  const curHybrid = window._hybridModels && Object.keys(window._hybridModels).some(id=>window._hybridModels[id]!==sel.model&&(taskRuns[id]||0)>0);
+  const curBatch = sel.batch;
+
+  // Find min and max for colour scale
+  const allVals = rows.flatMap(r => cacheOptions.map(c => calcArch(r.useHybrid, r.useBatch, c)));
+  const minVal = Math.min(...allVals);
+  const maxVal = Math.max(...allVals);
+
+  function cellColor(val) {
+    const pct = maxVal===minVal ? 0.5 : (val-minVal)/(maxVal-minVal);
+    if (pct < 0.33) return 'rgba(45,212,160,0.12)'; // green — cheap
+    if (pct < 0.66) return 'rgba(245,158,11,0.10)';  // amber — mid
+    return 'rgba(248,113,113,0.10)';                   // red — expensive
+  }
+
+  function isCurrentCell(row, cache) {
+    if (row.useHybrid) return false;
+    return cache === curCachePct;
+  }
+
+  body.innerHTML = `
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:8px 10px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);width:35%;">Architecture</th>
+            ${cacheOptions.map((c,i)=>`<th style="text-align:center;padding:8px 10px;color:${c===curCachePct?'var(--accent2)':'var(--text3)'};font-weight:${c===curCachePct?'600':'500'};border-bottom:1px solid var(--border);">${cacheLabels[i]}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(row=>`
+            <tr>
+              <td style="padding:8px 10px;color:var(--text2);border-bottom:1px solid var(--border);font-size:12px;">${row.label}</td>
+              ${cacheOptions.map(cache=>{
+                const val = calcArch(row.useHybrid, row.useBatch, cache);
+                const isCur = isCurrentCell(row, cache);
+                return `<td style="text-align:center;padding:8px 10px;border-bottom:1px solid var(--border);background:${isCur?'rgba(108,164,171,0.2)':cellColor(val)};${isCur?'outline:2px solid var(--accent2);outline-offset:-2px;border-radius:4px;':''}" title="${isCur?'Your current configuration':''}">
+                  <div style="font-family:var(--mono);font-size:12px;font-weight:${isCur?'600':'400'};color:${isCur?'var(--accent2)':'var(--text2)'};">${cx(val)}</div>
+                  ${isCur?`<div style="font-size:10px;color:var(--accent2);margin-top:2px;">current</div>`:''}
+                </td>`;
+              }).join('')}
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--text3);text-align:right;font-family:var(--mono);">Cheapest: ${cx(minVal)}/mo · Most expensive: ${cx(maxVal)}/mo</div>`;
+}
+
 function updateBridge() {
   const panel = document.getElementById('bridge-panel');
   const body  = document.getElementById('bridge-body');
@@ -1969,7 +2146,7 @@ function totalMonthly() {
   if (!model) return 0;
   return TASKS.reduce((s,t)=>{
     const r=taskRuns[t.id]||0; if(!r) return s;
-    return s+calcCost(t,model,sel.ctx,sel.batch,sel.cachePct).runCost*r*sel.days;
+    return s+calcCost(t,model,sel.ctx,sel.batch,sel.cachePct,sel.retryRate,sel.orchDepth,sel.ctxGrowth).runCost*r*sel.days;
   },0);
 }
 
@@ -1987,13 +2164,14 @@ function update() {
     document.getElementById('m-monthly-sub') && (document.getElementById('m-monthly-sub').textContent = '');
     return;
   }
-  let tIn=0,tOut=0,tInC=0,tOutC=0,tRuns=0,active=0;
+  let tIn=0,tOut=0,tInC=0,tOutC=0,tRuns=0,active=0,tTotal=0;
   TASKS.forEach(t=>{
     const r=taskRuns[t.id]||0; if(!r) return;
-    const {inTok,outTok,inCost,outCost}=calcCost(t,model,sel.ctx,sel.batch,sel.cachePct);
+    const {inTok,outTok,inCost,outCost,runCost}=calcCost(t,model,sel.ctx,sel.batch,sel.cachePct,sel.retryRate,sel.orchDepth,sel.ctxGrowth);
     tIn+=inTok*r; tOut+=outTok*r; tInC+=inCost*r; tOutC+=outCost*r; tRuns+=r; active++;
+    tTotal+=runCost*r;
   });
-  const daily=tInC+tOutC, monthly=daily*sel.days;
+  const monthly=tTotal*sel.days, daily=tTotal;
   document.getElementById('m-monthly').textContent=cx(monthly);
   const perRunEl = document.getElementById('m-per-run');
   const perDayEl = document.getElementById('m-per-day');
@@ -2061,6 +2239,7 @@ function update() {
   updateSystemSummary();
   updateInterpretation();
   updateTopDrivers();
+  updateArchSensitivity();
 }
 
 function updateCompare() {
