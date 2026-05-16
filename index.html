@@ -514,11 +514,11 @@ footer a:hover{color:var(--text2)}
         </div>
 
         <div style="margin-bottom:10px;">
-          <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">AI maturity</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">AI maturity — select all that apply</div>
           <div class="preset-row" id="maturity-row">
-            <button class="preset-btn" onclick="selectMaturity('assistive',event)">Assistive</button>
-            <button class="preset-btn" onclick="selectMaturity('workflow',event)">Workflow</button>
-            <button class="preset-btn" onclick="selectMaturity('agentic',event)">Agentic</button>
+            <button class="preset-btn" onclick="toggleMaturity('assistive',this)">Assistive</button>
+            <button class="preset-btn" onclick="toggleMaturity('workflow',this)">Workflow</button>
+            <button class="preset-btn" onclick="toggleMaturity('agentic',this)">Agentic</button>
           </div>
           <div style="display:flex;gap:0;margin-top:8px;">
             <div style="flex:1;font-size:10px;color:var(--text3);text-align:center;">AI assists individuals</div>
@@ -1235,7 +1235,7 @@ const WORKFLOW_VOLUMES = {
   agentic:   { small:{simple:5,complex:3},   medium:{simple:15,complex:8},  large:{simple:40,complex:20}, enterprise:{simple:80,complex:40} },
 };
 
-let activeSize=null, activeMaturity=null;
+let activeSize=null, activeMaturities=new Set();
 
 function selectSize(id, e) {
   activeSize=id;
@@ -1244,36 +1244,48 @@ function selectSize(id, e) {
   applyPreset();
 }
 
-function selectMaturity(id, e) {
-  activeMaturity=id;
-  document.querySelectorAll('#maturity-row .preset-btn').forEach(b=>b.classList.remove('active'));
-  if(e&&e.target) e.target.classList.add('active');
+function toggleMaturity(id, btn) {
+  if (activeMaturities.has(id)) {
+    activeMaturities.delete(id);
+    btn.classList.remove('active');
+  } else {
+    activeMaturities.add(id);
+    btn.classList.add('active');
+  }
   applyPreset();
 }
 
 function applyPreset() {
   const statusEl = document.getElementById('preset-status');
-  if (!activeSize || !activeMaturity) {
-    if (statusEl) statusEl.textContent = activeSize ? 'Select AI maturity →' : activeMaturity ? 'Select organisation size →' : '';
+  if (!activeSize || activeMaturities.size === 0) {
+    if (statusEl) statusEl.textContent = !activeSize ? 'Select organisation size →' : 'Select at least one AI maturity →';
     return;
   }
   if (statusEl) statusEl.textContent = '';
 
   const s = SIZE_PRESETS[activeSize];
-  const wv = WORKFLOW_VOLUMES[activeMaturity][activeSize];
-  const m = MATURITY_PRESETS[activeMaturity];
   const techIds = ['code','sql','rag','apidoc'];
+
+  // Sum workflow volumes across all selected maturities
+  let totalSimple = 0, totalComplex = 0, everydayMult = 0;
+  activeMaturities.forEach(mid => {
+    const wv = WORKFLOW_VOLUMES[mid][activeSize];
+    totalSimple  = Math.max(totalSimple,  wv.simple);
+    totalComplex = Math.max(totalComplex, wv.complex);
+    const m = MATURITY_PRESETS[mid];
+    everydayMult = Math.max(everydayMult, m.everydayMult);
+  });
 
   TASKS.forEach(t => {
     if (techIds.includes(t.id)) return;
     if (t.id === 'agent-simple') {
-      taskVol[t.id] = {employees: wv.simple, usesPerDay: 1};
-      taskRuns[t.id] = wv.simple;
+      taskVol[t.id] = {employees: totalSimple, usesPerDay: 1};
+      taskRuns[t.id] = totalSimple;
     } else if (t.id === 'agent-complex') {
-      taskVol[t.id] = {employees: wv.complex, usesPerDay: 1};
-      taskRuns[t.id] = wv.complex;
+      taskVol[t.id] = {employees: totalComplex, usesPerDay: 1};
+      taskRuns[t.id] = totalComplex;
     } else {
-      const emp = Math.round(s.employees * m.everydayMult);
+      const emp = Math.round(s.employees * everydayMult);
       taskVol[t.id] = {employees: emp, usesPerDay: s.usesPerDay};
       taskRuns[t.id] = Math.round(emp * s.usesPerDay);
     }
@@ -1281,6 +1293,7 @@ function applyPreset() {
   renderTasks(); update(); updateCompare(); updateRecommendedModel();
 }
 
+function selectMaturity(id, e) { } // no-op — replaced by toggleMaturity
 function applySize(id, e) { selectSize(id, e); } // backwards compat
 
 function updateRecommendedModel() {
@@ -2457,7 +2470,7 @@ function setTaskVol(id,field,val) {
   taskVol[id][field]=parseFloat(val)||0;
   const runs=Math.round(taskVol[id].employees*taskVol[id].usesPerDay);
   taskRuns[id]=runs;
-  activeSize=null;
+  activeSize=null; activeMaturities=new Set();
   document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
   const v=document.getElementById('rv-'+id);
   const isAgent=id.startsWith('agent');
