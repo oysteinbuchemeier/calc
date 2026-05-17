@@ -1305,6 +1305,11 @@ function applyPreset() {
   const statusEl = document.getElementById('preset-status');
   if (!activeSize || activeMaturities.size === 0) {
     if (statusEl) statusEl.textContent = !activeSize ? 'Select organisation size →' : 'Select at least one AI maturity →';
+    // Clear all tasks if no maturity selected
+    if (activeSize && activeMaturities.size === 0) {
+      TASKS.forEach(t => { taskVol[t.id]={employees:0,usesPerDay:1}; taskRuns[t.id]=0; });
+      renderTasks(); update(); updateCompare(); updateRecommendedModel();
+    }
     return;
   }
   if (statusEl) statusEl.textContent = '';
@@ -1312,14 +1317,14 @@ function applyPreset() {
   const s = SIZE_PRESETS[activeSize];
   const techIds = ['code','sql','rag','apidoc'];
 
-  // Sum workflow volumes across all selected maturities
-  let totalSimple = 0, totalComplex = 0, everydayMult = 0;
+  // Everyday tasks only if Assistive is selected
+  const includeEveryday = activeMaturities.has('assistive');
+  // Workflow volumes — max across selected maturities
+  let totalSimple = 0, totalComplex = 0;
   activeMaturities.forEach(mid => {
     const wv = WORKFLOW_VOLUMES[mid][activeSize];
     totalSimple  = Math.max(totalSimple,  wv.simple);
     totalComplex = Math.max(totalComplex, wv.complex);
-    const m = MATURITY_PRESETS[mid];
-    everydayMult = Math.max(everydayMult, m.everydayMult);
   });
 
   TASKS.forEach(t => {
@@ -1331,9 +1336,14 @@ function applyPreset() {
       taskVol[t.id] = {employees: totalComplex, usesPerDay: 1};
       taskRuns[t.id] = totalComplex;
     } else {
-      const emp = Math.round(s.employees * everydayMult);
-      taskVol[t.id] = {employees: emp, usesPerDay: s.usesPerDay};
-      taskRuns[t.id] = Math.round(emp * s.usesPerDay);
+      // Everyday tasks — only if Assistive selected
+      if (includeEveryday) {
+        taskVol[t.id] = {employees: s.employees, usesPerDay: s.usesPerDay};
+        taskRuns[t.id] = Math.round(s.employees * s.usesPerDay);
+      } else {
+        taskVol[t.id] = {employees: 0, usesPerDay: 1};
+        taskRuns[t.id] = 0;
+      }
     }
   });
   renderTasks(); update(); updateCompare(); updateRecommendedModel();
@@ -1646,19 +1656,13 @@ function updateTopDrivers() {
 }
 
 function getDefaultHybridModel(taskId) {
-  // Price-agnostic defaults: cheapest suitable model per task type
   const sorted = [...MODELS].sort((a,b) => a.inP - b.inP);
-  const cheapest = sorted[0].id;  // DeepSeek or similar
+  const cheapest = sorted[0].id;
   const midRange = sorted.filter(m => m.inP >= 0.5 && m.inP <= 5.0);
   const midId = midRange.length ? midRange[0].id : sorted[Math.floor(sorted.length/2)].id;
 
-  // Complex tasks need mid-range capability
-  if (taskId === 'agent-complex') return midId;
-  if (taskId === 'agent-simple') return midId;
-  if (taskId === 'rag') return midId;
-  if (taskId === 'code') return midId;
-  if (taskId === 'apidoc') return midId;
-  // All other tasks → cheapest model
+  const isComplex = ['agent-complex','agent-simple','rag','code','apidoc'].includes(taskId);
+  if (isComplex) return midId;
   return cheapest;
 }
 
@@ -1697,12 +1701,19 @@ function updateHybridRouting() {
       const currentId = window._hybridModels[t.id];
       const defaultId = getDefaultHybridModel(t.id);
       const isDefault = currentId === defaultId;
-      return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
-        <span style="font-size:13px;color:var(--text2);flex:1;">${t.name}</span>
-        ${isDefault ? `<span style="font-size:11px;font-family:var(--mono);color:var(--accent2);">suggested</span>` : ''}
-        <select class="compare-select" style="font-size:12px;padding:5px 8px;" onchange="setHybridModel('${t.id}',this.value)">
-          ${MODELS.map(m => `<option value="${m.id}"${m.id===currentId?' selected':''}>${m.name}</option>`).join('')}
-        </select>
+      const isAgentTask = ['agent-complex','agent-simple','rag','code','apidoc'].includes(t.id);
+      const assignedModel = MODELS.find(m=>m.id===currentId);
+      const isSmall = assignedModel && assignedModel.inP < 0.5;
+      const showWarning = isAgentTask && isSmall && !isDefault;
+      return `<div style="padding:8px 0;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:13px;color:var(--text2);flex:1;">${t.name}</span>
+          ${isDefault ? `<span style="font-size:11px;font-family:var(--mono);color:var(--accent2);">suggested</span>` : ''}
+          <select class="compare-select" style="font-size:12px;padding:5px 8px;" onchange="setHybridModel('${t.id}',this.value)">
+            ${MODELS.map(m => `<option value="${m.id}"${m.id===currentId?' selected':''}>${m.name}</option>`).join('')}
+          </select>
+        </div>
+        ${showWarning ? `<div style="font-size:11px;color:#f87171;margin-top:4px;font-family:var(--mono);">⚠ Small/fast models are generally not suited for this workflow type.</div>` : ''}
       </div>`;
     }).join('')}`;
 
