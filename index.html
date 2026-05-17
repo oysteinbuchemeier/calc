@@ -653,6 +653,7 @@ footer a:hover{color:var(--text2)}
         <div class="panel-title">Model</div>
         <div class="model-row" id="model-row"></div>
         <div id="model-desc" style="font-size:12px;color:var(--text3);margin-top:10px;font-family:var(--mono);"></div>
+        <div id="model-suitability-note" style="display:none;margin-top:10px;font-size:12px;font-family:var(--mono);line-height:1.6;padding:8px 12px;border-radius:6px;"></div>
         <div style="margin-top:8px;font-size:12px;color:var(--text3);font-family:var(--mono);line-height:1.6;">Model selection affects inference cost only. Output quality, latency and data residency vary by provider.</div>
       </div>
       <div class="rec-model-panel" id="rec-model-panel">
@@ -1145,6 +1146,49 @@ function setCurrency(code, symbol) {
   update(); updateCompare(); updateROI(); updateSavings();
 }
 
+function updateModelSuitabilityNote() {
+  const el = document.getElementById('model-suitability-note');
+  if (!el) return;
+
+  const hasAgentic = activeMaturities.has('agentic');
+  const hasWorkflow = activeMaturities.has('workflow');
+  if (!sel.model || (!hasAgentic && !hasWorkflow)) {
+    el.style.display = 'none';
+    return;
+  }
+
+  const model = MODELS.find(m => m.id === sel.model);
+  if (!model) { el.style.display = 'none'; return; }
+
+  // Classify model by price tier
+  const tier = model.inP < 0.5 ? 'small' : model.inP < 4.0 ? 'mid' : 'frontier';
+
+  let note = '', bg = '', color = '';
+
+  if (hasAgentic && tier === 'small') {
+    note = '⚠ Small/fast models are generally not suited for agentic workflows. Agentic systems require stable multi-step reasoning, consistent output structure and tool-use capability. Model suitability depends on system design and is not evaluated here.';
+    bg = 'rgba(248,113,113,0.06)';
+    color = '#f87171';
+  } else if (hasAgentic && tier === 'mid') {
+    note = 'ℹ Agentic capability varies significantly with system architecture and orchestration design. This model may support agentic workflows under strict system constraints. Suitability is not evaluated in this simulation.';
+    bg = 'rgba(245,158,11,0.06)';
+    color = 'var(--amber)';
+  } else if (hasWorkflow && tier === 'small') {
+    note = 'ℹ Small/fast models can handle simple workflow automation but may be inconsistent in structured multi-step output. System design matters significantly at this tier.';
+    bg = 'rgba(245,158,11,0.06)';
+    color = 'var(--amber)';
+  } else {
+    el.style.display = 'none';
+    return;
+  }
+
+  el.style.display = 'block';
+  el.style.background = bg;
+  el.style.color = color;
+  el.style.border = `1px solid ${color === '#f87171' ? 'rgba(248,113,113,0.2)' : 'rgba(245,158,11,0.2)'}`;
+  el.textContent = note;
+}
+
 function setSensitivity(key, val, badgeId, formatter) {
   sel[key] = val;
   const badge = document.getElementById(badgeId);
@@ -1254,6 +1298,7 @@ function toggleMaturity(id, btn) {
     btn.classList.add('active');
   }
   applyPreset();
+  updateModelSuitabilityNote();
 }
 
 function applyPreset() {
@@ -2392,6 +2437,7 @@ function pick(type,val) {
     const sA=document.getElementById('cmp-a');
     if(sA) sA.value=val;
     updateHybridRouting();
+    updateModelSuitabilityNote();
   }
   update(); updateCompare();
 }
