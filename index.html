@@ -1059,8 +1059,8 @@ const MODELS = [
   {id:'mini',     name:'GPT-4o mini',   full:'OpenAI GPT-4o mini',      inP:0.15,  outP:0.60,  note:'$0.15 / $0.60 per 1M tokens',   badge:null,       orId:'openai/gpt-4o-mini'},
   {id:'g-flash',  name:'Gemini Flash',  full:'Google Gemini 2.5 Flash', inP:0.30,  outP:2.50,  note:'$0.30 / $2.50 per 1M tokens',   badge:null,       orId:'google/gemini-2.5-flash'},
   {id:'g-pro',    name:'Gemini Pro',    full:'Google Gemini 3.1 Pro',   inP:2.00,  outP:12.00, note:'$2.00 / $12.00 per 1M tokens',  badge:null,       orId:'google/gemini-3.1-pro-preview'},
-  {id:'deepseek', name:'DeepSeek V4 Flash', full:'DeepSeek V4 Flash', inP:0.14, outP:0.28, note:'$0.14 / $0.28 per 1M tokens · Data processed outside EU/EEA — verify compliance before production use', badge:null, orId:'deepseek/deepseek-v4-flash'},
-  {id:'deepseek-pro', name:'DeepSeek V4 Pro', full:'DeepSeek V4 Pro', inP:0.435, outP:0.87, note:'$0.435 / $0.87 per 1M tokens · Data processed outside EU/EEA — verify compliance before production use', badge:null, orId:'deepseek/deepseek-v4-pro'},
+  {id:'deepseek', name:'DeepSeek V4 Flash', full:'DeepSeek V4 Flash', inP:0.14, outP:0.28, note:'$0.14 / $0.28 per 1M tokens', badge:null, orId:'deepseek/deepseek-v4-flash'},
+  {id:'deepseek-pro', name:'DeepSeek V4 Pro', full:'DeepSeek V4 Pro', inP:0.435, outP:0.87, note:'$0.435 / $0.87 per 1M tokens', badge:null, orId:'deepseek/deepseek-v4-pro'},
 ];
 
 async function fetchModelPrices() {
@@ -1150,8 +1150,8 @@ function updateModelSuitabilityNote() {
   const el = document.getElementById('model-suitability-note');
   if (!el) return;
 
-  const hasAgentic = activeMaturities.has('agentic');
-  const hasWorkflow = activeMaturities.has('workflow');
+  const hasAgentic = activeMaturities.has('agentic') || (taskRuns['agent-complex']||0) > 0;
+  const hasWorkflow = activeMaturities.has('workflow') || (taskRuns['agent-simple']||0) > 0;
   if (!sel.model || (!hasAgentic && !hasWorkflow)) {
     el.style.display = 'none';
     const dn = document.getElementById('data-residency-note');
@@ -1227,6 +1227,13 @@ function updateModelSuitabilityNote() {
     if (isDeepSeek) dnEl.textContent = 'ℹ Data processed outside EU/EEA. Verify compliance requirements before production use.';
     return;
   }
+
+  // Show capability note
+  el.style.display = 'block';
+  el.style.background = bg;
+  el.style.color = color;
+  el.style.border = `1px solid ${color === '#f87171' ? 'rgba(248,113,113,0.2)' : 'rgba(245,158,11,0.2)'}`;
+  el.textContent = note;
 
   // Show/hide dataresidency note
   let dnEl = document.getElementById('data-residency-note');
