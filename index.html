@@ -865,7 +865,7 @@ footer a:hover{color:var(--text2)}
 
       <!-- NEXT STEP -->
       <div style="background:rgba(108,164,171,0.06);border:1px solid rgba(108,164,171,0.2);border-radius:var(--radius-lg);padding:1.5rem;display:flex;flex-direction:column;gap:12px;">
-        <button onclick="openModal()" style="background:var(--accent);color:#fff;border:none;padding:13px 20px;border-radius:8px;font-size:14px;font-weight:500;font-family:var(--sans);cursor:pointer;width:100%;transition:opacity 0.15s;" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">View capacity impact →</button>
+        <button onclick="openModal()" style="background:var(--accent);color:#fff;border:none;padding:13px 20px;border-radius:8px;font-size:14px;font-weight:500;font-family:var(--sans);cursor:pointer;width:100%;transition:opacity 0.15s;" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">Advisory inquiry →</button>
       </div>
 
       <div class="step-nav">
@@ -996,11 +996,11 @@ footer a:hover{color:var(--text2)}
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">×</button>
     <div id="modal-form-wrap">
-      <div class="modal-eyebrow">AI Cost &amp; Architecture Review · 30 min</div>
-      <h2>Review your AI cost simulation and workflow setup</h2>
-      <p class="modal-sub">You share your use case — we review the generated model together. We walk through cost drivers, workflow structure, and what would change in a production-grade setup.</p>
-      <p class="modal-sub" style="margin-top:6px;font-size:12px;color:var(--text3);">This is not a sales call. It is a structured review of your AI usage model and assumptions.</p>
-      <div class="modal-estimate-box" id="modal-estimate-box"></div>
+      <div class="modal-eyebrow">Advisory Inquiry</div>
+      <h2>Reach out if there is a relevant basis for a conversation.</h2>
+      <p class="modal-sub">If your organisation is working with operational AI, workflow automation or AI-driven transformation, feel free to reach out.</p>
+      <p class="modal-sub" style="margin-top:6px;">The simulator and frameworks on this site are intended to support operational understanding and strategic discussion — not production assessment or forecasting.</p>
+      <p class="modal-sub" style="margin-top:10px;font-size:12px;color:var(--text3);">Initial conversations are focused on understanding organisational context, operational challenges, AI maturity, and whether there is a relevant basis for advisory or interim collaboration.</p>
       <div class="form-row">
         <div class="form-field">
           <label class="form-label">Name</label>
@@ -1019,7 +1019,7 @@ footer a:hover{color:var(--text2)}
         <label class="form-label">Describe your use case</label>
         <textarea class="form-input" id="cf-message" placeholder="Briefly describe your workflows, volume, and where AI is being used today."></textarea>
       </div>
-      <button class="modal-submit" id="modal-submit-btn" onclick="submitContact()">Book an AI Cost &amp; Architecture Review · 30 min →</button>
+      <button class="modal-submit" id="modal-submit-btn" onclick="submitContact()">Send inquiry →</button>
       <div class="modal-feedback" id="modal-feedback"></div>
     </div>
     <div class="modal-success" id="modal-success">
@@ -2727,7 +2727,6 @@ function updateScenarioPanel() {
         ${row('Complex workflows/day', a.complexRuns, b.complexRuns)}
         ${row('Runs / day', a.totalRuns.toLocaleString(), b.totalRuns.toLocaleString())}
         ${row('Cache', a.cachePct+'%', b.cachePct+'%')}
-        ${row('Routing', a.routing||'Single-model', b.routing||'Single-model')}
         ${row('Batch processing', a.batch?'On':'Off', b.batch?'On':'Off')}
         ${row('Primary cost driver', driver(a), driver(b))}
       </tbody>
@@ -2943,7 +2942,7 @@ async function submitContact() {
     document.getElementById('modal-success').style.display='block';
   }catch(err){
     fb.className='modal-feedback err';fb.textContent='Could not send — check your EmailJS config.';
-    btn.disabled=false;btn.textContent='Book an AI Cost &amp; Architecture Review · 30 min →';
+    btn.disabled=false;btn.textContent='Send inquiry →';
   }
 }
 </script>
