@@ -2013,6 +2013,9 @@ ${(()=>{
   if ((a.retryRate||0) !== (b.retryRate||0)) diffs.push(`Retry rate: ${Math.round((a.retryRate||0)*100)}% → ${Math.round((b.retryRate||0)*100)}%`);
   if ((a.orchDepth||1) !== (b.orchDepth||1)) diffs.push(`Orchestration depth: ${a.orchDepth||1}× → ${b.orchDepth||1}×`);
   if ((a.ctxGrowth||1) !== (b.ctxGrowth||1)) diffs.push(`Context growth: ${a.ctxGrowth||1}× → ${b.ctxGrowth||1}×`);
+  if (b.totalRuns !== a.totalRuns) diffs.push(`Total runs/day: ${a.totalRuns.toLocaleString()} → ${b.totalRuns.toLocaleString()}`);
+  if (b.users !== a.users) diffs.push(`Active AI users: ${a.users} → ${b.users}`);
+  if ((a.sizeLabel||a.size) !== (b.sizeLabel||b.size)) diffs.push(`Organisation size: ${a.sizeLabel||a.size} → ${b.sizeLabel||b.size}`);
   const row = (label, va, vb) => `<tr style="border-bottom:1px solid #eee"><td style="padding:5px 8px;color:#888;font-size:9pt;width:35%">${label}</td><td style="padding:5px 8px;font-family:monospace;font-size:9pt">${va}</td><td style="padding:5px 8px;font-family:monospace;font-size:9pt">${vb}</td></tr>`;
   return `<section style="page-break-before:always">
   <h2>Scenario comparison</h2>
@@ -2622,8 +2625,8 @@ function saveScenario(slot) {
   const ratio = annualCapacity>0 ? Math.round(annualCapacity/aiAnnual) : 0;
   const aiAsPct = annualCapacity>0 ? Math.round(aiAnnual/annualCapacity*100) : 0;
   const isHybrid = window._hybridModels && Object.keys(window._hybridModels).some(id=>window._hybridModels[id]!==sel.model&&(taskRuns[id]||0)>0);
-  const matLabel = [...activeMaturities].map(m=>m.charAt(0).toUpperCase()+m.slice(1)).join(' + ') || 'Custom';
-  const sizeLabel = activeSize ? SIZE_PRESETS[activeSize].label : 'Custom';
+  const matLabel = [...activeMaturities].map(m=>m.charAt(0).toUpperCase()+m.slice(1)).join(' + ') || '—';
+  const sizeLabel = activeSize ? SIZE_PRESETS[activeSize].label : '—';
 
   // Auto-generate descriptive label from optimisation state
   const optParts = [];
