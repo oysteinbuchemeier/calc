@@ -2621,11 +2621,20 @@ function saveScenario(slot) {
   const aiAnnual = monthly*12;
   const ratio = annualCapacity>0 ? Math.round(annualCapacity/aiAnnual) : 0;
   const aiAsPct = annualCapacity>0 ? Math.round(aiAnnual/annualCapacity*100) : 0;
-
-  // Auto-generate label from config
-  const matLabel = [...activeMaturities].map(m=>m.charAt(0).toUpperCase()+m.slice(1)).join('+') || 'Custom';
+  const isHybrid = window._hybridModels && Object.keys(window._hybridModels).some(id=>window._hybridModels[id]!==sel.model&&(taskRuns[id]||0)>0);
+  const matLabel = [...activeMaturities].map(m=>m.charAt(0).toUpperCase()+m.slice(1)).join(' + ') || 'Custom';
   const sizeLabel = activeSize ? SIZE_PRESETS[activeSize].label : 'Custom';
-  const label = `${sizeLabel} · ${matLabel}`;
+
+  // Auto-generate descriptive label
+  const parts = [];
+  if (model) parts.push(model.name);
+  if (!sel.batch && sel.cachePct===0 && !isHybrid) parts.push('no optimisation');
+  else {
+    if (isHybrid) parts.push('hybrid routing');
+    if (sel.cachePct>0) parts.push(`${sel.cachePct}% cache`);
+    if (sel.batch) parts.push('batch');
+  }
+  const label = parts.join(' — ');
 
   const data = {
     label,
@@ -2634,12 +2643,15 @@ function saveScenario(slot) {
     tasks: active.length,
     totalRuns,
     users: maxUsers,
-    size: activeSize||'—',
+    sizeKey: activeSize||'—',
+    sizeLabel,
     mat: matLabel,
     ratio, aiAsPct,
     complexRuns: taskRuns['agent-complex']||0,
     simpleRuns: taskRuns['agent-simple']||0,
-    batch: sel.batch, cachePct: sel.cachePct,
+    batch: sel.batch,
+    cachePct: sel.cachePct,
+    routing: isHybrid ? 'Hybrid routing' : 'Single-model',
   };
   localStorage.setItem('scenario'+slot, JSON.stringify(data));
   updateScenarioPanel();
@@ -2675,12 +2687,13 @@ function updateScenarioPanel() {
   if (a.model !== b.model) diffs.push(`Model: ${a.model} → ${b.model}`);
   if (b.cachePct !== a.cachePct) diffs.push(`Prompt caching: ${a.cachePct}% → ${b.cachePct}%`);
   if (b.batch !== a.batch) diffs.push(`Batch processing: ${a.batch?'On':'Off'} → ${b.batch?'On':'Off'}`);
+  if ((a.routing||'Single-model') !== (b.routing||'Single-model')) diffs.push(`Model routing: ${a.routing||'Single-model'} → ${b.routing||'Single-model'}`);
   if (b.complexRuns !== a.complexRuns) diffs.push(`Complex workflow triggers: ${a.complexRuns}/day → ${b.complexRuns}/day`);
   if (b.simpleRuns !== a.simpleRuns) diffs.push(`Simple workflow triggers: ${a.simpleRuns}/day → ${b.simpleRuns}/day`);
   if (b.totalRuns !== a.totalRuns) diffs.push(`Total runs/day: ${a.totalRuns.toLocaleString()} → ${b.totalRuns.toLocaleString()}`);
   if (b.users !== a.users) diffs.push(`Active AI users: ${a.users} → ${b.users}`);
   if (b.mat !== a.mat) diffs.push(`AI maturity: ${a.mat} → ${b.mat}`);
-  if (b.size !== a.size) diffs.push(`Organisation size: ${a.size} → ${b.size}`);
+  if ((a.sizeLabel||a.size) !== (b.sizeLabel||b.size)) diffs.push(`Organisation size: ${a.sizeLabel||a.size} → ${b.sizeLabel||b.size}`);
   if (diffs.length === 0) diffs.push('No structural differences — configurations are identical');
 
   const row = (label, va, vb, highlight=false) => `
@@ -2700,17 +2713,18 @@ function updateScenarioPanel() {
         </tr>
       </thead>
       <tbody>
+        ${row('Scenario', a.label, b.label)}
         ${row('Model', a.model, b.model)}
-        ${row('Organisation size', a.size==='—'?'Custom':a.size, b.size==='—'?'Custom':b.size)}
-        ${row('AI maturity', a.mat, b.mat)}
-        ${row('Active workflows', a.tasks, b.tasks)}
-        ${row('Runs / day', a.totalRuns.toLocaleString(), b.totalRuns.toLocaleString())}
         ${row('Monthly estimate', a.monthlyFmt, b.monthlyFmt, true)}
         ${row('Cost / run', runCostA, runCostB)}
-        ${row('Cache', a.cachePct+'%', b.cachePct+'%')}
-        ${row('Batch processing', a.batch?'On':'Off', b.batch?'On':'Off')}
+        ${row('Organisation size', a.sizeLabel||a.size, b.sizeLabel||b.size)}
+        ${row('AI maturity', a.mat, b.mat)}
+        ${row('Active workflows', a.tasks, b.tasks)}
         ${row('Complex workflows/day', a.complexRuns, b.complexRuns)}
-        ${row('Simple workflows/day', a.simpleRuns, b.simpleRuns)}
+        ${row('Runs / day', a.totalRuns.toLocaleString(), b.totalRuns.toLocaleString())}
+        ${row('Cache', a.cachePct+'%', b.cachePct+'%')}
+        ${row('Routing', a.routing||'Single-model', b.routing||'Single-model')}
+        ${row('Batch processing', a.batch?'On':'Off', b.batch?'On':'Off')}
         ${row('Primary cost driver', driver(a), driver(b))}
       </tbody>
     </table>
@@ -2722,7 +2736,7 @@ function updateScenarioPanel() {
     </div>
 
     <div style="margin-bottom:12px;">
-      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Structural differences</div>
+      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Architectural differences</div>
       ${diffs.map(d=>`<div style="font-size:12px;color:var(--text2);font-family:var(--mono);padding:5px 0;border-bottom:1px solid var(--border);line-height:1.6;">· ${d}</div>`).join('')}
     </div>
 
