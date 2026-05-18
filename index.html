@@ -858,6 +858,7 @@ footer a:hover{color:var(--text2)}
         <div style="display:flex;gap:8px;margin-bottom:16px;">
           <button onclick="saveScenario('A')" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-size:12px;font-family:var(--mono);color:var(--text2);cursor:pointer;transition:all 0.12s;" onmouseover="this.style.borderColor='var(--accent2)'" onmouseout="this.style.borderColor='var(--border)'">Save current as Scenario A <span id="scenario-saved-A" style="color:var(--green)"></span></button>
           <button onclick="saveScenario('B')" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-size:12px;font-family:var(--mono);color:var(--text2);cursor:pointer;transition:all 0.12s;" onmouseover="this.style.borderColor='var(--accent2)'" onmouseout="this.style.borderColor='var(--border)'">Save current as Scenario B <span id="scenario-saved-B" style="color:var(--green)"></span></button>
+          <button onclick="localStorage.removeItem('scenarioA');localStorage.removeItem('scenarioB');updateScenarioPanel()" style="background:none;border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:11px;font-family:var(--mono);color:var(--text3);cursor:pointer;">✕ Clear</button>
         </div>
         <div id="scenario-compare-body"></div>
       </div>
@@ -2771,6 +2772,11 @@ sA.value = sel.model || 'sonnet';
 sB.value = 'deepseek';
 
 loadFromURL();
+// Clear stale scenario data on fresh load (no URL params = fresh session)
+if (!window.location.search) {
+  localStorage.removeItem('scenarioA');
+  localStorage.removeItem('scenarioB');
+}
 renderTasks();
 renderModels();
 document.getElementById('roi-rate-unit').textContent = currency.symbol + ' / yr';
