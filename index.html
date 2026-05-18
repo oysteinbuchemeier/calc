@@ -1724,8 +1724,7 @@ function updateTopDrivers() {
     ${savings.map(s => `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(45,212,160,0.06);border:1px solid rgba(45,212,160,0.15);border-radius:6px;margin-bottom:6px;">
       <span style="font-size:13px;color:var(--text2);">${s.label}</span>
       <span style="font-size:13px;font-family:var(--mono);color:var(--green);">−${s.pct}% · ${cx(s.save)}/mo</span>
-    </div>`).join('')}` : ''}
-    <div style="font-size:12px;color:var(--text3);padding:8px 10px;background:rgba(255,255,255,0.02);border-radius:6px;margin-top:4px;">Hybrid model routing configured in step 2 can further reduce inference cost.</div>`;
+    </div>`).join('')}` : ''}`;
 }
 
 function getDefaultHybridModel(taskId) {
@@ -1960,7 +1959,7 @@ function printReport() {
   <div class="big-val">${cx(monthly)}</div>
   <div class="big-sub">${cx(monthly/sel.days)} / day &nbsp;·&nbsp; ${cx(totalRuns>0?monthly/(totalRuns*sel.days):0)} / run</div>
   <div class="grid2" style="margin-top:12px">
-    <div class="card"><div class="card-label">Model</div><div class="card-val teal">${model?model.full+(isHybrid?' · Hybrid routing':''):'Not selected'}</div></div>
+    <div class="card"><div class="card-label">Model</div><div class="card-val teal">${model?model.full:'Not selected'}</div></div>
     <div class="card"><div class="card-label">Active AI users</div><div class="card-val">${maxUsers||'—'}</div></div>
     <div class="card"><div class="card-label">Runs / day</div><div class="card-val">${totalRuns.toLocaleString()}</div></div>
     <div class="card"><div class="card-label">Working days</div><div class="card-val">${sel.days}</div></div>
