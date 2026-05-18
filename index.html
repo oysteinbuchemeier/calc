@@ -2625,16 +2625,15 @@ function saveScenario(slot) {
   const matLabel = [...activeMaturities].map(m=>m.charAt(0).toUpperCase()+m.slice(1)).join(' + ') || 'Custom';
   const sizeLabel = activeSize ? SIZE_PRESETS[activeSize].label : 'Custom';
 
-  // Auto-generate descriptive label
-  const parts = [];
-  if (model) parts.push(model.name);
-  if (!sel.batch && sel.cachePct===0 && !isHybrid) parts.push('no optimisation');
-  else {
-    if (isHybrid) parts.push('hybrid routing');
-    if (sel.cachePct>0) parts.push(`${sel.cachePct}% cache`);
-    if (sel.batch) parts.push('batch');
-  }
-  const label = parts.join(' — ');
+  // Auto-generate descriptive label from optimisation state
+  const optParts = [];
+  if (isHybrid) optParts.push('hybrid routing');
+  if (sel.cachePct>0) optParts.push(`${sel.cachePct}% cache`);
+  if (sel.batch) optParts.push('batch');
+  if (sel.retryRate>0) optParts.push(`${Math.round(sel.retryRate*100)}% retry`);
+  if (sel.orchDepth>1) optParts.push(`orch ${sel.orchDepth}×`);
+  if (sel.ctxGrowth>1) optParts.push(`ctx ${sel.ctxGrowth}×`);
+  const label = slot === 'A' ? 'Scenario A' : 'Scenario B';
 
   const data = {
     label,
@@ -2652,6 +2651,9 @@ function saveScenario(slot) {
     batch: sel.batch,
     cachePct: sel.cachePct,
     routing: isHybrid ? 'Hybrid routing' : 'Single-model',
+    retryRate: sel.retryRate||0,
+    orchDepth: sel.orchDepth||1,
+    ctxGrowth: sel.ctxGrowth||1,
   };
   localStorage.setItem('scenario'+slot, JSON.stringify(data));
   updateScenarioPanel();
@@ -2688,13 +2690,16 @@ function updateScenarioPanel() {
   if (b.cachePct !== a.cachePct) diffs.push(`Prompt caching: ${a.cachePct}% → ${b.cachePct}%`);
   if (b.batch !== a.batch) diffs.push(`Batch processing: ${a.batch?'On':'Off'} → ${b.batch?'On':'Off'}`);
   if ((a.routing||'Single-model') !== (b.routing||'Single-model')) diffs.push(`Model routing: ${a.routing||'Single-model'} → ${b.routing||'Single-model'}`);
+  if ((a.retryRate||0) !== (b.retryRate||0)) diffs.push(`Retry rate: ${Math.round((a.retryRate||0)*100)}% → ${Math.round((b.retryRate||0)*100)}%`);
+  if ((a.orchDepth||1) !== (b.orchDepth||1)) diffs.push(`Orchestration depth: ${a.orchDepth||1}× → ${b.orchDepth||1}×`);
+  if ((a.ctxGrowth||1) !== (b.ctxGrowth||1)) diffs.push(`Context growth: ${a.ctxGrowth||1}× → ${b.ctxGrowth||1}×`);
   if (b.complexRuns !== a.complexRuns) diffs.push(`Complex workflow triggers: ${a.complexRuns}/day → ${b.complexRuns}/day`);
   if (b.simpleRuns !== a.simpleRuns) diffs.push(`Simple workflow triggers: ${a.simpleRuns}/day → ${b.simpleRuns}/day`);
   if (b.totalRuns !== a.totalRuns) diffs.push(`Total runs/day: ${a.totalRuns.toLocaleString()} → ${b.totalRuns.toLocaleString()}`);
   if (b.users !== a.users) diffs.push(`Active AI users: ${a.users} → ${b.users}`);
   if (b.mat !== a.mat) diffs.push(`AI maturity: ${a.mat} → ${b.mat}`);
   if ((a.sizeLabel||a.size) !== (b.sizeLabel||b.size)) diffs.push(`Organisation size: ${a.sizeLabel||a.size} → ${b.sizeLabel||b.size}`);
-  if (diffs.length === 0) diffs.push('No structural differences — configurations are identical');
+  if (diffs.length === 0) diffs.push('No architectural differences — configurations are identical');
 
   const row = (label, va, vb, highlight=false) => `
     <tr style="border-bottom:1px solid var(--border);">
@@ -2713,7 +2718,6 @@ function updateScenarioPanel() {
         </tr>
       </thead>
       <tbody>
-        ${row('Scenario', a.label, b.label)}
         ${row('Model', a.model, b.model)}
         ${row('Monthly estimate', a.monthlyFmt, b.monthlyFmt, true)}
         ${row('Cost / run', runCostA, runCostB)}
