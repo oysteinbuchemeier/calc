@@ -621,7 +621,7 @@ footer a:hover{color:var(--text2)}
 
             <div style="font-size:11px;color:var(--text3);padding:8px 10px;background:rgba(255,255,255,0.02);border-radius:4px;line-height:1.6;">All input estimates include system prompt overhead (typically 200–800 tokens/call). Actual costs vary with prompt design, document length and retry frequency.</div>
 
-            <div style="font-size:11px;color:var(--text3);padding:8px 10px;background:rgba(255,255,255,0.02);border-radius:4px;line-height:1.6;margin-top:8px;">This simulator models active workflow-driven AI usage and inference consumption. Seat-based AI subscriptions (e.g. Copilot, ChatGPT Team, Gemini Workspace) may include bundled usage and are therefore not fully reflected in inference-based estimates.</div>
+            <div style="font-size:11px;color:var(--text3);padding:8px 10px;background:rgba(255,255,255,0.02);border-radius:4px;line-height:1.6;margin-top:8px;">This simulator models inference cost only — the direct cost of API calls to language models. It does not include infrastructure costs (cloud hosting, vector databases, monitoring), implementation and integration effort, compliance and audit logging, multi-agent orchestration overhead, embedding generation, fine-tuning, guardrails and content filtering, or human-in-the-loop process costs.<br><br>Seat-based AI subscriptions (e.g. Copilot, ChatGPT Team, Gemini Workspace) may include bundled usage and are therefore not reflected in inference-based estimates. For larger organisations with complex AI deployments, total AI operating cost will typically exceed inference cost significantly.</div>
 
           </div>
         </div>
@@ -705,6 +705,7 @@ footer a:hover{color:var(--text2)}
             <input type="range" id="sl-retry" min="0" max="50" step="5" value="0" oninput="setSensitivity('retryRate', this.value/100, 'retry-badge', v=>(v*100)+'%')" style="flex:1;">
             <span style="font-family:var(--mono);font-size:12px;color:var(--accent2);min-width:80px;text-align:right;" id="retry-impact-label"></span>
           </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:5px;font-family:var(--mono);">Typical: 2–10% in production. Above 20% indicates systemic instability.</div>
         </div>
 
         <!-- Orchestration depth -->
@@ -719,6 +720,7 @@ footer a:hover{color:var(--text2)}
             <input type="range" id="sl-orch" min="1" max="3" step="0.5" value="1" oninput="setSensitivity('orchDepth', parseFloat(this.value), 'orch-badge', v=>v+'×')" style="flex:1;">
             <span style="font-family:var(--mono);font-size:12px;color:var(--accent2);min-width:80px;text-align:right;" id="orch-impact-label"></span>
           </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:5px;font-family:var(--mono);">Simple agents: 1–1.5×. Multi-step workflows: 2–2.5×. Complex autonomous loops: 3×.</div>
         </div>
 
         <!-- Context growth -->
@@ -733,6 +735,7 @@ footer a:hover{color:var(--text2)}
             <input type="range" id="sl-ctx-growth" min="1" max="4" step="0.5" value="1" oninput="setSensitivity('ctxGrowth', parseFloat(this.value), 'ctx-badge', v=>v+'×')" style="flex:1;">
             <span style="font-family:var(--mono);font-size:12px;color:var(--accent2);min-width:80px;text-align:right;" id="ctx-impact-label"></span>
           </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:5px;font-family:var(--mono);">Short workflows: 1–1.5×. Document-heavy workflows: 2–3×. Long-running agents: 3–4×.</div>
         </div>
       </div>
 
