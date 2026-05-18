@@ -852,9 +852,13 @@ footer a:hover{color:var(--text2)}
       </div>
 
       <!-- SCENARIO COMPARE -->
-      <div class="panel" id="scenario-compare-panel" style="display:none;">
+      <div class="panel" id="scenario-compare-panel">
         <div class="panel-title">Scenario comparison</div>
-        <p style="font-size:11px;color:var(--text3);margin-bottom:12px;line-height:1.6;">Save two configurations using the Save A / Save B buttons above to compare them side by side.</p>
+        <p style="font-size:11px;color:var(--text3);margin-bottom:14px;line-height:1.6;">Configure a scenario, save it as A. Reconfigure and save as B. The delta shows the impact of the change.</p>
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <button onclick="saveScenario('A')" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-size:12px;font-family:var(--mono);color:var(--text2);cursor:pointer;transition:all 0.12s;" onmouseover="this.style.borderColor='var(--accent2)'" onmouseout="this.style.borderColor='var(--border)'">Save current as Scenario A <span id="scenario-saved-A" style="color:var(--green)"></span></button>
+          <button onclick="saveScenario('B')" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-size:12px;font-family:var(--mono);color:var(--text2);cursor:pointer;transition:all 0.12s;" onmouseover="this.style.borderColor='var(--accent2)'" onmouseout="this.style.borderColor='var(--border)'">Save current as Scenario B <span id="scenario-saved-B" style="color:var(--green)"></span></button>
+        </div>
         <div id="scenario-compare-body"></div>
       </div>
 
@@ -877,8 +881,6 @@ footer a:hover{color:var(--text2)}
   <div class="right-col">
     <div class="action-row">
       <button class="action-btn share" onclick="shareURL()">↗ Share</button>
-      <button class="action-btn" onclick="saveScenario('A')" style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);">Save A <span id="scenario-saved-A" style="color:var(--green)"></span></button>
-      <button class="action-btn" onclick="saveScenario('B')" style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);">Save B <span id="scenario-saved-B" style="color:var(--green)"></span></button>
       <button class="action-btn reset" onclick="resetAll()">↺ Reset</button>
     </div>
     <div class="copy-confirm" id="copy-confirm"></div>
@@ -2607,53 +2609,99 @@ function buildScenarioURL() {
 }
 
 function saveScenario(slot) {
-  const url = buildScenarioURL();
   const model = MODELS.find(m=>m.id===sel.model);
   const monthly = totalMonthly();
-  const label = slot === 'A' ? prompt('Name this scenario:', 'Scenario A') : prompt('Name this scenario:', 'Scenario B');
-  if (!label) return;
+  const active = TASKS.filter(t=>(taskRuns[t.id]||0)>0);
+  const totalRuns = active.reduce((s,t)=>s+taskRuns[t.id],0);
+  const maxUsers = Math.max(0,...TASKS.map(t=>taskVol[t.id]?.employees||0));
+  const pct = parseFloat(document.getElementById('roi-pct')?.value)||10;
+  const annualCostPerPerson = (parseFloat(document.getElementById('roi-rate')?.value)||0)/currency.rate;
+  const annualCapacity = annualCostPerPerson*maxUsers*(pct/100);
+  const aiAnnual = monthly*12;
+  const ratio = annualCapacity>0 ? Math.round(annualCapacity/aiAnnual) : 0;
+  const aiAsPct = annualCapacity>0 ? Math.round(aiAnnual/annualCapacity*100) : 0;
+  const complexRuns = taskRuns['agent-complex']||0;
+  const simpleRuns = taskRuns['agent-simple']||0;
+
   const data = {
-    url, label,
+    label: slot==='A' ? 'Scenario A' : 'Scenario B',
     model: model ? model.name : '—',
-    monthly: cx(monthly),
-    tasks: TASKS.filter(t=>(taskRuns[t.id]||0)>0).length,
-    size: activeSize || '—',
+    monthly, monthlyFmt: cx(monthly),
+    tasks: active.length,
+    totalRuns,
+    users: maxUsers,
+    size: activeSize||'—',
     mat: [...activeMaturities].join('+') || '—',
+    ratio, aiAsPct,
+    complexRuns, simpleRuns,
+    batch: sel.batch, cachePct: sel.cachePct,
   };
-  localStorage.setItem('scenario' + slot, JSON.stringify(data));
+  localStorage.setItem('scenario'+slot, JSON.stringify(data));
   updateScenarioPanel();
-  const el = document.getElementById('scenario-saved-' + slot);
-  if (el) { el.textContent = '✓ Saved'; setTimeout(()=>el.textContent='', 2000); }
+  const el = document.getElementById('scenario-saved-'+slot);
+  if (el) { el.textContent = ' ✓'; setTimeout(()=>el.textContent='', 2500); }
 }
 
 function updateScenarioPanel() {
-  const panel = document.getElementById('scenario-compare-panel');
-  if (!panel) return;
+  const body = document.getElementById('scenario-compare-body');
+  if (!body) return;
   const a = localStorage.getItem('scenarioA') ? JSON.parse(localStorage.getItem('scenarioA')) : null;
   const b = localStorage.getItem('scenarioB') ? JSON.parse(localStorage.getItem('scenarioB')) : null;
-  if (!a && !b) { panel.style.display='none'; return; }
-  panel.style.display = 'block';
+  if (!a && !b) { body.innerHTML = ''; return; }
+  if (!a || !b) {
+    body.innerHTML = `<div style="font-size:12px;color:var(--text3);font-family:var(--mono);padding:8px 0;">${a ? '✓ Scenario A saved. Configure a new scenario and save as B.' : '✓ Scenario B saved. Configure a new scenario and save as A.'}</div>`;
+    return;
+  }
 
-  const col = (s, slot) => s ? `
-    <div style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;">
-      <div style="font-size:10px;font-weight:600;color:var(--accent2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Scenario ${slot}</div>
-      <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:8px;">${s.label}</div>
-      <div style="font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.8;">
-        Model: <span style="color:var(--text2)">${s.model}</span><br>
-        Size: <span style="color:var(--text2)">${s.size}</span><br>
-        Maturity: <span style="color:var(--text2)">${s.mat}</span><br>
-        Tasks: <span style="color:var(--text2)">${s.tasks} active</span>
-      </div>
-      <div style="font-size:18px;font-weight:600;font-family:var(--mono);color:var(--green);margin-top:10px;">${s.monthly}<span style="font-size:11px;color:var(--text3);font-weight:400;">/mo</span></div>
-      <a href="${s.url}" style="font-size:11px;color:var(--accent2);text-decoration:none;font-family:var(--mono);display:block;margin-top:8px;">Load scenario →</a>
-      <button onclick="localStorage.removeItem('scenario${slot}');updateScenarioPanel()" style="background:none;border:none;font-size:11px;color:var(--text3);cursor:pointer;padding:0;margin-top:4px;font-family:var(--mono);">Clear</button>
-    </div>` : `
-    <div style="flex:1;background:var(--bg3);border:1px dashed var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;justify-content:center;">
-      <div style="font-size:12px;color:var(--text3);text-align:center;">Scenario ${slot}<br>not saved yet</div>
+  // Delta calculations
+  const delta = (valA, valB, lowerIsBetter=false) => {
+    if (!valA || !valB) return {fmt:'—', color:'var(--text3)', arrow:''};
+    const diff = valB - valA;
+    const pct = valA !== 0 ? Math.round(Math.abs(diff)/valA*100) : 0;
+    const positive = lowerIsBetter ? diff < 0 : diff > 0;
+    const color = diff === 0 ? 'var(--text3)' : positive ? 'var(--green)' : '#f87171';
+    const arrow = diff === 0 ? '' : diff > 0 ? ' ↑' : ' ↓';
+    const sign = diff > 0 ? '+' : '';
+    return {fmt: `${sign}${pct}%${arrow}`, color, arrow};
+  };
+
+  const rows = [
+    ['Monthly cost',        a.monthlyFmt,         b.monthlyFmt,         delta(a.monthly, b.monthly, true)],
+    ['Model',               a.model,               b.model,               null],
+    ['Active tasks',        a.tasks,               b.tasks,               delta(a.tasks, b.tasks)],
+    ['Runs / day',          a.totalRuns.toLocaleString(), b.totalRuns.toLocaleString(), delta(a.totalRuns, b.totalRuns)],
+    ['Active AI users',     a.users||'—',          b.users||'—',          delta(a.users, b.users)],
+    ['Complex workflows/day', a.complexRuns,        b.complexRuns,         delta(a.complexRuns, b.complexRuns)],
+    ['Simple workflows/day',  a.simpleRuns,         b.simpleRuns,          delta(a.simpleRuns, b.simpleRuns)],
+    ['Capacity ratio',      a.ratio ? a.ratio+'×':'—', b.ratio ? b.ratio+'×':'—', delta(a.ratio, b.ratio)],
+    ['AI cost as % capacity', a.aiAsPct ? a.aiAsPct+'%':'—', b.aiAsPct ? b.aiAsPct+'%':'—', delta(a.aiAsPct, b.aiAsPct, true)],
+    ['Batch',               a.batch?'On':'Off',    b.batch?'On':'Off',    null],
+    ['Cache',               a.cachePct+'%',        b.cachePct+'%',        null],
+  ];
+
+  body.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border);">
+          <th style="text-align:left;padding:6px 8px;color:var(--text3);font-weight:500;width:35%;"></th>
+          <th style="text-align:right;padding:6px 8px;color:var(--accent2);font-weight:500;">A — ${a.label}</th>
+          <th style="text-align:right;padding:6px 8px;color:var(--accent2);font-weight:500;">B — ${b.label}</th>
+          <th style="text-align:right;padding:6px 8px;color:var(--text3);font-weight:500;">Δ</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map(([label, va, vb, d])=>`
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:6px 8px;color:var(--text3);">${label}</td>
+            <td style="text-align:right;padding:6px 8px;font-family:var(--mono);color:var(--text2);">${va}</td>
+            <td style="text-align:right;padding:6px 8px;font-family:var(--mono);color:var(--text2);">${vb}</td>
+            <td style="text-align:right;padding:6px 8px;font-family:var(--mono);color:${d?d.color:'var(--text3)'};">${d?d.fmt:'—'}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+    <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:10px;">
+      <button onclick="localStorage.removeItem('scenarioA');localStorage.removeItem('scenarioB');updateScenarioPanel()" style="background:none;border:none;font-size:11px;color:var(--text3);cursor:pointer;font-family:var(--mono);">Clear both</button>
     </div>`;
-
-  document.getElementById('scenario-compare-body').innerHTML =
-    `<div style="display:flex;gap:12px;">${col(a,'A')}${col(b,'B')}</div>`;
 }
 
 function shareURL() {
