@@ -1154,6 +1154,23 @@ function updateModelSuitabilityNote() {
   const hasWorkflow = activeMaturities.has('workflow');
   if (!sel.model || (!hasAgentic && !hasWorkflow)) {
     el.style.display = 'none';
+    const dn = document.getElementById('data-residency-note');
+    if (dn) dn.style.display = 'none';
+    // Still show dataresidency for DeepSeek even without workflow/agentic
+    if (sel.model) {
+      const m = MODELS.find(m=>m.id===sel.model);
+      if (m && (m.id==='deepseek'||m.id==='deepseek-pro')) {
+        let dnEl = document.getElementById('data-residency-note');
+        if (!dnEl) {
+          dnEl = document.createElement('div');
+          dnEl.id = 'data-residency-note';
+          dnEl.style.cssText = 'margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--amber);background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;';
+          el.parentNode.insertBefore(dnEl, el.nextSibling);
+        }
+        dnEl.style.display = 'block';
+        dnEl.textContent = 'ℹ Data processed outside EU/EEA. Verify compliance requirements before production use.';
+      }
+    }
     return;
   }
 
@@ -1161,7 +1178,11 @@ function updateModelSuitabilityNote() {
   if (!model) { el.style.display = 'none'; return; }
 
   // Classify model by price tier
-  const tier = model.inP < 0.5 ? 'small' : model.inP < 4.0 ? 'mid' : 'frontier';
+  const tier = model.inP < 0.5 && model.id !== 'deepseek-pro' ? 'small' : model.inP < 4.0 && model.id !== 'deepseek-pro' ? 'mid' : 'frontier';
+
+  // Dataresidency note for DeepSeek models
+  const isDeepSeek = model.id === 'deepseek' || model.id === 'deepseek-pro';
+  const dataNote = isDeepSeek ? '<div style="margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--amber);background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;">ℹ Data processed outside EU/EEA. Verify compliance requirements before production use.</div>' : '';
 
   let note = '', bg = '', color = '';
 
@@ -1182,11 +1203,31 @@ function updateModelSuitabilityNote() {
     return;
   }
 
-  el.style.display = 'block';
-  el.style.background = bg;
-  el.style.color = color;
-  el.style.border = `1px solid ${color === '#f87171' ? 'rgba(248,113,113,0.2)' : 'rgba(245,158,11,0.2)'}`;
-  el.textContent = note;
+  if (!note) {
+    el.style.display = 'none';
+    // Still show dataresidency note if DeepSeek
+    let dnEl = document.getElementById('data-residency-note');
+    if (!dnEl) {
+      dnEl = document.createElement('div');
+      dnEl.id = 'data-residency-note';
+      dnEl.style.cssText = 'margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--amber);background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;';
+      el.parentNode.insertBefore(dnEl, el.nextSibling);
+    }
+    dnEl.style.display = isDeepSeek ? 'block' : 'none';
+    if (isDeepSeek) dnEl.textContent = 'ℹ Data processed outside EU/EEA. Verify compliance requirements before production use.';
+    return;
+  }
+
+  // Show/hide dataresidency note
+  let dnEl = document.getElementById('data-residency-note');
+  if (!dnEl) {
+    dnEl = document.createElement('div');
+    dnEl.id = 'data-residency-note';
+    dnEl.style.cssText = 'margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--amber);background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;';
+    el.parentNode.insertBefore(dnEl, el.nextSibling);
+  }
+  dnEl.style.display = isDeepSeek ? 'block' : 'none';
+  if (isDeepSeek) dnEl.textContent = 'ℹ Data processed outside EU/EEA. Verify compliance requirements before production use.';
 }
 
 function setSensitivity(key, val, badgeId, formatter) {
