@@ -2659,37 +2659,36 @@ function updateScenarioPanel() {
     return;
   }
 
-  // Delta
   const diff = b.monthly - a.monthly;
   const diffPct = a.monthly > 0 ? Math.round(Math.abs(diff)/a.monthly*100) : 0;
   const cheaper = diff < 0;
   const diffFmt = cheaper ? `−${cx(Math.abs(diff))}/mo` : `+${cx(Math.abs(diff))}/mo`;
   const diffColor = cheaper ? 'var(--green)' : '#f87171';
 
-  // Structural differences
-  const diffs = [];
-  if (a.model !== b.model) diffs.push(`Model changed from ${a.model} to ${b.model}`);
-  if (b.cachePct > a.cachePct) diffs.push(`Prompt caching increased from ${a.cachePct}% to ${b.cachePct}% — reduces repeated context processing`);
-  if (a.cachePct > b.cachePct) diffs.push(`Prompt caching reduced from ${a.cachePct}% to ${b.cachePct}%`);
-  if (b.batch && !a.batch) diffs.push('Batch processing enabled — reduces input token cost by 50%');
-  if (a.batch && !b.batch) diffs.push('Batch processing disabled');
-  if (b.complexRuns !== a.complexRuns) diffs.push(`Complex workflow volume changed from ${a.complexRuns} to ${b.complexRuns} triggers/day`);
-  if (b.simpleRuns !== a.simpleRuns) diffs.push(`Simple workflow volume changed from ${a.simpleRuns} to ${b.simpleRuns} triggers/day`);
-  if (b.totalRuns === a.totalRuns) diffs.push('Same workload volume across both scenarios');
-  if (diffs.length === 0) diffs.push('No structural differences detected — configurations are identical');
-
-  // Primary cost driver
-  const driver = (s) => s.complexRuns > 0 ? 'Complex agentic workflows' : s.simpleRuns > 0 ? 'Simple automated workflows' : 'Everyday AI tasks';
-
-  const row = (label, va, vb) => `
-    <tr style="border-bottom:1px solid var(--border);">
-      <td style="padding:7px 10px;color:var(--text3);font-size:12px;">${label}</td>
-      <td style="padding:7px 10px;font-family:var(--mono);color:var(--text2);font-size:12px;">${va}</td>
-      <td style="padding:7px 10px;font-family:var(--mono);color:var(--text2);font-size:12px;">${vb}</td>
-    </tr>`;
-
   const runCostA = a.totalRuns > 0 ? cx(a.monthly / (a.totalRuns * 22)) : '—';
   const runCostB = b.totalRuns > 0 ? cx(b.monthly / (b.totalRuns * 22)) : '—';
+
+  const driver = (s) => s.complexRuns > 0 ? 'Complex agentic workflows' : s.simpleRuns > 0 ? 'Simple automated workflows' : 'Everyday AI tasks';
+
+  // Factual structural differences only
+  const diffs = [];
+  if (a.model !== b.model) diffs.push(`Model: ${a.model} → ${b.model}`);
+  if (b.cachePct !== a.cachePct) diffs.push(`Prompt caching: ${a.cachePct}% → ${b.cachePct}%`);
+  if (b.batch !== a.batch) diffs.push(`Batch processing: ${a.batch?'On':'Off'} → ${b.batch?'On':'Off'}`);
+  if (b.complexRuns !== a.complexRuns) diffs.push(`Complex workflow triggers: ${a.complexRuns}/day → ${b.complexRuns}/day`);
+  if (b.simpleRuns !== a.simpleRuns) diffs.push(`Simple workflow triggers: ${a.simpleRuns}/day → ${b.simpleRuns}/day`);
+  if (b.totalRuns !== a.totalRuns) diffs.push(`Total runs/day: ${a.totalRuns.toLocaleString()} → ${b.totalRuns.toLocaleString()}`);
+  if (b.users !== a.users) diffs.push(`Active AI users: ${a.users} → ${b.users}`);
+  if (b.mat !== a.mat) diffs.push(`AI maturity: ${a.mat} → ${b.mat}`);
+  if (b.size !== a.size) diffs.push(`Organisation size: ${a.size} → ${b.size}`);
+  if (diffs.length === 0) diffs.push('No structural differences — configurations are identical');
+
+  const row = (label, va, vb, highlight=false) => `
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:7px 10px;color:var(--text3);font-size:12px;width:35%;">${label}</td>
+      <td style="padding:7px 10px;font-family:var(--mono);color:${highlight?'var(--green)':'var(--text2)'};font-size:12px;font-weight:${highlight?'500':'400'};">${va}</td>
+      <td style="padding:7px 10px;font-family:var(--mono);color:${highlight?'var(--green)':'var(--text2)'};font-size:12px;font-weight:${highlight?'500':'400'};">${vb}</td>
+    </tr>`;
 
   body.innerHTML = `
     <table style="width:100%;border-collapse:collapse;margin-bottom:16px;">
@@ -2701,39 +2700,30 @@ function updateScenarioPanel() {
         </tr>
       </thead>
       <tbody>
-        ${row('Configuration', a.label, b.label)}
         ${row('Model', a.model, b.model)}
-        ${row('Organisation size', a.size, b.size)}
+        ${row('Organisation size', a.size==='—'?'Custom':a.size, b.size==='—'?'Custom':b.size)}
         ${row('AI maturity', a.mat, b.mat)}
         ${row('Active workflows', a.tasks, b.tasks)}
         ${row('Runs / day', a.totalRuns.toLocaleString(), b.totalRuns.toLocaleString())}
-        ${row('Monthly estimate', `<span style="color:var(--green);font-weight:500">${a.monthlyFmt}</span>`, `<span style="color:var(--green);font-weight:500">${b.monthlyFmt}</span>`)}
+        ${row('Monthly estimate', a.monthlyFmt, b.monthlyFmt, true)}
         ${row('Cost / run', runCostA, runCostB)}
         ${row('Cache', a.cachePct+'%', b.cachePct+'%')}
         ${row('Batch processing', a.batch?'On':'Off', b.batch?'On':'Off')}
         ${row('Complex workflows/day', a.complexRuns, b.complexRuns)}
+        ${row('Simple workflows/day', a.simpleRuns, b.simpleRuns)}
         ${row('Primary cost driver', driver(a), driver(b))}
       </tbody>
     </table>
 
     <div style="background:rgba(45,212,160,0.08);border:1px solid rgba(45,212,160,0.2);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px;">
       <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Estimated difference</div>
-      <div style="font-size:20px;font-weight:600;font-family:var(--mono);color:${diffColor};margin-bottom:4px;">${diffFmt} estimated operating cost</div>
-      <div style="font-size:12px;color:var(--text2);font-family:var(--mono);">~${diffPct}% ${cheaper?'lower':'higher'} estimated cost under current assumptions</div>
+      <div style="font-size:20px;font-weight:600;font-family:var(--mono);color:${diffColor};margin-bottom:4px;">${diffFmt}</div>
+      <div style="font-size:12px;color:var(--text2);font-family:var(--mono);">~${diffPct}% ${cheaper?'lower':'higher'} estimated cost · B vs A</div>
     </div>
 
     <div style="margin-bottom:12px;">
-      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Main structural differences</div>
-      ${diffs.map(d=>`<div style="font-size:12px;color:var(--text2);font-family:var(--mono);padding:4px 0;border-bottom:1px solid var(--border);line-height:1.6;">· ${d}</div>`).join('')}
-    </div>
-
-    <div style="background:rgba(255,255,255,0.02);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;">
-      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Interpretation</div>
-      <div style="font-size:12px;color:var(--text3);line-height:1.8;font-family:var(--mono);">
-        The workload ${a.totalRuns===b.totalRuns?'remains unchanged across both scenarios.':'differs between the two scenarios.'}<br>
-        The cost difference emerges ${diff!==0?'primarily from architectural behaviour — how workflows are routed, how context is reused, and how inference load is distributed.':'from changes in workflow volume or model selection.'}<br><br>
-        This comparison is designed for operational exploration, not deterministic forecasting.
-      </div>
+      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Structural differences</div>
+      ${diffs.map(d=>`<div style="font-size:12px;color:var(--text2);font-family:var(--mono);padding:5px 0;border-bottom:1px solid var(--border);line-height:1.6;">· ${d}</div>`).join('')}
     </div>
 
     <div style="display:flex;justify-content:flex-end;">
