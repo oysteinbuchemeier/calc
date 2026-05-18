@@ -2061,88 +2061,61 @@ function updateArchSensitivity() {
   panel.style.display='block';
 
   const model = MODELS.find(m=>m.id===sel.model);
-  const sorted = [...MODELS].sort((a,b)=>a.inP-b.inP);
-  const cheapest = sorted[0];
-  const midRange = sorted.filter(m=>m.inP>=0.5&&m.inP<=5.0);
-  const mid = midRange.length ? midRange[0] : sorted[Math.floor(sorted.length/2)];
 
-  // Calculate cost for a given architecture config
-  function calcArch(useHybrid, useBatch, cachePct) {
+  function calcConfig(batch, cachePct, retryRate, orchDepth, ctxGrowth) {
     return active.reduce((s,t) => {
-      let m;
-      if (useHybrid) {
-        const isComplex = t.id==='agent-complex'||t.id==='agent-simple'||t.id==='rag'||t.id==='code'||t.id==='apidoc';
-        m = isComplex ? mid : cheapest;
-      } else {
-        m = model;
-      }
-      return s + calcCost(t, m, sel.ctx, useBatch, cachePct).runCost * taskRuns[t.id] * sel.days;
+      return s + calcCost(t, model, sel.ctx, batch, cachePct, retryRate, orchDepth, ctxGrowth).runCost * taskRuns[t.id] * sel.days;
     }, 0);
   }
 
-  // Dynamic cache columns: 0%, current, 80%
-  const curCachePct = sel.cachePct;
-  const cacheOptions = curCachePct === 0 ? [0, 40, 80]
-    : curCachePct === 80 ? [0, 40, 80]
-    : [0, curCachePct, 80];
+  const baseline = calcConfig(false, 0, 0, 1, 1);
+  const cacheVal = sel.cachePct > 0 ? sel.cachePct : 40;
 
-  const cacheLabels = cacheOptions.map(c =>
-    c === curCachePct && c !== 0 && c !== 80 ? `${c}% cache (current)` : `${c}% cache`
-  );
   const rows = [
-    { label: `Single model (${model.name})${sel.batch?' · batch':''} `, useHybrid: false, useBatch: sel.batch },
-    { label: `Hybrid routing`,                                            useHybrid: true,  useBatch: false  },
-    { label: `Batch + hybrid routing`,                                    useHybrid: true,  useBatch: true   },
+    { label: 'Baseline — no optimisation',       val: baseline,                                           isCurrent: false },
+    { label: 'Batch processing',                 val: calcConfig(true,     0,        0, 1, 1),            isCurrent: sel.batch && sel.cachePct===0 && sel.retryRate===0 && sel.orchDepth===1 && sel.ctxGrowth===1 },
+    { label: 'Prompt caching (' + cacheVal + '%)', val: calcConfig(false, cacheVal,  0, 1, 1),            isCurrent: !sel.batch && sel.cachePct>0 && sel.retryRate===0 && sel.orchDepth===1 && sel.ctxGrowth===1 },
+    { label: 'Batch + caching (' + cacheVal + '%)',val: calcConfig(true,  cacheVal,  0, 1, 1),            isCurrent: sel.batch && sel.cachePct>0 && sel.retryRate===0 && sel.orchDepth===1 && sel.ctxGrowth===1 },
   ];
 
-  // Find current config cell
-  const curCache = sel.cachePct;
-  const curHybrid = window._hybridModels && Object.keys(window._hybridModels).some(id=>window._hybridModels[id]!==sel.model&&(taskRuns[id]||0)>0);
-  const curBatch = sel.batch;
+  if (sel.retryRate > 0) rows.push({ label: 'Retry rate ' + Math.round(sel.retryRate*100) + '%', val: calcConfig(sel.batch, sel.cachePct, sel.retryRate, 1, 1), isCurrent: sel.orchDepth===1 && sel.ctxGrowth===1 });
+  if (sel.orchDepth > 1) rows.push({ label: 'Orchestration depth ' + sel.orchDepth + '×',     val: calcConfig(sel.batch, sel.cachePct, 0, sel.orchDepth, 1),  isCurrent: sel.retryRate===0 && sel.ctxGrowth===1 });
+  if (sel.ctxGrowth > 1) rows.push({ label: 'Context growth ' + sel.ctxGrowth + '×',          val: calcConfig(sel.batch, sel.cachePct, 0, 1, sel.ctxGrowth),  isCurrent: sel.retryRate===0 && sel.orchDepth===1 });
 
-  // Find min and max for colour scale
-  const allVals = rows.flatMap(r => cacheOptions.map(c => calcArch(r.useHybrid, r.useBatch, c)));
-  const minVal = Math.min(...allVals);
-  const maxVal = Math.max(...allVals);
-
-  function cellColor(val) {
-    const pct = maxVal===minVal ? 0.5 : (val-minVal)/(maxVal-minVal);
-    if (pct < 0.33) return 'rgba(45,212,160,0.12)'; // green — cheap
-    if (pct < 0.66) return 'rgba(245,158,11,0.10)';  // amber — mid
-    return 'rgba(248,113,113,0.10)';                   // red — expensive
+  const currentVal = calcConfig(sel.batch, sel.cachePct, sel.retryRate, sel.orchDepth, sel.ctxGrowth);
+  const alreadyCovered = rows.some(r => r.isCurrent);
+  if (!alreadyCovered) {
+    rows.splice(1, 0, { label: 'Current configuration', val: currentVal, isCurrent: true });
+  } else {
+    rows.forEach(r => { if(r.isCurrent) r.label += ' ← current'; });
   }
 
-  function isCurrentCell(row, cache) {
-    if (row.useHybrid) return false;
-    return cache === curCachePct;
-  }
+  let tableRows = '';
+  rows.forEach(function(r) {
+    const delta = r.val - baseline;
+    const deltaPct = baseline > 0 ? Math.round(Math.abs(delta)/baseline*100) : 0;
+    const isBase = Math.abs(r.val - baseline) < 0.001 && !r.isCurrent;
+    const deltaFmt = isBase ? '—' : (delta > 0 ? '+' + deltaPct + '%' : '−' + deltaPct + '%');
+    const deltaColor = isBase ? 'var(--text3)' : (delta > 0 ? '#f87171' : 'var(--green)');
+    const bg = r.isCurrent ? 'background:rgba(108,164,171,0.08);' : '';
+    const labelColor = r.isCurrent ? 'var(--accent2)' : 'var(--text2)';
+    const fw = r.isCurrent ? '500' : '400';
+    tableRows += '<tr style="border-bottom:1px solid var(--border);' + bg + '">'
+      + '<td style="padding:7px 8px;font-size:12px;color:' + labelColor + ';font-weight:' + fw + ';">' + r.label + '</td>'
+      + '<td style="text-align:right;padding:7px 8px;font-family:var(--mono);font-size:12px;color:' + labelColor + ';">' + cx(r.val) + '</td>'
+      + '<td style="text-align:right;padding:7px 8px;font-family:var(--mono);font-size:12px;color:' + deltaColor + ';">' + deltaFmt + '</td>'
+      + '</tr>';
+  });
 
-  body.innerHTML = `
-    <div style="overflow-x:auto;">
-      <table style="width:100%;border-collapse:collapse;font-size:12px;">
-        <thead>
-          <tr>
-            <th style="text-align:left;padding:8px 10px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);width:35%;">Architecture</th>
-            ${cacheOptions.map((c,i)=>`<th style="text-align:center;padding:8px 10px;color:${c===curCachePct?'var(--accent2)':'var(--text3)'};font-weight:${c===curCachePct?'600':'500'};border-bottom:1px solid var(--border);">${cacheLabels[i]}</th>`).join('')}
-          </tr>
-        </thead>
-        <tbody>
-          ${rows.map(row=>`
-            <tr>
-              <td style="padding:8px 10px;color:var(--text2);border-bottom:1px solid var(--border);font-size:12px;">${row.label}</td>
-              ${cacheOptions.map(cache=>{
-                const val = calcArch(row.useHybrid, row.useBatch, cache);
-                const isCur = isCurrentCell(row, cache);
-                return `<td style="text-align:center;padding:8px 10px;border-bottom:1px solid var(--border);background:${isCur?'rgba(108,164,171,0.2)':cellColor(val)};${isCur?'outline:2px solid var(--accent2);outline-offset:-2px;border-radius:4px;':''}" title="${isCur?'Your current configuration':''}">
-                  <div style="font-family:var(--mono);font-size:12px;font-weight:${isCur?'600':'400'};color:${isCur?'var(--accent2)':'var(--text2)'};">${cx(val)}</div>
-                  ${isCur?`<div style="font-size:10px;color:var(--accent2);margin-top:2px;">current</div>`:''}
-                </td>`;
-              }).join('')}
-            </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>
-    <div style="margin-top:10px;font-size:11px;color:var(--text3);text-align:right;font-family:var(--mono);">Cheapest: ${cx(minVal)}/mo · Most expensive: ${cx(maxVal)}/mo</div>`;
+  body.innerHTML = '<table style="width:100%;border-collapse:collapse;">'
+    + '<thead><tr style="border-bottom:1px solid var(--border);">'
+    + '<th style="text-align:left;padding:7px 8px;color:var(--text3);font-weight:500;font-size:12px;">Architecture</th>'
+    + '<th style="text-align:right;padding:7px 8px;color:var(--text3);font-weight:500;font-size:12px;">Monthly cost</th>'
+    + '<th style="text-align:right;padding:7px 8px;color:var(--text3);font-weight:500;font-size:12px;">Δ vs baseline</th>'
+    + '</tr></thead>'
+    + '<tbody>' + tableRows + '</tbody>'
+    + '</table>'
+    + '<div style="margin-top:10px;font-size:11px;color:var(--text3);text-align:right;font-family:var(--mono);">All rows use ' + model.name + ' · Same workload</div>';
 }
 
 function updateBridge() {
