@@ -1471,8 +1471,11 @@ function updateVariance() {
     return s + calcCost(t, model, sel.ctx, true, 80).runCost * r * sel.days;
   }, 0);
 
-  // Mid: current config
-  const mid = totalMonthly();
+  // Mid: current batch+cache only, no sensitivity
+  const mid = TASKS.reduce((s,t) => {
+    const r = taskRuns[t.id]||0; if(!r) return s;
+    return s + calcCost(t, model, sel.ctx, sel.batch, sel.cachePct, 0, 1, 1).runCost * r * sel.days;
+  }, 0);
 
   // High: batch=false, cache=0%
   const high = TASKS.reduce((s,t) => {
@@ -1508,7 +1511,7 @@ function updateVariance() {
       <div style="position:absolute;left:0;top:0;height:100%;width:${lowPct}%;background:var(--green);border-radius:6px;transition:width 0.4s;"></div>
     </div>
     <div style="font-size:12px;color:var(--text3);line-height:1.6;">
-      Optimisation could reduce your cost by <strong style="color:var(--green)">${Math.round((1-low/high)*100)}%</strong> — from ${cx(high)} down to ${cx(low)}/month. Your current config has captured <strong>${Math.round((high-mid)/(high-low)*100)}%</strong> of the available optimisation potential.
+      Optimisation could reduce your cost by <strong style="color:var(--green)">${Math.round((1-low/high)*100)}%</strong> — from ${cx(high)} down to ${cx(low)}/month.${mid <= high ? ' Your current config has captured <strong>' + Math.round((high-mid)/(high-low)*100) + '%</strong> of the available optimisation potential.' : ''}
     </div>`;
 }
 
@@ -1707,12 +1710,7 @@ function updateTopDrivers() {
           </div>`;
         }).join('')}
       </div>
-    </div>` : ''}
-    ${savings.length ? `<div style="font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Cost optimisation opportunities</div>
-    ${savings.map(s => `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(45,212,160,0.06);border:1px solid rgba(45,212,160,0.15);border-radius:6px;margin-bottom:6px;">
-      <span style="font-size:13px;color:var(--text2);">${s.label}</span>
-      <span style="font-size:13px;font-family:var(--mono);color:var(--green);">−${s.pct}% · ${cx(s.save)}/mo</span>
-    </div>`).join('')}` : ''}`;
+    </div>` : ''}`;
 }
 
 function getDefaultHybridModel(taskId) {
@@ -2090,6 +2088,12 @@ function updateArchSensitivity() {
       + '</tr>';
   });
 
+  const combined = calcWith(sel.retryRate, sel.orchDepth, sel.ctxGrowth);
+  const combinedDelta = combined - baseline;
+  const combinedPct = baseline > 0 ? Math.round(Math.abs(combinedDelta)/baseline*100) : 0;
+  const combinedFmt = combinedDelta === 0 ? 'No sensitivity parameters active' : (combinedDelta > 0 ? '+' + combinedPct + '% cost increase' : '\u2212' + combinedPct + '% cost reduction') + ' when all parameters combined';
+  const combinedColor = combinedDelta === 0 ? 'var(--text3)' : (combinedDelta > 0 ? '#f87171' : 'var(--green)');
+
   body.innerHTML = '<table style="width:100%;border-collapse:collapse;">'
     + '<thead><tr style="border-bottom:2px solid var(--border);">'
     + '<th style="text-align:left;padding:7px 10px;color:var(--text3);font-weight:500;font-size:11px;">Parameter</th>'
@@ -2099,7 +2103,11 @@ function updateArchSensitivity() {
     + '</tr></thead>'
     + '<tbody>' + rows + '</tbody>'
     + '</table>'
-    + '<div style="margin-top:10px;font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.6;">Baseline: no sensitivity parameters. Each row shows the isolated effect of one parameter at its current slider value. Adjust sliders in step 2 to explore.</div>';
+    + '<div style="margin-top:10px;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:var(--radius);border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">'
+    + '<span style="font-size:12px;color:var(--text3);font-family:var(--mono);">Combined effect at current settings</span>'
+    + '<span style="font-size:13px;font-weight:500;font-family:var(--mono);color:' + combinedColor + ';">' + combinedFmt.split(' when')[0] + '</span>'
+    + '</div>'
+    + '<div style="margin-top:8px;font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.6;">Baseline: no sensitivity parameters. Each row shows the isolated effect of one parameter at its current slider value. Adjust sliders in step 2 to explore.</div>';
 }
 
 function updateBridge() {
