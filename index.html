@@ -2652,60 +2652,92 @@ function updateScenarioPanel() {
   if (!body) return;
   const a = localStorage.getItem('scenarioA') ? JSON.parse(localStorage.getItem('scenarioA')) : null;
   const b = localStorage.getItem('scenarioB') ? JSON.parse(localStorage.getItem('scenarioB')) : null;
+
   if (!a && !b) { body.innerHTML = ''; return; }
   if (!a || !b) {
-    body.innerHTML = `<div style="font-size:12px;color:var(--text3);font-family:var(--mono);padding:8px 0;">${a ? '✓ Scenario A saved. Configure a new scenario and save as B.' : '✓ Scenario B saved. Configure a new scenario and save as A.'}</div>`;
+    body.innerHTML = `<div style="font-size:12px;color:var(--text3);font-family:var(--mono);padding:8px 0;">${a ? '✓ Scenario A saved. Reconfigure and save as B to compare.' : '✓ Scenario B saved. Reconfigure and save as A to compare.'}</div>`;
     return;
   }
 
-  // Delta calculations
-  const delta = (valA, valB, lowerIsBetter=false) => {
-    if (!valA || !valB) return {fmt:'—', color:'var(--text3)', arrow:''};
-    const diff = valB - valA;
-    const pct = valA !== 0 ? Math.round(Math.abs(diff)/valA*100) : 0;
-    const positive = lowerIsBetter ? diff < 0 : diff > 0;
-    const color = diff === 0 ? 'var(--text3)' : positive ? 'var(--green)' : '#f87171';
-    const arrow = diff === 0 ? '' : diff > 0 ? ' ↑' : ' ↓';
-    const sign = diff > 0 ? '+' : '';
-    return {fmt: `${sign}${pct}%${arrow}`, color, arrow};
-  };
+  // Delta
+  const diff = b.monthly - a.monthly;
+  const diffPct = a.monthly > 0 ? Math.round(Math.abs(diff)/a.monthly*100) : 0;
+  const cheaper = diff < 0;
+  const diffFmt = cheaper ? `−${cx(Math.abs(diff))}/mo` : `+${cx(Math.abs(diff))}/mo`;
+  const diffColor = cheaper ? 'var(--green)' : '#f87171';
 
-  const rows = [
-    ['Monthly cost',        a.monthlyFmt,         b.monthlyFmt,         delta(a.monthly, b.monthly, true)],
-    ['Model',               a.model,               b.model,               null],
-    ['Active tasks',        a.tasks,               b.tasks,               delta(a.tasks, b.tasks)],
-    ['Runs / day',          a.totalRuns.toLocaleString(), b.totalRuns.toLocaleString(), delta(a.totalRuns, b.totalRuns)],
-    ['Active AI users',     a.users||'—',          b.users||'—',          delta(a.users, b.users)],
-    ['Complex workflows/day', a.complexRuns,        b.complexRuns,         delta(a.complexRuns, b.complexRuns)],
-    ['Simple workflows/day',  a.simpleRuns,         b.simpleRuns,          delta(a.simpleRuns, b.simpleRuns)],
-    ['Capacity ratio',      a.ratio ? a.ratio+'×':'—', b.ratio ? b.ratio+'×':'—', delta(a.ratio, b.ratio)],
-    ['AI cost as % capacity', a.aiAsPct ? a.aiAsPct+'%':'—', b.aiAsPct ? b.aiAsPct+'%':'—', delta(a.aiAsPct, b.aiAsPct, true)],
-    ['Batch',               a.batch?'On':'Off',    b.batch?'On':'Off',    null],
-    ['Cache',               a.cachePct+'%',        b.cachePct+'%',        null],
-  ];
+  // Structural differences
+  const diffs = [];
+  if (a.model !== b.model) diffs.push(`Model changed from ${a.model} to ${b.model}`);
+  if (b.cachePct > a.cachePct) diffs.push(`Prompt caching increased from ${a.cachePct}% to ${b.cachePct}% — reduces repeated context processing`);
+  if (a.cachePct > b.cachePct) diffs.push(`Prompt caching reduced from ${a.cachePct}% to ${b.cachePct}%`);
+  if (b.batch && !a.batch) diffs.push('Batch processing enabled — reduces input token cost by 50%');
+  if (a.batch && !b.batch) diffs.push('Batch processing disabled');
+  if (b.complexRuns !== a.complexRuns) diffs.push(`Complex workflow volume changed from ${a.complexRuns} to ${b.complexRuns} triggers/day`);
+  if (b.simpleRuns !== a.simpleRuns) diffs.push(`Simple workflow volume changed from ${a.simpleRuns} to ${b.simpleRuns} triggers/day`);
+  if (b.totalRuns === a.totalRuns) diffs.push('Same workload volume across both scenarios');
+  if (diffs.length === 0) diffs.push('No structural differences detected — configurations are identical');
+
+  // Primary cost driver
+  const driver = (s) => s.complexRuns > 0 ? 'Complex agentic workflows' : s.simpleRuns > 0 ? 'Simple automated workflows' : 'Everyday AI tasks';
+
+  const row = (label, va, vb) => `
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:7px 10px;color:var(--text3);font-size:12px;">${label}</td>
+      <td style="padding:7px 10px;font-family:var(--mono);color:var(--text2);font-size:12px;">${va}</td>
+      <td style="padding:7px 10px;font-family:var(--mono);color:var(--text2);font-size:12px;">${vb}</td>
+    </tr>`;
+
+  const runCostA = a.totalRuns > 0 ? cx(a.monthly / (a.totalRuns * 22)) : '—';
+  const runCostB = b.totalRuns > 0 ? cx(b.monthly / (b.totalRuns * 22)) : '—';
 
   body.innerHTML = `
-    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+    <table style="width:100%;border-collapse:collapse;margin-bottom:16px;">
       <thead>
-        <tr style="border-bottom:1px solid var(--border);">
-          <th style="text-align:left;padding:6px 8px;color:var(--text3);font-weight:500;width:35%;"></th>
-          <th style="text-align:right;padding:6px 8px;color:var(--accent2);font-weight:500;">A — ${a.label}</th>
-          <th style="text-align:right;padding:6px 8px;color:var(--accent2);font-weight:500;">B — ${b.label}</th>
-          <th style="text-align:right;padding:6px 8px;color:var(--text3);font-weight:500;">Δ</th>
+        <tr style="border-bottom:2px solid var(--border);">
+          <th style="padding:7px 10px;text-align:left;color:var(--text3);font-size:11px;font-weight:500;width:35%;"></th>
+          <th style="padding:7px 10px;text-align:left;color:var(--accent2);font-size:11px;font-weight:600;">Scenario A</th>
+          <th style="padding:7px 10px;text-align:left;color:var(--accent2);font-size:11px;font-weight:600;">Scenario B</th>
         </tr>
       </thead>
       <tbody>
-        ${rows.map(([label, va, vb, d])=>`
-          <tr style="border-bottom:1px solid var(--border);">
-            <td style="padding:6px 8px;color:var(--text3);">${label}</td>
-            <td style="text-align:right;padding:6px 8px;font-family:var(--mono);color:var(--text2);">${va}</td>
-            <td style="text-align:right;padding:6px 8px;font-family:var(--mono);color:var(--text2);">${vb}</td>
-            <td style="text-align:right;padding:6px 8px;font-family:var(--mono);color:${d?d.color:'var(--text3)'};">${d?d.fmt:'—'}</td>
-          </tr>`).join('')}
+        ${row('Configuration', a.label, b.label)}
+        ${row('Model', a.model, b.model)}
+        ${row('Organisation size', a.size, b.size)}
+        ${row('AI maturity', a.mat, b.mat)}
+        ${row('Active workflows', a.tasks, b.tasks)}
+        ${row('Runs / day', a.totalRuns.toLocaleString(), b.totalRuns.toLocaleString())}
+        ${row('Monthly estimate', `<span style="color:var(--green);font-weight:500">${a.monthlyFmt}</span>`, `<span style="color:var(--green);font-weight:500">${b.monthlyFmt}</span>`)}
+        ${row('Cost / run', runCostA, runCostB)}
+        ${row('Cache', a.cachePct+'%', b.cachePct+'%')}
+        ${row('Batch processing', a.batch?'On':'Off', b.batch?'On':'Off')}
+        ${row('Complex workflows/day', a.complexRuns, b.complexRuns)}
+        ${row('Primary cost driver', driver(a), driver(b))}
       </tbody>
     </table>
-    <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:10px;">
-      <button onclick="localStorage.removeItem('scenarioA');localStorage.removeItem('scenarioB');updateScenarioPanel()" style="background:none;border:none;font-size:11px;color:var(--text3);cursor:pointer;font-family:var(--mono);">Clear both</button>
+
+    <div style="background:rgba(45,212,160,0.08);border:1px solid rgba(45,212,160,0.2);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Estimated difference</div>
+      <div style="font-size:20px;font-weight:600;font-family:var(--mono);color:${diffColor};margin-bottom:4px;">${diffFmt} estimated operating cost</div>
+      <div style="font-size:12px;color:var(--text2);font-family:var(--mono);">~${diffPct}% ${cheaper?'lower':'higher'} estimated cost under current assumptions</div>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Main structural differences</div>
+      ${diffs.map(d=>`<div style="font-size:12px;color:var(--text2);font-family:var(--mono);padding:4px 0;border-bottom:1px solid var(--border);line-height:1.6;">· ${d}</div>`).join('')}
+    </div>
+
+    <div style="background:rgba(255,255,255,0.02);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Interpretation</div>
+      <div style="font-size:12px;color:var(--text3);line-height:1.8;font-family:var(--mono);">
+        The workload ${a.totalRuns===b.totalRuns?'remains unchanged across both scenarios.':'differs between the two scenarios.'}<br>
+        The cost difference emerges ${diff!==0?'primarily from architectural behaviour — how workflows are routed, how context is reused, and how inference load is distributed.':'from changes in workflow volume or model selection.'}<br><br>
+        This comparison is designed for operational exploration, not deterministic forecasting.
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;">
+      <button onclick="localStorage.removeItem('scenarioA');localStorage.removeItem('scenarioB');updateScenarioPanel()" style="background:none;border:none;font-size:11px;color:var(--text3);cursor:pointer;font-family:var(--mono);">✕ Clear both</button>
     </div>`;
 }
 
