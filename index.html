@@ -2620,20 +2620,24 @@ function saveScenario(slot) {
   const aiAnnual = monthly*12;
   const ratio = annualCapacity>0 ? Math.round(annualCapacity/aiAnnual) : 0;
   const aiAsPct = annualCapacity>0 ? Math.round(aiAnnual/annualCapacity*100) : 0;
-  const complexRuns = taskRuns['agent-complex']||0;
-  const simpleRuns = taskRuns['agent-simple']||0;
+
+  // Auto-generate label from config
+  const matLabel = [...activeMaturities].map(m=>m.charAt(0).toUpperCase()+m.slice(1)).join('+') || 'Custom';
+  const sizeLabel = activeSize ? SIZE_PRESETS[activeSize].label : 'Custom';
+  const label = `${sizeLabel} · ${matLabel}`;
 
   const data = {
-    label: slot==='A' ? 'Scenario A' : 'Scenario B',
+    label,
     model: model ? model.name : '—',
     monthly, monthlyFmt: cx(monthly),
     tasks: active.length,
     totalRuns,
     users: maxUsers,
     size: activeSize||'—',
-    mat: [...activeMaturities].join('+') || '—',
+    mat: matLabel,
     ratio, aiAsPct,
-    complexRuns, simpleRuns,
+    complexRuns: taskRuns['agent-complex']||0,
+    simpleRuns: taskRuns['agent-simple']||0,
     batch: sel.batch, cachePct: sel.cachePct,
   };
   localStorage.setItem('scenario'+slot, JSON.stringify(data));
@@ -2735,8 +2739,20 @@ function resetAll() {
   TASKS.forEach(t=>{taskRuns[t.id]=0;taskVol[t.id]={employees:0,usesPerDay:1};});
   window._hybridModels = {};
   document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
-  activeSize=null;
-  renderTasks(); update(); updateCompare(); updateROI(); goToStep(1);
+  activeSize=null; activeMaturities=new Set();
+  sel.model=null; sel.batch=false; sel.cachePct=0; sel.retryRate=0; sel.orchDepth=1; sel.ctxGrowth=1; sel.days=22;
+  // Reset UI
+  document.getElementById('tog-batch').classList.remove('on');
+  const sc=document.getElementById('sl-cache'); if(sc) sc.value=0;
+  const sd=document.getElementById('sl-days'); if(sd) sd.value=22;
+  const sv=document.getElementById('sv-days'); if(sv) sv.textContent=22;
+  const sr=document.getElementById('sl-retry'); if(sr) sr.value=0;
+  const so=document.getElementById('sl-orch'); if(so) so.value=1;
+  const sg=document.getElementById('sl-ctx-growth'); if(sg) sg.value=1;
+  document.getElementById('retry-badge').textContent='0%';
+  document.getElementById('orch-badge').textContent='1×';
+  document.getElementById('ctx-badge').textContent='1×';
+  renderTasks(); renderModels(); update(); updateCompare(); updateROI(); updateModelSuitabilityNote(); goToStep(1);
 }
 
 document.getElementById('sl-days').addEventListener('input',e=>{
