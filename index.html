@@ -2772,11 +2772,9 @@ sA.value = sel.model || 'sonnet';
 sB.value = 'deepseek';
 
 loadFromURL();
-// Clear stale scenario data on fresh load (no URL params = fresh session)
-if (!window.location.search) {
-  localStorage.removeItem('scenarioA');
-  localStorage.removeItem('scenarioB');
-}
+// Always clear scenario data on fresh page load
+localStorage.removeItem('scenarioA');
+localStorage.removeItem('scenarioB');
 renderTasks();
 renderModels();
 document.getElementById('roi-rate-unit').textContent = currency.symbol + ' / yr';
