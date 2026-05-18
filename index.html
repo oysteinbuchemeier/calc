@@ -1756,12 +1756,12 @@ function updateHybridRouting() {
       Suggested routing based on task complexity. Adjust as needed.
     </div>
     ${active.map(t => {
-      const currentId = window._hybridModels[t.id];
       const defaultId = getDefaultHybridModel(t.id);
+      const currentId = window._hybridModels[t.id] || defaultId;
       const isDefault = currentId === defaultId;
       const isAgentTask = ['agent-complex','agent-simple','rag','code','apidoc'].includes(t.id);
       const assignedModel = MODELS.find(m=>m.id===currentId);
-      const isSmall = assignedModel && assignedModel.inP < 0.5;
+      const isSmall = assignedModel && assignedModel.inP < 0.5 && assignedModel.id !== 'deepseek-pro';
       const showWarning = isAgentTask && isSmall && !isDefault;
       return `<div style="padding:8px 0;border-bottom:1px solid var(--border);">
         <div style="display:flex;align-items:center;gap:10px;">
