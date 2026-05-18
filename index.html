@@ -851,6 +851,13 @@ footer a:hover{color:var(--text2)}
         <div id="system-summary-body" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
       </div>
 
+      <!-- SCENARIO COMPARE -->
+      <div class="panel" id="scenario-compare-panel" style="display:none;">
+        <div class="panel-title">Scenario comparison</div>
+        <p style="font-size:11px;color:var(--text3);margin-bottom:12px;line-height:1.6;">Save two configurations using the Save A / Save B buttons above to compare them side by side.</p>
+        <div id="scenario-compare-body"></div>
+      </div>
+
       <!-- NEXT STEP -->
       <div style="background:rgba(108,164,171,0.06);border:1px solid rgba(108,164,171,0.2);border-radius:var(--radius-lg);padding:1.5rem;display:flex;flex-direction:column;gap:12px;">
         <button onclick="openModal()" style="background:var(--accent);color:#fff;border:none;padding:13px 20px;border-radius:8px;font-size:14px;font-weight:500;font-family:var(--sans);cursor:pointer;width:100%;transition:opacity 0.15s;" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">View capacity impact →</button>
@@ -870,6 +877,8 @@ footer a:hover{color:var(--text2)}
   <div class="right-col">
     <div class="action-row">
       <button class="action-btn share" onclick="shareURL()">↗ Share</button>
+      <button class="action-btn" onclick="saveScenario('A')" style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);">Save A <span id="scenario-saved-A" style="color:var(--green)"></span></button>
+      <button class="action-btn" onclick="saveScenario('B')" style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);">Save B <span id="scenario-saved-B" style="color:var(--green)"></span></button>
       <button class="action-btn reset" onclick="resetAll()">↺ Reset</button>
     </div>
     <div class="copy-confirm" id="copy-confirm"></div>
@@ -1032,7 +1041,7 @@ function goToStep(n) {
     document.getElementById('step-num-'+i).textContent = i<n ? '✓' : i;
   });
   if (n===2) { updateHybridRouting(); }
-  if (n===3) { updateConclusion(); updateROI(); updateSavings(); updateChart(); updateBridge(); updateVariance(); updateSystemSummary(); updateInterpretation(); updateTopDrivers(); updateArchSensitivity(); }
+  if (n===3) { updateConclusion(); updateROI(); updateSavings(); updateChart(); updateBridge(); updateVariance(); updateSystemSummary(); updateInterpretation(); updateTopDrivers(); updateArchSensitivity(); updateScenarioPanel(); }
   updateConfigSummary();
   window.scrollTo({top:0, behavior:'smooth'});
 }
@@ -2585,6 +2594,66 @@ function renderModels() {
   document.getElementById('model-row').innerHTML=MODELS.map(m=>`<button class="model-pill${m.id===sel.model?' active':''}" onclick="pick('model','${m.id}')">${m.name}</button>`).join('');
   const m=sel.model ? MODELS.find(x=>x.id===sel.model) : null;
   document.getElementById('model-desc').textContent = m ? m.full+' — '+m.note : 'Select a model above to see pricing details.';
+}
+
+function buildScenarioURL() {
+  const p = new URLSearchParams();
+  p.set('model', sel.model); p.set('days', sel.days);
+  p.set('batch', sel.batch?'1':'0'); p.set('cpct', sel.cachePct||0);
+  p.set('retry', sel.retryRate||0); p.set('orch', sel.orchDepth||1); p.set('ctx', sel.ctxGrowth||1);
+  p.set('size', activeSize||''); p.set('mat', [...activeMaturities].join(','));
+  TASKS.forEach(t=>{if(taskRuns[t.id]>0) p.set('t_'+t.id, taskRuns[t.id]);});
+  return window.location.origin + window.location.pathname + '?' + p.toString();
+}
+
+function saveScenario(slot) {
+  const url = buildScenarioURL();
+  const model = MODELS.find(m=>m.id===sel.model);
+  const monthly = totalMonthly();
+  const label = slot === 'A' ? prompt('Name this scenario:', 'Scenario A') : prompt('Name this scenario:', 'Scenario B');
+  if (!label) return;
+  const data = {
+    url, label,
+    model: model ? model.name : '—',
+    monthly: cx(monthly),
+    tasks: TASKS.filter(t=>(taskRuns[t.id]||0)>0).length,
+    size: activeSize || '—',
+    mat: [...activeMaturities].join('+') || '—',
+  };
+  localStorage.setItem('scenario' + slot, JSON.stringify(data));
+  updateScenarioPanel();
+  const el = document.getElementById('scenario-saved-' + slot);
+  if (el) { el.textContent = '✓ Saved'; setTimeout(()=>el.textContent='', 2000); }
+}
+
+function updateScenarioPanel() {
+  const panel = document.getElementById('scenario-compare-panel');
+  if (!panel) return;
+  const a = localStorage.getItem('scenarioA') ? JSON.parse(localStorage.getItem('scenarioA')) : null;
+  const b = localStorage.getItem('scenarioB') ? JSON.parse(localStorage.getItem('scenarioB')) : null;
+  if (!a && !b) { panel.style.display='none'; return; }
+  panel.style.display = 'block';
+
+  const col = (s, slot) => s ? `
+    <div style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;">
+      <div style="font-size:10px;font-weight:600;color:var(--accent2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Scenario ${slot}</div>
+      <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:8px;">${s.label}</div>
+      <div style="font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.8;">
+        Model: <span style="color:var(--text2)">${s.model}</span><br>
+        Size: <span style="color:var(--text2)">${s.size}</span><br>
+        Maturity: <span style="color:var(--text2)">${s.mat}</span><br>
+        Tasks: <span style="color:var(--text2)">${s.tasks} active</span>
+      </div>
+      <div style="font-size:18px;font-weight:600;font-family:var(--mono);color:var(--green);margin-top:10px;">${s.monthly}<span style="font-size:11px;color:var(--text3);font-weight:400;">/mo</span></div>
+      <a href="${s.url}" style="font-size:11px;color:var(--accent2);text-decoration:none;font-family:var(--mono);display:block;margin-top:8px;">Load scenario →</a>
+      <button onclick="localStorage.removeItem('scenario${slot}');updateScenarioPanel()" style="background:none;border:none;font-size:11px;color:var(--text3);cursor:pointer;padding:0;margin-top:4px;font-family:var(--mono);">Clear</button>
+    </div>` : `
+    <div style="flex:1;background:var(--bg3);border:1px dashed var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;justify-content:center;">
+      <div style="font-size:12px;color:var(--text3);text-align:center;">Scenario ${slot}<br>not saved yet</div>
+    </div>`;
+
+  document.getElementById('scenario-compare-body').innerHTML =
+    `<div style="display:flex;gap:12px;">${col(a,'A')}${col(b,'B')}</div>`;
 }
 
 function shareURL() {
