@@ -2007,8 +2007,56 @@ ${varHTML?`<section>
   ${varHTML}
 </section>`:''}
 
+${(()=>{
+  const a = localStorage.getItem('scenarioA') ? JSON.parse(localStorage.getItem('scenarioA')) : null;
+  const b = localStorage.getItem('scenarioB') ? JSON.parse(localStorage.getItem('scenarioB')) : null;
+  if (!a || !b) return '';
+  const diff = b.monthly - a.monthly;
+  const diffPct = a.monthly > 0 ? Math.round(Math.abs(diff)/a.monthly*100) : 0;
+  const cheaper = diff < 0;
+  const diffFmt = cheaper ? `−${cx(Math.abs(diff))}/mo` : `+${cx(Math.abs(diff))}/mo`;
+  const driver = s => s.complexRuns > 0 ? 'Complex agentic workflows' : s.simpleRuns > 0 ? 'Simple automated workflows' : 'Everyday AI tasks';
+  const runCostA = a.totalRuns > 0 ? cx(a.monthly / (a.totalRuns * 22)) : '—';
+  const runCostB = b.totalRuns > 0 ? cx(b.monthly / (b.totalRuns * 22)) : '—';
+  const diffs = [];
+  if (a.model !== b.model) diffs.push(`Model: ${a.model} → ${b.model}`);
+  if (b.cachePct !== a.cachePct) diffs.push(`Prompt caching: ${a.cachePct}% → ${b.cachePct}%`);
+  if (b.batch !== a.batch) diffs.push(`Batch processing: ${a.batch?'On':'Off'} → ${b.batch?'On':'Off'}`);
+  if (b.complexRuns !== a.complexRuns) diffs.push(`Complex workflow triggers: ${a.complexRuns}/day → ${b.complexRuns}/day`);
+  if (b.simpleRuns !== a.simpleRuns) diffs.push(`Simple workflow triggers: ${a.simpleRuns}/day → ${b.simpleRuns}/day`);
+  if (b.mat !== a.mat) diffs.push(`AI maturity: ${a.mat} → ${b.mat}`);
+  if ((a.retryRate||0) !== (b.retryRate||0)) diffs.push(`Retry rate: ${Math.round((a.retryRate||0)*100)}% → ${Math.round((b.retryRate||0)*100)}%`);
+  if ((a.orchDepth||1) !== (b.orchDepth||1)) diffs.push(`Orchestration depth: ${a.orchDepth||1}× → ${b.orchDepth||1}×`);
+  if ((a.ctxGrowth||1) !== (b.ctxGrowth||1)) diffs.push(`Context growth: ${a.ctxGrowth||1}× → ${b.ctxGrowth||1}×`);
+  const row = (label, va, vb) => `<tr style="border-bottom:1px solid #eee"><td style="padding:5px 8px;color:#888;font-size:9pt;width:35%">${label}</td><td style="padding:5px 8px;font-family:monospace;font-size:9pt">${va}</td><td style="padding:5px 8px;font-family:monospace;font-size:9pt">${vb}</td></tr>`;
+  return `<section style="page-break-before:always">
+  <h2>Scenario comparison</h2>
+  <table style="width:100%;border-collapse:collapse;margin-bottom:12px">
+    <thead><tr style="border-bottom:2px solid #ddd"><th style="text-align:left;padding:5px 8px;color:#888;font-size:8pt;width:35%"></th><th style="text-align:left;padding:5px 8px;color:#4a8a91;font-size:9pt">Scenario A</th><th style="text-align:left;padding:5px 8px;color:#4a8a91;font-size:9pt">Scenario B</th></tr></thead>
+    <tbody>
+      ${row('Model', a.model, b.model)}
+      ${row('Monthly estimate', `<strong style="color:#1a7a5e">${a.monthlyFmt}</strong>`, `<strong style="color:#1a7a5e">${b.monthlyFmt}</strong>`)}
+      ${row('Cost / run', runCostA, runCostB)}
+      ${row('Organisation size', a.sizeLabel||a.size, b.sizeLabel||b.size)}
+      ${row('AI maturity', a.mat, b.mat)}
+      ${row('Complex workflows/day', a.complexRuns, b.complexRuns)}
+      ${row('Runs / day', a.totalRuns.toLocaleString(), b.totalRuns.toLocaleString())}
+      ${row('Cache', a.cachePct+'%', b.cachePct+'%')}
+      ${row('Batch processing', a.batch?'On':'Off', b.batch?'On':'Off')}
+      ${row('Primary cost driver', driver(a), driver(b))}
+    </tbody>
+  </table>
+  <div style="background:#f0f9f5;border:1px solid #b2dfdb;border-radius:4px;padding:10px 14px;margin-bottom:10px">
+    <div style="font-size:8pt;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Estimated difference</div>
+    <div style="font-size:16pt;font-weight:600;font-family:monospace;color:${cheaper?'#1a7a5e':'#e53e3e'}">${diffFmt}</div>
+    <div style="font-size:9pt;color:#555">~${diffPct}% ${cheaper?'lower':'higher'} estimated cost · B vs A</div>
+  </div>
+  ${diffs.length?`<div style="font-size:8pt;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Architectural differences</div>${diffs.map(d=>`<div style="font-size:9pt;color:#444;padding:4px 0;border-bottom:1px solid #f0f0f0">· ${d}</div>`).join('')}`:''}
+</section>`;
+})()}
+
 <footer>
-  © 2026 Büchemeier Consulting &nbsp;·&nbsp; www.buchemeier.com &nbsp;·&nbsp;
+  © 2026 Büchemeier Consulting &nbsp;·&nbsp; www.buchemeier.no &nbsp;·&nbsp;
   Generated ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})} &nbsp;·&nbsp;
   We take no responsibility for errors in pricing, calculations, or outputs. This tool is provided for indicative use only.
 </footer>
