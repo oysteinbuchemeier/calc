@@ -2795,7 +2795,9 @@ function resetAll() {
   document.getElementById('retry-badge').textContent='0%';
   document.getElementById('orch-badge').textContent='1×';
   document.getElementById('ctx-badge').textContent='1×';
-  renderTasks(); renderModels(); update(); updateCompare(); updateROI(); updateModelSuitabilityNote(); goToStep(1);
+  localStorage.removeItem('scenarioA');
+  localStorage.removeItem('scenarioB');
+  renderTasks(); renderModels(); update(); updateCompare(); updateROI(); updateModelSuitabilityNote(); updateScenarioPanel(); goToStep(1);
 }
 
 document.getElementById('sl-days').addEventListener('input',e=>{
