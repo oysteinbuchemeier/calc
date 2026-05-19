@@ -505,7 +505,7 @@ footer a:hover{color:var(--text2)}
     <div class="step-panel active" id="step-1">
       <div class="panel">
         <div class="panel-title">Organisation size &amp; AI maturity</div>
-        <p style="font-size:13px;color:var(--text3);margin-bottom:14px;line-height:1.5;">Select both to set task volumes. Size determines user count, maturity determines workflow mix.</p>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:14px;line-height:1.5;">Select both to preset task volumes. Size determines user count, maturity determines workflow mix.</p>
 
         <div style="margin-bottom:10px;">
           <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Organisation size</div>
@@ -531,7 +531,7 @@ footer a:hover{color:var(--text2)}
           </div>
         </div>
 
-        <div id="preset-status" style="font-size:12px;font-family:var(--mono);color:var(--text3);min-height:16px;margin-top:4px;"></div>
+        <div id="preset-status" style="font-size:12px;font-family:var(--mono);color:var(--text3);min-height:16px;margin-top:8px;"></div>
 
         <div style="margin-top:10px;">
           <button onclick="const d=this.nextElementSibling;const open=d.style.display==='block';d.style.display=open?'none':'block';this.textContent=open?'Adoption assumptions ▾':'Hide ▴'" style="background:none;border:none;font-size:12px;font-family:var(--mono);color:var(--text3);cursor:pointer;padding:0;">Adoption assumptions ▾</button>
@@ -555,7 +555,7 @@ footer a:hover{color:var(--text2)}
         </div>
       </div>
       <div class="panel">
-        <div class="panel-title">Select tasks &amp; set daily volume</div>
+        <div class="panel-title">Select or adjust tasks &amp; daily volume</div>
         <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.5;">Select which workflows to include and adjust volume per task. <strong style="color:var(--text2)">One run = one AI request.</strong></p>
         <div class="methodology-panel" style="margin-bottom:12px;">
           <button class="methodology-toggle" id="meth-toggle" onclick="toggleMethodology()">
@@ -1373,7 +1373,7 @@ function applyPreset() {
     }
     return;
   }
-  if (statusEl) statusEl.textContent = '';
+  if (statusEl) statusEl.innerHTML = `<span style="color:var(--green);">✓</span> ${SIZE_PRESETS[activeSize].label} · ${[...activeMaturities].map(m=>m.charAt(0).toUpperCase()+m.slice(1)).join(' + ')} applied — <span style="color:var(--accent2);">adjust individual tasks below if needed</span>`;
 
   const s = SIZE_PRESETS[activeSize];
   const techIds = ['code','sql','rag','apidoc'];
