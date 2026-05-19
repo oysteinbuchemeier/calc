@@ -1181,7 +1181,7 @@ function updateModelSuitabilityNote() {
   if (!model) { el.style.display = 'none'; return; }
 
   // Classify model by price tier
-  const tier = model.inP < 0.5 && model.id !== 'deepseek-pro' ? 'small' : model.inP < 4.0 && model.id !== 'deepseek-pro' ? 'mid' : 'frontier';
+  const tier = model.inP < 0.5 && model.id !== 'deepseek-pro' ? 'small' : 'frontier';
 
   // Dataresidency note for DeepSeek models
   const isDeepSeek = model.id === 'deepseek' || model.id === 'deepseek-pro';
@@ -1193,10 +1193,6 @@ function updateModelSuitabilityNote() {
     note = '⚠ Small/fast models are generally not suited for agentic workflows. Agentic systems require stable multi-step reasoning, consistent output structure and tool-use capability. Model suitability depends on system design and is not evaluated here.';
     bg = 'rgba(248,113,113,0.06)';
     color = '#f87171';
-  } else if (hasAgentic && tier === 'mid') {
-    note = 'ℹ Agentic capability varies significantly with system architecture and orchestration design. This model may support agentic workflows under strict system constraints. Suitability is not evaluated in this simulation.';
-    bg = 'rgba(245,158,11,0.06)';
-    color = 'var(--amber)';
   } else if (hasWorkflow && tier === 'small') {
     note = 'ℹ Small/fast models can handle simple workflow automation but may be inconsistent in structured multi-step output. System design matters significantly at this tier.';
     bg = 'rgba(245,158,11,0.06)';
