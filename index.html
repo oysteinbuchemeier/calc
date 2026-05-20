@@ -1369,7 +1369,17 @@ function applyPreset() {
     }
     return;
   }
-  if (statusEl) statusEl.innerHTML = `<span style="color:var(--green);">✓</span> ${SIZE_PRESETS[activeSize].label} · ${[...activeMaturities].map(m=>m.charAt(0).toUpperCase()+m.slice(1)).join(' + ')} applied — <span style="color:var(--accent2);">adjust individual tasks below if needed</span>`;
+  const sizePreset = SIZE_PRESETS[activeSize];
+  const statusSimple = Math.max(...[...activeMaturities].map(m => WORKFLOW_VOLUMES[m]?.[activeSize]?.simple||0));
+  const statusComplex = Math.max(...[...activeMaturities].map(m => WORKFLOW_VOLUMES[m]?.[activeSize]?.complex||0));
+  const everydayRuns = activeMaturities.has('assistive') ? Math.round(sizePreset.employees * sizePreset.usesPerDay) : 0;
+
+  let parts = [];
+  if (everydayRuns > 0) parts.push(`${sizePreset.employees} AI users · ${everydayRuns} runs/day per everyday task`);
+  if (statusSimple > 0) parts.push(`${statusSimple} simple workflows/day`);
+  if (statusComplex > 0) parts.push(`${statusComplex} complex workflows/day`);
+
+  if (statusEl) statusEl.innerHTML = `<span style="color:var(--green);">✓</span> <span style="color:var(--text2);">${parts.join(' · ')}</span>`;
 
   const s = SIZE_PRESETS[activeSize];
   const techIds = ['code','sql','rag','apidoc'];
