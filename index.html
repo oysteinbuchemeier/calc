@@ -2789,6 +2789,8 @@ function resetAll() {
   window._hybridModels = {};
   document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
   activeSize=null; activeMaturities=new Set();
+  const ps = document.getElementById('preset-status');
+  if (ps) ps.innerHTML = '';
   sel.model=null; sel.batch=false; sel.cachePct=0; sel.retryRate=0; sel.orchDepth=1; sel.ctxGrowth=1; sel.days=22;
   // Reset UI
   document.getElementById('tog-batch').classList.remove('on');
