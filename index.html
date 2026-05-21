@@ -1978,19 +1978,29 @@ function printReport() {
 </section>
 
 ${annualCapacity>0?`<section>
-  <h2>Productivity impact estimate</h2>
+  <h2>Estimated annual capacity impact</h2>
   <div class="highlight">
-    <div class="highlight-label">Estimated annual capacity impact</div>
-    <div class="highlight-val">${cx(annualCapacity)}</div>
+    <div class="highlight-val green">${cx(annualCapacity)}</div>
   </div>
   <div class="grid2">
     <div class="card"><div class="card-label">Equivalent operational capacity</div><div class="card-val green">~${fteLow}–${fteHigh} FTE</div></div>
     <div class="card"><div class="card-label">Efficiency assumption</div><div class="card-val">${pct}%</div></div>
   </div>
-  ${ratio?`<div class="ratio-box">
+  <div style="margin-top:8px;font-size:8pt;color:#888;line-height:1.6;">Assumes ${pct}% efficiency improvement across ${maxUsers} affected employees. Excludes implementation cost, integration work, governance, process redesign and organisational adoption effort.</div>
+</section>
+
+<section>
+  <h2>Capacity-to-cost ratio</h2>
+  <div class="grid2">
+    <div class="card"><div class="card-label">Modelled AI operating cost</div><div class="card-val">${cx(aiMonthly)}/mo</div></div>
+    <div class="card"><div class="card-label">Modelled annual capacity value</div><div class="card-val green">${cx(annualCapacity)}/yr</div></div>
+    <div class="card"><div class="card-label">AI cost as % of capacity value</div><div class="card-val">${aiAsPct}%</div></div>
+    <div class="card"><div class="card-label">Capacity multiplier</div><div class="card-val green">~${ratio}×</div></div>
+  </div>
+  <div class="ratio-box">
     <div class="ratio-val">1 ${currency.symbol} AI cost → ~${ratio} ${currency.symbol} capacity value</div>
     <div class="ratio-label">AI operating cost represents ${aiAsPct}% of modelled annual capacity value</div>
-  </div>`:''}
+  </div>
 </section>`:''}
 
 ${driversHTML?`<section>
