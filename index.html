@@ -905,12 +905,16 @@ footer a:hover{color:var(--text2)}
         <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-users">—</span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:12px;color:var(--text3);">Workflows</span>
-        <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-workflows">—</span>
+        <span style="font-size:12px;color:var(--text3);">Everyday runs / day</span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-everyday-runs">—</span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:12px;color:var(--text3);">Runs / day</span>
-        <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-runs-day">—</span>
+        <span style="font-size:12px;color:var(--text3);">Simple workflows / day</span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-simple-runs">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:var(--text3);">Complex workflows / day</span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-complex-runs">—</span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:12px;color:var(--text3);">Working days</span>
@@ -1565,7 +1569,7 @@ function updateSystemSummary() {
   const pct = pctEl ? parseFloat(pctEl.value) : 10;
   const annualCostEl = document.getElementById('roi-rate');
   const annualCost = annualCostEl ? (parseFloat(annualCostEl.value)||0) / currency.rate : 0;
-  const maxEmp = Math.max(0, ...TASKS.map(t => taskVol[t.id]?.employees || 0));
+  const maxEmp = Math.max(0, ...TASKS.filter(t => !t.id.startsWith('agent') && !['code','sql','rag','apidoc'].includes(t.id)).map(t => taskVol[t.id]?.employees || 0));
   const annualCapacity = annualCost * maxEmp * (pct/100);
   const ratio = monthly > 0 && annualCapacity > 0 ? Math.round(annualCapacity / (monthly*12)) : null;
 
@@ -1600,7 +1604,7 @@ function updateInterpretation() {
   const model = MODELS.find(m => m.id === sel.model);
   const pct = parseFloat(document.getElementById('roi-pct')?.value||10);
   const annualCost = (parseFloat(document.getElementById('roi-rate')?.value)||0) / currency.rate;
-  const maxEmp = Math.max(0, ...TASKS.map(t => taskVol[t.id]?.employees || 0));
+  const maxEmp = Math.max(0, ...TASKS.filter(t => !t.id.startsWith('agent') && !['code','sql','rag','apidoc'].includes(t.id)).map(t => taskVol[t.id]?.employees || 0));
   const annualCapacity = annualCost * maxEmp * (pct/100);
   const ratio = monthly > 0 && annualCapacity > 0 ? Math.round(annualCapacity / (monthly*12)) : 0;
   const hasAgents = active.some(t => t.id.startsWith('agent'));
@@ -2128,7 +2132,7 @@ function updateBridge() {
   const pct         = pctEl ? parseFloat(pctEl.value) : 10;
   const annualCostEl= document.getElementById('roi-rate');
   const annualCost  = annualCostEl ? (parseFloat(annualCostEl.value)||0) / currency.rate : 0;
-  const maxEmployees= Math.max(0, ...TASKS.map(t => taskVol[t.id]?.employees || 0));
+  const maxEmployees= Math.max(0, ...TASKS.filter(t => !t.id.startsWith('agent') && !['code','sql','rag','apidoc'].includes(t.id)).map(t => taskVol[t.id]?.employees || 0));
   const annualCapacity = annualCost * maxEmployees * (pct / 100);
 
   // Need at least AI cost and capacity to show
@@ -2216,7 +2220,7 @@ function updateConclusion() {
 function updateConfigSummary() {
   const active = TASKS.filter(t => (taskRuns[t.id]||0) > 0);
   const totalRuns = active.reduce((s,t) => s + taskRuns[t.id], 0);
-  const maxEmp = Math.max(0, ...TASKS.map(t => taskVol[t.id]?.employees || 0));
+  const maxEmp = Math.max(0, ...TASKS.filter(t => !t.id.startsWith('agent') && !['code','sql','rag','apidoc'].includes(t.id)).map(t => taskVol[t.id]?.employees || 0));
   const model = MODELS.find(m => m.id === sel.model);
 
   // Step 2 bar — shows step 1 config
@@ -2363,7 +2367,7 @@ function updateTaskBreakdown(model) {
 }
 
 function updateROI() {
-  const maxEmployees = Math.max(0, ...TASKS.map(t => taskVol[t.id]?.employees || 0));
+  const maxEmployees = Math.max(0, ...TASKS.filter(t => !t.id.startsWith('agent') && !['code','sql','rag','apidoc'].includes(t.id)).map(t => taskVol[t.id]?.employees || 0));
   const dispEl = document.getElementById('roi-employees-display');
   if (dispEl) dispEl.textContent = maxEmployees || '—';
 
@@ -2448,9 +2452,25 @@ function update() {
   if (workflowsEl) workflowsEl.textContent = active > 0 ? active : '—';
   const usersEl = document.getElementById('m-users');
   if (usersEl) {
-    const maxUsers = Math.max(0, ...TASKS.map(t => taskVol[t.id]?.employees || 0));
+    const maxUsers = Math.max(0, ...TASKS.filter(t => !t.id.startsWith('agent') && !['code','sql','rag','apidoc'].includes(t.id)).map(t => taskVol[t.id]?.employees || 0));
     usersEl.textContent = maxUsers > 0 ? maxUsers : '—';
   }
+  const triggersEl = document.getElementById('m-triggers');
+  if (triggersEl) {
+    const totalTriggers = (taskRuns['agent-simple']||0) + (taskRuns['agent-complex']||0);
+    triggersEl.textContent = totalTriggers > 0 ? totalTriggers + '/day' : '—';
+  }
+  // New consistent fields
+  const everydayRunsEl = document.getElementById('m-everyday-runs');
+  if (everydayRunsEl) {
+    const everydayTasks = TASKS.filter(t => !t.id.startsWith('agent') && !['code','sql','rag','apidoc'].includes(t.id));
+    const maxEverydayRuns = Math.max(0, ...everydayTasks.map(t => taskRuns[t.id]||0));
+    everydayRunsEl.textContent = maxEverydayRuns > 0 ? maxEverydayRuns : '—';
+  }
+  const simpleRunsEl = document.getElementById('m-simple-runs');
+  if (simpleRunsEl) simpleRunsEl.textContent = (taskRuns['agent-simple']||0) > 0 ? taskRuns['agent-simple'] : '—';
+  const complexRunsEl = document.getElementById('m-complex-runs');
+  if (complexRunsEl) complexRunsEl.textContent = (taskRuns['agent-complex']||0) > 0 ? taskRuns['agent-complex'] : '—';
   const daysLabel = document.getElementById('m-days-label');
   if (daysLabel) daysLabel.textContent = sel.days;
   const batchStatusEl = document.getElementById('m-batch-label');
@@ -2731,8 +2751,9 @@ function updateScenarioPanel() {
         ${row('Cost / run', runCostA, runCostB)}
         ${row('Organisation size', a.sizeLabel||a.size, b.sizeLabel||b.size)}
         ${row('AI maturity', a.mat, b.mat)}
-        ${row('Active workflows', a.tasks, b.tasks)}
         ${row('Active AI users', a.users||'—', b.users||'—')}
+        ${row('Active workflows', a.tasks, b.tasks)}
+        ${row('Simple workflows/day', a.simpleRuns||'—', b.simpleRuns||'—')}
         ${row('Complex workflows/day', a.complexRuns, b.complexRuns)}
         ${row('Runs / day', a.totalRuns.toLocaleString(), b.totalRuns.toLocaleString())}
         ${row('Cache', a.cachePct+'%', b.cachePct+'%')}
