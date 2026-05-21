@@ -2732,6 +2732,7 @@ function updateScenarioPanel() {
         ${row('Organisation size', a.sizeLabel||a.size, b.sizeLabel||b.size)}
         ${row('AI maturity', a.mat, b.mat)}
         ${row('Active workflows', a.tasks, b.tasks)}
+        ${row('Active AI users', a.users||'—', b.users||'—')}
         ${row('Complex workflows/day', a.complexRuns, b.complexRuns)}
         ${row('Runs / day', a.totalRuns.toLocaleString(), b.totalRuns.toLocaleString())}
         ${row('Cache', a.cachePct+'%', b.cachePct+'%')}
