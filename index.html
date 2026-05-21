@@ -1984,12 +1984,12 @@ ${annualCapacity>0?`<section>
     <div class="highlight-val">${cx(annualCapacity)}</div>
   </div>
   <div class="grid2">
-    <div class="card"><div class="card-label">FTE equivalent</div><div class="card-val green">~${fteLow}–${fteHigh} FTE</div></div>
+    <div class="card"><div class="card-label">Equivalent operational capacity</div><div class="card-val green">~${fteLow}–${fteHigh} FTE</div></div>
     <div class="card"><div class="card-label">Efficiency assumption</div><div class="card-val">${pct}%</div></div>
   </div>
   ${ratio?`<div class="ratio-box">
     <div class="ratio-val">1 ${currency.symbol} AI cost → ~${ratio} ${currency.symbol} capacity value</div>
-    <div class="ratio-label">AI cost represents ${aiAsPct}% of modelled capacity value</div>
+    <div class="ratio-label">AI operating cost represents ${aiAsPct}% of modelled annual capacity value</div>
   </div>`:''}
 </section>`:''}
 
