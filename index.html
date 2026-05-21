@@ -1956,7 +1956,9 @@ function printReport() {
   <div class="grid2" style="margin-top:12px">
     <div class="card"><div class="card-label">Model</div><div class="card-val teal">${model?model.full:'Not selected'}</div></div>
     <div class="card"><div class="card-label">Active AI users</div><div class="card-val">${maxUsers||'—'}</div></div>
-    <div class="card"><div class="card-label">Runs / day</div><div class="card-val">${totalRuns.toLocaleString()}</div></div>
+    <div class="card"><div class="card-label">Total runs / day</div><div class="card-val">${totalRuns.toLocaleString()}</div></div>
+    <div class="card"><div class="card-label">Simple workflows / day</div><div class="card-val">${taskRuns['agent-simple']||'—'}</div></div>
+    <div class="card"><div class="card-label">Complex workflows / day</div><div class="card-val">${taskRuns['agent-complex']||'—'}</div></div>
     <div class="card"><div class="card-label">Working days</div><div class="card-val">${sel.days}</div></div>
     <div class="card"><div class="card-label">Batch</div><div class="card-val">${sel.batch?'On':'Off'}</div></div>
     <div class="card"><div class="card-label">Cache</div><div class="card-val">${sel.cachePct>0?sel.cachePct+'%':'Off'}</div></div>
@@ -2708,22 +2710,77 @@ function updateScenarioPanel() {
 
   const driver = (s) => s.complexRuns > 0 ? 'Complex agentic workflows' : s.simpleRuns > 0 ? 'Simple automated workflows' : 'Everyday AI tasks';
 
-  // Factual structural differences only
-  const diffs = [];
-  if (a.model !== b.model) diffs.push(`Model: ${a.model} → ${b.model}`);
-  if (b.cachePct !== a.cachePct) diffs.push(`Prompt caching: ${a.cachePct}% → ${b.cachePct}%`);
-  if (b.batch !== a.batch) diffs.push(`Batch processing: ${a.batch?'On':'Off'} → ${b.batch?'On':'Off'}`);
-  if ((a.routing||'Single-model') !== (b.routing||'Single-model')) diffs.push(`Model routing: ${a.routing||'Single-model'} → ${b.routing||'Single-model'}`);
-  if ((a.retryRate||0) !== (b.retryRate||0)) diffs.push(`Retry rate: ${Math.round((a.retryRate||0)*100)}% → ${Math.round((b.retryRate||0)*100)}%`);
-  if ((a.orchDepth||1) !== (b.orchDepth||1)) diffs.push(`Orchestration depth: ${a.orchDepth||1}× → ${b.orchDepth||1}×`);
-  if ((a.ctxGrowth||1) !== (b.ctxGrowth||1)) diffs.push(`Context growth: ${a.ctxGrowth||1}× → ${b.ctxGrowth||1}×`);
-  if (b.complexRuns !== a.complexRuns) diffs.push(`Complex workflow triggers: ${a.complexRuns}/day → ${b.complexRuns}/day`);
-  if (b.simpleRuns !== a.simpleRuns) diffs.push(`Simple workflow triggers: ${a.simpleRuns}/day → ${b.simpleRuns}/day`);
-  if (b.totalRuns !== a.totalRuns) diffs.push(`Total runs/day: ${a.totalRuns.toLocaleString()} → ${b.totalRuns.toLocaleString()}`);
-  if (b.users !== a.users) diffs.push(`Active AI users: ${a.users} → ${b.users}`);
-  if (b.mat !== a.mat) diffs.push(`AI maturity: ${a.mat} → ${b.mat}`);
-  if ((a.sizeLabel||a.size) !== (b.sizeLabel||b.size)) diffs.push(`Organisation size: ${a.sizeLabel||a.size} → ${b.sizeLabel||b.size}`);
-  if (diffs.length === 0) diffs.push('No architectural differences — configurations are identical');
+  // Calculate cost impact per architectural change
+  // We need the model to recalculate - use stored monthly values as proxy
+  const calcImpact = (valA, valB, totalDiff) => {
+    // Proportional attribution based on magnitude of change
+    return null; // Will use direct calculation below
+  };
+
+  // Build diffs with cost impact using stored data
+  const diffsWithCost = [];
+  const baseMonthly = a.monthly;
+
+  // For each architectural change, estimate isolated cost impact
+  if (a.model !== b.model) diffsWithCost.push({ label: `Model: ${a.model} → ${b.model}`, impact: null });
+
+  // Cache impact: cache reduces input cost by ~90% on cached portion
+  if (b.cachePct !== a.cachePct) {
+    const cacheDiff = b.cachePct - a.cachePct;
+    // Approx: each 10% cache saves ~9% of input cost, input ~60% of total
+    const approxImpact = baseMonthly * (cacheDiff/100) * 0.9 * 0.6 * -1;
+    diffsWithCost.push({ label: `Prompt caching: ${a.cachePct}% → ${b.cachePct}%`, impact: approxImpact });
+  }
+
+  // Batch impact: batch = 50% off input cost (~60% of total)
+  if (b.batch !== a.batch) {
+    const approxImpact = baseMonthly * 0.5 * 0.6 * (b.batch ? -1 : 1);
+    diffsWithCost.push({ label: `Batch processing: ${a.batch?'On':'Off'} → ${b.batch?'On':'Off'}`, impact: approxImpact });
+  }
+
+  // Retry impact: linear multiplier
+  if ((a.retryRate||0) !== (b.retryRate||0)) {
+    const retryDiff = (b.retryRate||0) - (a.retryRate||0);
+    const approxImpact = baseMonthly * retryDiff;
+    diffsWithCost.push({ label: `Retry rate: ${Math.round((a.retryRate||0)*100)}% → ${Math.round((b.retryRate||0)*100)}%`, impact: approxImpact });
+  }
+
+  // Orchestration depth: affects agent tasks only (~complex workflow share)
+  if ((a.orchDepth||1) !== (b.orchDepth||1)) {
+    const orchDiff = (b.orchDepth||1) - (a.orchDepth||1);
+    const agentShare = a.complexRuns > 0 ? Math.min(0.8, a.complexRuns / (a.totalRuns||1)) : 0.3;
+    const approxImpact = baseMonthly * agentShare * orchDiff;
+    diffsWithCost.push({ label: `Orchestration depth: ${a.orchDepth||1}× → ${b.orchDepth||1}×`, impact: approxImpact });
+  }
+
+  // Context growth: affects complex agent tasks
+  if ((a.ctxGrowth||1) !== (b.ctxGrowth||1)) {
+    const ctxDiff = (b.ctxGrowth||1) - (a.ctxGrowth||1);
+    const complexShare = a.complexRuns > 0 ? Math.min(0.7, a.complexRuns / (a.totalRuns||1)) : 0.2;
+    const approxImpact = baseMonthly * complexShare * ctxDiff;
+    diffsWithCost.push({ label: `Context growth: ${a.ctxGrowth||1}× → ${b.ctxGrowth||1}×`, impact: approxImpact });
+  }
+
+  // Volume changes
+  if (b.complexRuns !== a.complexRuns) {
+    const volDiff = (b.complexRuns - a.complexRuns) / (a.complexRuns||1);
+    const complexShare = a.complexRuns > 0 ? Math.min(0.8, a.complexRuns / (a.totalRuns||1)) : 0;
+    const approxImpact = baseMonthly * complexShare * volDiff;
+    diffsWithCost.push({ label: `Complex workflow triggers: ${a.complexRuns}/day → ${b.complexRuns}/day`, impact: approxImpact });
+  }
+
+  if (b.simpleRuns !== a.simpleRuns) {
+    const volDiff = (b.simpleRuns - a.simpleRuns) / (a.simpleRuns||1);
+    const simpleShare = a.simpleRuns > 0 ? Math.min(0.5, a.simpleRuns / (a.totalRuns||1)) : 0;
+    const approxImpact = baseMonthly * simpleShare * volDiff;
+    diffsWithCost.push({ label: `Simple workflow triggers: ${a.simpleRuns}/day → ${b.simpleRuns}/day`, impact: approxImpact });
+  }
+
+  if (b.users !== a.users) diffsWithCost.push({ label: `Active AI users: ${a.users} → ${b.users}`, impact: null });
+  if (b.mat !== a.mat) diffsWithCost.push({ label: `AI maturity: ${a.mat} → ${b.mat}`, impact: null });
+  if ((a.sizeLabel||a.size) !== (b.sizeLabel||b.size)) diffsWithCost.push({ label: `Organisation size: ${a.sizeLabel||a.size} → ${b.sizeLabel||b.size}`, impact: null });
+
+  if (diffsWithCost.length === 0) diffsWithCost.push({ label: 'No architectural differences — configurations are identical', impact: null });
 
   const row = (label, va, vb, highlight=false) => `
     <tr style="border-bottom:1px solid var(--border);">
@@ -2766,7 +2823,17 @@ function updateScenarioPanel() {
 
     <div style="margin-bottom:12px;">
       <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Architectural differences</div>
-      ${diffs.map(d=>`<div style="font-size:12px;color:var(--text2);font-family:var(--mono);padding:5px 0;border-bottom:1px solid var(--border);line-height:1.6;">· ${d}</div>`).join('')}
+      ${diffsWithCost.map(d => {
+        const hasImpact = d.impact !== null && Math.abs(d.impact) > 1;
+        const impactPct = hasImpact && baseMonthly > 0 ? Math.round(Math.abs(d.impact)/baseMonthly*100) : 0;
+        const impactColor = !hasImpact ? 'var(--text3)' : d.impact > 0 ? '#f87171' : 'var(--green)';
+        const impactFmt = !hasImpact ? '' : (d.impact > 0 ? `+${cx(Math.abs(d.impact))} · +${impactPct}%` : `−${cx(Math.abs(d.impact))} · −${impactPct}%`);
+        return `<div style="display:flex;justify-content:space-between;align-items:baseline;font-size:12px;padding:5px 0;border-bottom:1px solid var(--border);line-height:1.6;">
+          <span style="color:var(--text2);font-family:var(--mono);">· ${d.label}</span>
+          ${hasImpact ? `<span style="font-family:var(--mono);font-size:11px;color:${impactColor};white-space:nowrap;margin-left:12px;">${impactFmt}</span>` : ''}
+        </div>`;
+      }).join('')}
+      <div style="font-size:10px;color:var(--text3);margin-top:6px;font-family:var(--mono);">Cost impacts are directional estimates based on proportional attribution — not exact recalculations.</div>
     </div>
 
     <div style="display:flex;justify-content:flex-end;">
