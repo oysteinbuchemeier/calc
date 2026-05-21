@@ -2014,19 +2014,19 @@ ${(()=>{
   const driver = s => s.complexRuns > 0 ? 'Complex agentic workflows' : s.simpleRuns > 0 ? 'Simple automated workflows' : 'Everyday AI tasks';
   const runCostA = a.totalRuns > 0 ? cx(a.monthly / (a.totalRuns * 22)) : '—';
   const runCostB = b.totalRuns > 0 ? cx(b.monthly / (b.totalRuns * 22)) : '—';
-  const diffs = [];
-  if (a.model !== b.model) diffs.push(`Model: ${a.model} → ${b.model}`);
-  if (b.cachePct !== a.cachePct) diffs.push(`Prompt caching: ${a.cachePct}% → ${b.cachePct}%`);
-  if (b.batch !== a.batch) diffs.push(`Batch processing: ${a.batch?'On':'Off'} → ${b.batch?'On':'Off'}`);
-  if (b.complexRuns !== a.complexRuns) diffs.push(`Complex workflow triggers: ${a.complexRuns}/day → ${b.complexRuns}/day`);
-  if (b.simpleRuns !== a.simpleRuns) diffs.push(`Simple workflow triggers: ${a.simpleRuns}/day → ${b.simpleRuns}/day`);
-  if (b.mat !== a.mat) diffs.push(`AI maturity: ${a.mat} → ${b.mat}`);
-  if ((a.retryRate||0) !== (b.retryRate||0)) diffs.push(`Retry rate: ${Math.round((a.retryRate||0)*100)}% → ${Math.round((b.retryRate||0)*100)}%`);
-  if ((a.orchDepth||1) !== (b.orchDepth||1)) diffs.push(`Orchestration depth: ${a.orchDepth||1}× → ${b.orchDepth||1}×`);
-  if ((a.ctxGrowth||1) !== (b.ctxGrowth||1)) diffs.push(`Context growth: ${a.ctxGrowth||1}× → ${b.ctxGrowth||1}×`);
-  if (b.totalRuns !== a.totalRuns) diffs.push(`Total runs/day: ${a.totalRuns.toLocaleString()} → ${b.totalRuns.toLocaleString()}`);
-  if (b.users !== a.users) diffs.push(`Active AI users: ${a.users} → ${b.users}`);
-  if ((a.sizeLabel||a.size) !== (b.sizeLabel||b.size)) diffs.push(`Organisation size: ${a.sizeLabel||a.size} → ${b.sizeLabel||b.size}`);
+  const baseMonthly = a.monthly;
+  const pdfDiffs = [];
+  if (a.model !== b.model) pdfDiffs.push({ label: `Model: ${a.model} → ${b.model}`, impact: null });
+  if (b.cachePct !== a.cachePct) { const imp = baseMonthly * ((b.cachePct-a.cachePct)/100) * 0.9 * 0.6 * -1; pdfDiffs.push({ label: `Prompt caching: ${a.cachePct}% → ${b.cachePct}%`, impact: imp }); }
+  if (b.batch !== a.batch) { const imp = baseMonthly * 0.5 * 0.6 * (b.batch ? -1 : 1); pdfDiffs.push({ label: `Batch processing: ${a.batch?'On':'Off'} → ${b.batch?'On':'Off'}`, impact: imp }); }
+  if ((a.retryRate||0) !== (b.retryRate||0)) { const imp = baseMonthly * ((b.retryRate||0)-(a.retryRate||0)); pdfDiffs.push({ label: `Retry rate: ${Math.round((a.retryRate||0)*100)}% → ${Math.round((b.retryRate||0)*100)}%`, impact: imp }); }
+  if ((a.orchDepth||1) !== (b.orchDepth||1)) { const share = a.complexRuns>0?Math.min(0.8,a.complexRuns/(a.totalRuns||1)):0.3; const imp = baseMonthly*share*((b.orchDepth||1)-(a.orchDepth||1)); pdfDiffs.push({ label: `Orchestration depth: ${a.orchDepth||1}× → ${b.orchDepth||1}×`, impact: imp }); }
+  if ((a.ctxGrowth||1) !== (b.ctxGrowth||1)) { const share = a.complexRuns>0?Math.min(0.7,a.complexRuns/(a.totalRuns||1)):0.2; const imp = baseMonthly*share*((b.ctxGrowth||1)-(a.ctxGrowth||1)); pdfDiffs.push({ label: `Context growth: ${a.ctxGrowth||1}× → ${b.ctxGrowth||1}×`, impact: imp }); }
+  if (b.complexRuns !== a.complexRuns) { const share = a.complexRuns>0?Math.min(0.8,a.complexRuns/(a.totalRuns||1)):0; const imp = baseMonthly*share*((b.complexRuns-a.complexRuns)/(a.complexRuns||1)); pdfDiffs.push({ label: `Complex workflow triggers: ${a.complexRuns}/day → ${b.complexRuns}/day`, impact: imp }); }
+  if (b.simpleRuns !== a.simpleRuns) { const share = a.simpleRuns>0?Math.min(0.5,a.simpleRuns/(a.totalRuns||1)):0; const imp = baseMonthly*share*((b.simpleRuns-a.simpleRuns)/(a.simpleRuns||1)); pdfDiffs.push({ label: `Simple workflow triggers: ${a.simpleRuns}/day → ${b.simpleRuns}/day`, impact: imp }); }
+  if (b.users !== a.users) pdfDiffs.push({ label: `Active AI users: ${a.users} → ${b.users}`, impact: null });
+  if (b.mat !== a.mat) pdfDiffs.push({ label: `AI maturity: ${a.mat} → ${b.mat}`, impact: null });
+  if ((a.sizeLabel||a.size) !== (b.sizeLabel||b.size)) pdfDiffs.push({ label: `Organisation size: ${a.sizeLabel||a.size} → ${b.sizeLabel||b.size}`, impact: null });
   const row = (label, va, vb) => `<tr style="border-bottom:1px solid #eee"><td style="padding:5px 8px;color:#888;font-size:9pt;width:35%">${label}</td><td style="padding:5px 8px;font-family:monospace;font-size:9pt">${va}</td><td style="padding:5px 8px;font-family:monospace;font-size:9pt">${vb}</td></tr>`;
   return `<section style="page-break-before:always">
   <h2>Scenario comparison</h2>
@@ -2038,6 +2038,9 @@ ${(()=>{
       ${row('Cost / run', runCostA, runCostB)}
       ${row('Organisation size', a.sizeLabel||a.size, b.sizeLabel||b.size)}
       ${row('AI maturity', a.mat, b.mat)}
+      ${row('Active AI users', a.users||'—', b.users||'—')}
+      ${row('Active workflows', a.tasks, b.tasks)}
+      ${row('Simple workflows/day', a.simpleRuns||'—', b.simpleRuns||'—')}
       ${row('Complex workflows/day', a.complexRuns, b.complexRuns)}
       ${row('Total runs / day', a.totalRuns.toLocaleString(), b.totalRuns.toLocaleString())}
       ${row('Cache', a.cachePct+'%', b.cachePct+'%')}
@@ -2050,7 +2053,7 @@ ${(()=>{
     <div style="font-size:16pt;font-weight:600;font-family:monospace;color:${cheaper?'#1a7a5e':'#e53e3e'}">${diffFmt}</div>
     <div style="font-size:9pt;color:#555">~${diffPct}% ${cheaper?'lower':'higher'} estimated cost · B vs A</div>
   </div>
-  ${diffs.length?`<div style="font-size:8pt;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Architectural differences</div>${diffs.map(d=>`<div style="font-size:9pt;color:#444;padding:4px 0;border-bottom:1px solid #f0f0f0">· ${d}</div>`).join('')}`:''}
+  ${pdfDiffs.length?`<div style="font-size:8pt;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Architectural differences</div>${pdfDiffs.map(d=>{const hasImpact=d.impact!==null&&Math.abs(d.impact)>1;const impactPct=hasImpact&&baseMonthly>0?Math.round(Math.abs(d.impact)/baseMonthly*100):0;const color=!hasImpact?'#888':d.impact>0?'#e53e3e':'#1a7a5e';const impFmt=hasImpact?(d.impact>0?'+':'\u2212')+cx(Math.abs(d.impact))+' \u00b7 '+(d.impact>0?'+':'\u2212')+impactPct+'%':'';return`<div style="display:flex;justify-content:space-between;font-size:9pt;color:#444;padding:4px 0;border-bottom:1px solid #f0f0f0"><span>\u00b7 ${d.label}</span>${hasImpact?`<span style="color:${color};font-family:monospace;white-space:nowrap;margin-left:8px">${impFmt}</span>`:''}</div>`;}).join('')}<div style="font-size:7pt;color:#aaa;margin-top:4px">Cost impacts are directional estimates — not exact recalculations.</div>`:''}
 </section>`;
 })()}
 
