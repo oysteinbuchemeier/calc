@@ -2882,7 +2882,7 @@ function updateScenarioPanel() {
       </thead>
       <tbody>
         ${row('Model', a.model, b.model)}
-        ${row('Monthly estimate', a.monthlyFmt, b.monthlyFmt, true)}
+        ${row('Monthly estimate', cx(a.monthly), cx(b.monthly), true)}
         ${row('Cost / run', runCostA, runCostB)}
         ${row('Organisation size', a.sizeLabel||a.size, b.sizeLabel||b.size)}
         ${row('AI maturity', a.mat, b.mat)}
