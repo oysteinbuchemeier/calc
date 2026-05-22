@@ -2047,7 +2047,7 @@ ${annualCapacity>0?`<section>
     <div class="card"><div class="card-label">Equivalent operational capacity</div><div class="card-val green">~${fteLow}–${fteHigh} FTE</div></div>
     <div class="card"><div class="card-label">Efficiency assumption</div><div class="card-val">${pct}%</div></div>
   </div>
-  <div style="margin-top:8px;font-size:8pt;color:#888;line-height:1.6;">Assumes ${pct}% efficiency improvement across ${maxUsers} employees at ${cx(parseFloat(document.getElementById('roi-rate')?.value)||0)}/yr fully-loaded cost. Excludes implementation cost, integration work, governance, process redesign and organisational adoption effort.</div>
+  <div style="margin-top:8px;font-size:8pt;color:#888;line-height:1.6;">Assumes ${pct}% efficiency improvement across ${maxUsers} employees at ${cx(annualCostPerPerson)}/yr fully-loaded cost. Excludes implementation cost, integration work, governance, process redesign and organisational adoption effort.</div>
 </section>
 
 <section>
