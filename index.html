@@ -1205,12 +1205,19 @@ function cx(v) {
 }
 
 function setCurrency(code, symbol) {
+  const oldRate = currency.rate;
   currency={code, symbol, rate:CURRENCY_RATES[code]};
   document.querySelectorAll('.currency-btn').forEach(b=>b.classList.toggle('active', b.textContent===code));
   const ru = document.getElementById('roi-rate-unit');
   if(ru) ru.textContent=symbol+' / yr';
   const sl = document.getElementById('savings-currency-label');
   if(sl) sl.textContent=symbol+' / mo';
+  // Convert roi-rate input value to new currency
+  const roiRate = document.getElementById('roi-rate');
+  if(roiRate && oldRate && currency.rate) {
+    const currentVal = parseFloat(roiRate.value)||0;
+    roiRate.value = Math.round(currentVal / oldRate * currency.rate);
+  }
   update(); updateCompare(); updateROI(); updateSavings();
 }
 
