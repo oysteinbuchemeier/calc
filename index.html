@@ -265,7 +265,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .chart-growth-row{display:flex;gap:8px;margin-bottom:12px;align-items:center}
 .chart-growth-label{font-size:12px;color:var(--text2);flex:1}
 .chart-growth-select{background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;font-size:13px;font-family:var(--mono);color:var(--text);outline:none}
-.chart-bars{display:block;width:100%;}
+.chart-bars{display:flex;align-items:flex-end;gap:4px;height:100px}
 .chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
 .chart-bar{width:100%;border-radius:3px 3px 0 0;background:var(--accent);opacity:0.7;transition:height 0.4s ease;min-height:3px}
 .chart-bar.current{opacity:1;background:var(--green)}
@@ -879,7 +879,7 @@ footer a:hover{color:var(--text2)}
 
             <div class="chart-panel">
         <div class="chart-panel-title">Cost over time</div>
-        <div class="chart-panel-sub">What happens when AI scales without architectural controls</div>
+        <div class="chart-panel-sub">Projected monthly cost as AI usage grows</div>
         <div class="chart-growth-row">
           <span class="chart-growth-label">Expected monthly growth</span>
           <select class="chart-growth-select" id="growth-rate" onchange="updateChart()">
@@ -889,7 +889,7 @@ footer a:hover{color:var(--text2)}
             <option value="20">Aggressive (20%/mo)</option>
           </select>
         </div>
-        <div id="chart-bars" style="width:100%;margin-top:8px;"></div>
+        <div class="chart-bars" id="chart-bars"></div>
       </div>
 
 
@@ -2391,84 +2391,17 @@ function renderMethodology() {
 }
 
 function updateChart() {
-  const monthly = totalMonthly();
-  const growthPct = parseFloat(document.getElementById('growth-rate').value)/100;
-  const el = document.getElementById('chart-bars');
-  if (monthly === 0) {
-    el.innerHTML = '<div style="width:100%;text-align:center;font-size:12px;color:var(--text3);padding:2rem 0;font-family:var(--mono);">Add tasks to see the projection.</div>';
-    return;
-  }
-  const model = MODELS.find(m => m.id === sel.model);
-  if (!model) {
-    el.innerHTML = '<div style="width:100%;text-align:center;font-size:12px;color:var(--text3);padding:2rem 0;font-family:var(--mono);">Select a model to see the projection.</div>';
-    return;
-  }
-
-  const active = TASKS.filter(t => (taskRuns[t.id]||0) > 0);
-  const N = 12;
-  const months = ['Now','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'];
-
-  // Capacity value
-  const maxUsers = Math.max(0,...TASKS.filter(t=>!t.id.startsWith('agent')&&!['code','sql','rag','apidoc'].includes(t.id)).map(t=>taskVol[t.id]?.employees||0));
-  const annualSalary = (parseFloat(document.getElementById('roi-rate')?.value)||750000)/currency.rate;
-  const effPct = (parseFloat(document.getElementById('roi-pct')?.value)||10)/100;
-  const baseCapacity = annualSalary * maxUsers * effPct / 12;
-
-  // Controlled: current config + volume growth
-  const controlled = Array.from({length:N},(_,i) => monthly * Math.pow(1+growthPct,i));
-
-  // Unconstrained: volume + compounding sensitivity
-  const uncontrolled = Array.from({length:N},(_,i) => {
-    const vol = Math.pow(1+growthPct,i);
-    const orch = Math.min(1 + i*0.2, 4);
-    const ctx  = Math.min(1 + i*0.15, 5);
-    const retry = Math.min(i*0.03, 0.4);
-    return active.reduce((s,t) => s + calcCost(t,model,sel.ctx,false,0,retry,orch,ctx).runCost * taskRuns[t.id] * sel.days * vol, 0);
-  });
-
-  // Capacity value: grows linearly
-  const capacity = Array.from({length:N},(_,i) => baseCapacity * (1 + i*0.08));
-
-  const W = 560, H = 180, PL = 52, PR = 16, PT = 12, PB = 28;
-  const IW = W-PL-PR, IH = H-PT-PB;
-  const allVals = [...controlled,...uncontrolled,...(baseCapacity>0?capacity:[])];
-  const maxVal = Math.max(...allVals, 0.01);
-
-  function toX(i) { return PL + (i/(N-1))*IW; }
-  function toY(v) { return PT + IH - Math.min(v/maxVal,1)*IH; }
-  function polyline(vals, color, dash) {
-    const pts = vals.map((v,i)=>toX(i)+','+toY(v)).join(' ');
-    return '<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'+(dash?' stroke-dasharray="'+dash+'"':'')+'/>';
-  }
-
-  const yLabels = [0,0.25,0.5,0.75,1].map(function(f) {
-    const v = f*maxVal*currency.rate;
-    const label = v>=1000000 ? currency.symbol+(v/1000000).toFixed(1)+'M' : v>=1000 ? currency.symbol+Math.round(v/1000)+'k' : currency.symbol+Math.round(v);
-    return '<text x="'+(PL-4)+'" y="'+(PT+IH-f*IH+4)+'" text-anchor="end" font-size="9" fill="var(--text3)" font-family="monospace">'+label+'</text>';
+  const monthly=totalMonthly(),growthPct=parseFloat(document.getElementById('growth-rate').value)/100;
+  const el=document.getElementById('chart-bars');
+  if(monthly===0){el.innerHTML='<div style="width:100%;text-align:center;font-size:12px;color:var(--text3);padding:2rem 0;font-family:var(--mono);">Add tasks to see the projection.</div>';return;}
+  const months=['Now','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'];
+  const values=months.map((_,i)=>monthly*Math.pow(1+growthPct,i));
+  const maxVal=Math.max(...values,0.01);
+  el.innerHTML=values.map((v,i)=>{
+    const n=Math.round(v*currency.rate);
+    const label=n>=1000000?currency.symbol+(n/1000000).toFixed(1)+'M':n>=1000?currency.symbol+(n/1000).toFixed(0)+'k':currency.symbol+n;
+    return '<div class="chart-bar-wrap"><div class="chart-bar-val">'+label+'</div><div class="chart-bar'+(i===0?' current':'')+'" style="height:'+Math.max(Math.round(v/maxVal*80),3)+'px"></div><div class="chart-bar-label">'+months[i]+'</div></div>';
   }).join('');
-
-  const xLabels = [0,3,6,9,11].map(function(i) {
-    return '<text x="'+toX(i)+'" y="'+(H-6)+'" text-anchor="middle" font-size="9" fill="var(--text3)" font-family="monospace">'+months[i]+'</text>';
-  }).join('');
-
-  const grid = [0.25,0.5,0.75,1].map(function(f) {
-    return '<line x1="'+PL+'" y1="'+(PT+IH-f*IH)+'" x2="'+(W-PR)+'" y2="'+(PT+IH-f*IH)+'" stroke="var(--border)" stroke-width="0.5"/>';
-  }).join('');
-
-  el.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block;">'
-    + grid
-    + '<line x1="'+PL+'" y1="'+PT+'" x2="'+PL+'" y2="'+(PT+IH)+'" stroke="var(--border)" stroke-width="0.5"/>'
-    + yLabels + xLabels
-    + polyline(controlled, 'var(--accent2)')
-    + polyline(uncontrolled, '#f87171')
-    + (baseCapacity>0 ? polyline(capacity, 'var(--green)', '4 3') : '')
-    + '</svg>'
-    + '<div style="display:flex;flex-wrap:wrap;gap:12px;font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:8px;">'
-    + '<span><span style="color:var(--accent2);">\u2014</span> Controlled cost</span>'
-    + '<span><span style="color:#f87171;">\u2014</span> Unconstrained cost</span>'
-    + (baseCapacity>0 ? '<span><span style="color:var(--green);">\u254c</span> Capacity value</span>' : '')
-    + '</div>'
-    + '<div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:6px;line-height:1.6;">Unconstrained: orchestration depth, context growth and retry compound as system scales. Capacity value assumes linear adoption growth.</div>';
 }
 
 function updateSmartCTA(monthlyCost,activeTasks) {
