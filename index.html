@@ -671,15 +671,9 @@ footer a:hover{color:var(--text2)}
         <div class="panel-title">Model</div>
         <div class="model-row" id="model-row"></div>
         <div id="model-desc" style="font-size:12px;color:var(--text3);margin-top:10px;font-family:var(--mono);"></div>
+        <div id="model-legend" style="font-size:11px;color:var(--text3);margin-top:6px;font-family:var(--mono);"></div>
         <div id="model-suitability-note" style="display:none;margin-top:10px;font-size:12px;font-family:var(--mono);line-height:1.6;padding:8px 12px;border-radius:6px;"></div>
         <div style="margin-top:8px;font-size:12px;color:var(--text3);font-family:var(--mono);line-height:1.6;">Model selection affects inference cost only. Output quality, latency and data residency vary by provider.</div>
-      </div>
-      <div class="rec-model-panel" id="rec-model-panel">
-        <div class="rec-model-label">Lowest cost model for this volume</div>
-        <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.6;">Automatically selects the cheapest available model by input price. No workload or capability evaluation.</div>
-        <div class="rec-model-name" id="rec-model-name">—</div>
-        <div class="rec-model-reason" id="rec-model-reason">—</div>
-        <div class="rec-model-saving" id="rec-model-saving"></div>
       </div>
       <div class="panel">
         <div class="panel-title">Optimisations</div>
@@ -2113,7 +2107,7 @@ ${(()=>{
     <thead><tr style="border-bottom:2px solid #ddd"><th style="text-align:left;padding:5px 8px;color:#888;font-size:8pt;width:35%"></th><th style="text-align:left;padding:5px 8px;color:#4a8a91;font-size:9pt">Scenario A</th><th style="text-align:left;padding:5px 8px;color:#4a8a91;font-size:9pt">Scenario B</th></tr></thead>
     <tbody>
       ${row('Model', a.model, b.model)}
-      ${row('Monthly estimate', `<strong style="color:#1a7a5e">${a.monthlyFmt}</strong>`, `<strong style="color:#1a7a5e">${b.monthlyFmt}</strong>`)}
+      ${row('Monthly estimate', `<strong style="color:#1a7a5e">${cx(a.monthly)}</strong>`, `<strong style="color:#1a7a5e">${cx(b.monthly)}</strong>`)}
       ${row('Cost / run', runCostA, runCostB)}
       ${row('Organisation size', a.sizeLabel||a.size, b.sizeLabel||b.size)}
       ${row('AI maturity', a.mat, b.mat)}
@@ -2702,8 +2696,26 @@ function setTaskVol(id,field,val) {
 }
 
 function renderModels() {
-  document.getElementById('model-row').innerHTML=MODELS.map(m=>`<button class="model-pill${m.id===sel.model?' active':''}" onclick="pick('model','${m.id}')">${m.name}</button>`).join('');
-  const m=sel.model ? MODELS.find(x=>x.id===sel.model) : null;
+  const prices = MODELS.map(m => m.inP).sort((a,b) => a-b);
+  const low = prices[Math.ceil(prices.length * 0.33) - 1];
+  const high = prices[Math.floor(prices.length * 0.67)];
+
+  function dot(m) {
+    if (m.inP <= low) return '<span style="color:#4ade80;font-size:9px;margin-right:3px;">●</span>';
+    if (m.inP >= high) return '<span style="color:#f87171;font-size:9px;margin-right:3px;">●</span>';
+    return '<span style="color:#fbbf24;font-size:9px;margin-right:3px;">●</span>';
+  }
+
+  document.getElementById('model-row').innerHTML = MODELS.map(m =>
+    `<button class="model-pill${m.id===sel.model?' active':''}" onclick="pick('model','${m.id}')">${dot(m)}${m.name}</button>`
+  ).join('');
+
+  document.getElementById('model-legend').innerHTML =
+    '<span style="color:#4ade80;font-size:9px;">●</span> Lowest cost &nbsp;·&nbsp; ' +
+    '<span style="color:#fbbf24;font-size:9px;">●</span> Mid-range &nbsp;·&nbsp; ' +
+    '<span style="color:#f87171;font-size:9px;">●</span> Highest cost &nbsp;·&nbsp; input price per 1M tokens';
+
+  const m = sel.model ? MODELS.find(x=>x.id===sel.model) : null;
   document.getElementById('model-desc').textContent = m ? m.full+' — '+m.note : 'Select a model above to see pricing details.';
 }
 
