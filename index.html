@@ -1959,6 +1959,10 @@ function printReport() {
     const active = TASKS.filter(t=>(taskRuns[t.id]||0)>0);
     const totalRuns = active.reduce((s,t)=>s+taskRuns[t.id],0);
     const monthly = totalMonthly();
+    function calcBase(batch, cache, retry, orch, ctx) {
+      return TASKS.reduce((s,t)=>{const r=taskRuns[t.id]||0;if(!r)return s;return s+calcCost(t,model,sel.ctx,batch,cache,retry,orch,ctx).runCost*r*sel.days;},0);
+    }
+    const pureBase = calcBase(false,0,0,1,1);
     const maxUsers = Math.max(0,...TASKS.filter(t=>!t.id.startsWith('agent')&&!['code','sql','rag','apidoc'].includes(t.id)).map(t=>taskVol[t.id]?.employees||0));
     const pct = parseFloat(document.getElementById('roi-pct')?.value)||10;
     const annualCostPerPerson = (parseFloat(document.getElementById('roi-rate')?.value)||0)/currency.rate;
@@ -2043,8 +2047,11 @@ function printReport() {
     <div class="card"><div class="card-label">Simple workflows / day</div><div class="card-val">${taskRuns['agent-simple']||'—'}</div></div>
     <div class="card"><div class="card-label">Complex workflows / day</div><div class="card-val">${taskRuns['agent-complex']||'—'}</div></div>
     <div class="card"><div class="card-label">Working days</div><div class="card-val">${sel.days}</div></div>
-    <div class="card"><div class="card-label">Batch</div><div class="card-val">${sel.batch?'On':'Off'}</div></div>
-    <div class="card"><div class="card-label">Cache</div><div class="card-val">${sel.cachePct>0?sel.cachePct+'%':'Off'}</div></div>
+    <div class="card"><div class="card-label">Batch</div><div class="card-val">${sel.batch ? 'On &nbsp;−'+cx(pureBase-calcBase(true,0,0,1,1)) : 'Off'}</div></div>
+    <div class="card"><div class="card-label">Cache</div><div class="card-val">${sel.cachePct>0 ? sel.cachePct+'% &nbsp;−'+cx(pureBase-calcBase(false,sel.cachePct,0,1,1)) : 'Off'}</div></div>
+    <div class="card"><div class="card-label">Retry rate</div><div class="card-val">${(sel.retryRate||0)>0 ? Math.round(sel.retryRate*100)+'% &nbsp;+'+cx(calcBase(false,0,sel.retryRate,1,1)-pureBase) : '0%'}</div></div>
+    <div class="card"><div class="card-label">Orchestration depth</div><div class="card-val">${(sel.orchDepth||1)>1 ? sel.orchDepth+'× &nbsp;+'+cx(calcBase(false,0,0,sel.orchDepth,1)-pureBase) : '1×'}</div></div>
+    <div class="card"><div class="card-label">Context growth</div><div class="card-val">${(sel.ctxGrowth||1)>1 ? sel.ctxGrowth+'× &nbsp;+'+cx(calcBase(false,0,0,1,sel.ctxGrowth)-pureBase) : '1×'}</div></div>
   </div>
 </section>
 
@@ -2110,13 +2117,13 @@ ${(()=>{
   const baseMonthly = a.monthly;
   const pdfDiffs = [];
   if (a.model !== b.model) pdfDiffs.push({ label: `Model: ${a.model} → ${b.model}`, impact: null });
-  if (b.cachePct !== a.cachePct) { const imp = baseMonthly * ((b.cachePct-a.cachePct)/100) * 0.9 * 0.6 * -1; pdfDiffs.push({ label: `Prompt caching: ${a.cachePct}% → ${b.cachePct}%`, impact: imp }); }
-  if (b.batch !== a.batch) { const imp = baseMonthly * 0.5 * 0.6 * (b.batch ? -1 : 1); pdfDiffs.push({ label: `Batch processing: ${a.batch?'On':'Off'} → ${b.batch?'On':'Off'}`, impact: imp }); }
-  if ((a.retryRate||0) !== (b.retryRate||0)) { const imp = baseMonthly * ((b.retryRate||0)-(a.retryRate||0)); pdfDiffs.push({ label: `Retry rate: ${Math.round((a.retryRate||0)*100)}% → ${Math.round((b.retryRate||0)*100)}%`, impact: imp }); }
-  if ((a.orchDepth||1) !== (b.orchDepth||1)) { const share = a.complexRuns>0?Math.min(0.8,a.complexRuns/(a.totalRuns||1)):0.3; const imp = baseMonthly*share*((b.orchDepth||1)-(a.orchDepth||1)); pdfDiffs.push({ label: `Orchestration depth: ${a.orchDepth||1}× → ${b.orchDepth||1}×`, impact: imp }); }
-  if ((a.ctxGrowth||1) !== (b.ctxGrowth||1)) { const share = a.complexRuns>0?Math.min(0.7,a.complexRuns/(a.totalRuns||1)):0.2; const imp = baseMonthly*share*((b.ctxGrowth||1)-(a.ctxGrowth||1)); pdfDiffs.push({ label: `Context growth: ${a.ctxGrowth||1}× → ${b.ctxGrowth||1}×`, impact: imp }); }
-  if (b.complexRuns !== a.complexRuns) { const share = a.complexRuns>0?Math.min(0.8,a.complexRuns/(a.totalRuns||1)):0; const imp = baseMonthly*share*((b.complexRuns-a.complexRuns)/(a.complexRuns||1)); pdfDiffs.push({ label: `Complex workflow triggers: ${a.complexRuns}/day → ${b.complexRuns}/day`, impact: imp }); }
-  if (b.simpleRuns !== a.simpleRuns) { const share = a.simpleRuns>0?Math.min(0.5,a.simpleRuns/(a.totalRuns||1)):0; const imp = baseMonthly*share*((b.simpleRuns-a.simpleRuns)/(a.simpleRuns||1)); pdfDiffs.push({ label: `Simple workflow triggers: ${a.simpleRuns}/day → ${b.simpleRuns}/day`, impact: imp }); }
+  if (b.cachePct !== a.cachePct) pdfDiffs.push({ label: `Prompt caching: ${a.cachePct}% → ${b.cachePct}%`, impact: null });
+  if (b.batch !== a.batch) pdfDiffs.push({ label: `Batch processing: ${a.batch?'On':'Off'} → ${b.batch?'On':'Off'}`, impact: null });
+  if ((a.retryRate||0) !== (b.retryRate||0)) pdfDiffs.push({ label: `Retry rate: ${Math.round((a.retryRate||0)*100)}% → ${Math.round((b.retryRate||0)*100)}%`, impact: null });
+  if ((a.orchDepth||1) !== (b.orchDepth||1)) pdfDiffs.push({ label: `Orchestration depth: ${a.orchDepth||1}× → ${b.orchDepth||1}×`, impact: null });
+  if ((a.ctxGrowth||1) !== (b.ctxGrowth||1)) pdfDiffs.push({ label: `Context growth: ${a.ctxGrowth||1}× → ${b.ctxGrowth||1}×`, impact: null });
+  if (b.complexRuns !== a.complexRuns) pdfDiffs.push({ label: `Complex workflow triggers: ${a.complexRuns}/day → ${b.complexRuns}/day`, impact: null });
+  if (b.simpleRuns !== a.simpleRuns) pdfDiffs.push({ label: `Simple workflow triggers: ${a.simpleRuns}/day → ${b.simpleRuns}/day`, impact: null });
   if (b.users !== a.users) pdfDiffs.push({ label: `Active AI users: ${a.users} → ${b.users}`, impact: null });
   if (b.mat !== a.mat) pdfDiffs.push({ label: `AI maturity: ${a.mat} → ${b.mat}`, impact: null });
   if ((a.sizeLabel||a.size) !== (b.sizeLabel||b.size)) pdfDiffs.push({ label: `Organisation size: ${a.sizeLabel||a.size} → ${b.sizeLabel||b.size}`, impact: null });
@@ -3012,63 +3019,15 @@ function updateScenarioPanel() {
 
   // Build diffs with cost impact using stored data
   const diffsWithCost = [];
-  const baseMonthly = a.monthly;
 
-  // For each architectural change, estimate isolated cost impact
   if (a.model !== b.model) diffsWithCost.push({ label: `Model: ${a.model} → ${b.model}`, impact: null });
-
-  // Cache impact: cache reduces input cost by ~90% on cached portion
-  if (b.cachePct !== a.cachePct) {
-    const cacheDiff = b.cachePct - a.cachePct;
-    // Approx: each 10% cache saves ~9% of input cost, input ~60% of total
-    const approxImpact = baseMonthly * (cacheDiff/100) * 0.9 * 0.6 * -1;
-    diffsWithCost.push({ label: `Prompt caching: ${a.cachePct}% → ${b.cachePct}%`, impact: approxImpact });
-  }
-
-  // Batch impact: batch = 50% off input cost (~60% of total)
-  if (b.batch !== a.batch) {
-    const approxImpact = baseMonthly * 0.5 * 0.6 * (b.batch ? -1 : 1);
-    diffsWithCost.push({ label: `Batch processing: ${a.batch?'On':'Off'} → ${b.batch?'On':'Off'}`, impact: approxImpact });
-  }
-
-  // Retry impact: linear multiplier
-  if ((a.retryRate||0) !== (b.retryRate||0)) {
-    const retryDiff = (b.retryRate||0) - (a.retryRate||0);
-    const approxImpact = baseMonthly * retryDiff;
-    diffsWithCost.push({ label: `Retry rate: ${Math.round((a.retryRate||0)*100)}% → ${Math.round((b.retryRate||0)*100)}%`, impact: approxImpact });
-  }
-
-  // Orchestration depth: affects agent tasks only (~complex workflow share)
-  if ((a.orchDepth||1) !== (b.orchDepth||1)) {
-    const orchDiff = (b.orchDepth||1) - (a.orchDepth||1);
-    const agentShare = a.complexRuns > 0 ? Math.min(0.8, a.complexRuns / (a.totalRuns||1)) : 0.3;
-    const approxImpact = baseMonthly * agentShare * orchDiff;
-    diffsWithCost.push({ label: `Orchestration depth: ${a.orchDepth||1}× → ${b.orchDepth||1}×`, impact: approxImpact });
-  }
-
-  // Context growth: affects complex agent tasks
-  if ((a.ctxGrowth||1) !== (b.ctxGrowth||1)) {
-    const ctxDiff = (b.ctxGrowth||1) - (a.ctxGrowth||1);
-    const complexShare = a.complexRuns > 0 ? Math.min(0.7, a.complexRuns / (a.totalRuns||1)) : 0.2;
-    const approxImpact = baseMonthly * complexShare * ctxDiff;
-    diffsWithCost.push({ label: `Context growth: ${a.ctxGrowth||1}× → ${b.ctxGrowth||1}×`, impact: approxImpact });
-  }
-
-  // Volume changes
-  if (b.complexRuns !== a.complexRuns) {
-    const volDiff = (b.complexRuns - a.complexRuns) / (a.complexRuns||1);
-    const complexShare = a.complexRuns > 0 ? Math.min(0.8, a.complexRuns / (a.totalRuns||1)) : 0;
-    const approxImpact = baseMonthly * complexShare * volDiff;
-    diffsWithCost.push({ label: `Complex workflow triggers: ${a.complexRuns}/day → ${b.complexRuns}/day`, impact: approxImpact });
-  }
-
-  if (b.simpleRuns !== a.simpleRuns) {
-    const volDiff = (b.simpleRuns - a.simpleRuns) / (a.simpleRuns||1);
-    const simpleShare = a.simpleRuns > 0 ? Math.min(0.5, a.simpleRuns / (a.totalRuns||1)) : 0;
-    const approxImpact = baseMonthly * simpleShare * volDiff;
-    diffsWithCost.push({ label: `Simple workflow triggers: ${a.simpleRuns}/day → ${b.simpleRuns}/day`, impact: approxImpact });
-  }
-
+  if (b.cachePct !== a.cachePct) diffsWithCost.push({ label: `Prompt caching: ${a.cachePct}% → ${b.cachePct}%`, impact: null });
+  if (b.batch !== a.batch) diffsWithCost.push({ label: `Batch processing: ${a.batch?'On':'Off'} → ${b.batch?'On':'Off'}`, impact: null });
+  if ((a.retryRate||0) !== (b.retryRate||0)) diffsWithCost.push({ label: `Retry rate: ${Math.round((a.retryRate||0)*100)}% → ${Math.round((b.retryRate||0)*100)}%`, impact: null });
+  if ((a.orchDepth||1) !== (b.orchDepth||1)) diffsWithCost.push({ label: `Orchestration depth: ${a.orchDepth||1}× → ${b.orchDepth||1}×`, impact: null });
+  if ((a.ctxGrowth||1) !== (b.ctxGrowth||1)) diffsWithCost.push({ label: `Context growth: ${a.ctxGrowth||1}× → ${b.ctxGrowth||1}×`, impact: null });
+  if (b.complexRuns !== a.complexRuns) diffsWithCost.push({ label: `Complex workflow triggers: ${a.complexRuns}/day → ${b.complexRuns}/day`, impact: null });
+  if (b.simpleRuns !== a.simpleRuns) diffsWithCost.push({ label: `Simple workflow triggers: ${a.simpleRuns}/day → ${b.simpleRuns}/day`, impact: null });
   if (b.users !== a.users) diffsWithCost.push({ label: `Active AI users: ${a.users} → ${b.users}`, impact: null });
   if (b.mat !== a.mat) diffsWithCost.push({ label: `AI maturity: ${a.mat} → ${b.mat}`, impact: null });
   if ((a.sizeLabel||a.size) !== (b.sizeLabel||b.size)) diffsWithCost.push({ label: `Organisation size: ${a.sizeLabel||a.size} → ${b.sizeLabel||b.size}`, impact: null });
