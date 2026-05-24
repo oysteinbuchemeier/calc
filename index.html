@@ -2391,17 +2391,106 @@ function renderMethodology() {
 }
 
 function updateChart() {
-  const monthly=totalMonthly(),growthPct=parseFloat(document.getElementById('growth-rate').value)/100;
-  const el=document.getElementById('chart-bars');
-  if(monthly===0){el.innerHTML='<div style="width:100%;text-align:center;font-size:12px;color:var(--text3);padding:2rem 0;font-family:var(--mono);">Add tasks to see the projection.</div>';return;}
-  const months=['Now','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'];
-  const values=months.map((_,i)=>monthly*Math.pow(1+growthPct,i));
-  const maxVal=Math.max(...values,0.01);
-  el.innerHTML=values.map((v,i)=>{
-    const n=Math.round(v*currency.rate);
-    const label=n>=1000000?currency.symbol+(n/1000000).toFixed(1)+'M':n>=1000?currency.symbol+(n/1000).toFixed(0)+'k':currency.symbol+n;
-    return '<div class="chart-bar-wrap"><div class="chart-bar-val">'+label+'</div><div class="chart-bar'+(i===0?' current':'')+'" style="height:'+Math.max(Math.round(v/maxVal*80),3)+'px"></div><div class="chart-bar-label">'+months[i]+'</div></div>';
+  const monthly = totalMonthly();
+  const growthPct = parseFloat(document.getElementById('growth-rate').value)/100;
+  const el = document.getElementById('chart-bars');
+  if (monthly === 0) {
+    el.innerHTML = '<div style="width:100%;text-align:center;font-size:12px;color:var(--text3);padding:2rem 0;font-family:var(--mono);">Add tasks to see the projection.</div>';
+    return;
+  }
+  const model = MODELS.find(m => m.id === sel.model);
+  if (!model) {
+    el.innerHTML = '<div style="width:100%;text-align:center;font-size:12px;color:var(--text3);padding:2rem 0;font-family:var(--mono);">Select a model to see the projection.</div>';
+    return;
+  }
+
+  const active = TASKS.filter(t => (taskRuns[t.id]||0) > 0);
+  const N = 12;
+  const months = ['Now','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'];
+
+  // Agent share from actual task configuration
+  const totalRuns = active.reduce((s,t) => s + taskRuns[t.id], 0);
+  const agentRuns = (taskRuns['agent-complex']||0) + (taskRuns['agent-simple']||0);
+  const agentShare = totalRuns > 0 ? agentRuns / totalRuns : 0;
+
+  // Controlled: no sensitivity, current batch/cache, volume growth
+  const controlled = Array.from({length:N}, (_,i) => {
+    const vol = Math.pow(1+growthPct, i);
+    return active.reduce((s,t) => s + calcCost(t, model, sel.ctx, sel.batch, sel.cachePct, 0, 1, 1).runCost * taskRuns[t.id] * sel.days * vol, 0);
+  });
+
+  // With sensitivity: user actual values compound with volume
+  const sensitivityMult = (sel.orchDepth||1) * (sel.ctxGrowth||1) * (1 + (sel.retryRate||0));
+  const sensitivity = Array.from({length:N}, (_,i) => {
+    const vol = Math.pow(1+growthPct, i);
+    const agentCost = monthly * agentShare * sensitivityMult * vol;
+    const everydayCost = monthly * (1-agentShare) * vol;
+    return agentCost + everydayCost;
+  });
+
+  // Capacity value
+  const maxUsers = Math.max(0,...TASKS.filter(t=>!t.id.startsWith('agent')&&!['code','sql','rag','apidoc'].includes(t.id)).map(t=>taskVol[t.id]?.employees||0));
+  const annualSalary = (parseFloat(document.getElementById('roi-rate')?.value)||0)/currency.rate;
+  const effPct = (parseFloat(document.getElementById('roi-pct')?.value)||10)/100;
+  const baseCapacity = annualSalary * maxUsers * effPct / 12;
+  const capacity = Array.from({length:N}, (_,i) => baseCapacity * (1 + i*0.08));
+
+  // SVG dimensions
+  const W = 540, H = 160, PL = 52, PR = 12, PT = 10, PB = 24;
+  const IW = W-PL-PR, IH = H-PT-PB;
+  const allVals = [...controlled, ...sensitivity, ...(baseCapacity>0 ? capacity : [])];
+  const maxVal = Math.max(...allVals, 0.01);
+
+  function toX(i) { return PL + (i/(N-1))*IW; }
+  function toY(v) { return PT + IH - Math.min(v/maxVal,1)*IH; }
+
+  function polyline(vals, color, dash) {
+    const pts = vals.map((v,i) => toX(i).toFixed(1)+','+toY(v).toFixed(1)).join(' ');
+    return '<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'+(dash?' stroke-dasharray="'+dash+'"':'')+'/>';
+  }
+
+  const grid = [0.25,0.5,0.75,1].map(f =>
+    '<line x1="'+PL+'" y1="'+(PT+IH-f*IH).toFixed(1)+'" x2="'+(W-PR)+'" y2="'+(PT+IH-f*IH).toFixed(1)+'" stroke="var(--border)" stroke-width="0.5"/>'
+  ).join('');
+
+  const yLabels = [0,0.5,1].map(f => {
+    const v = f*maxVal*currency.rate;
+    const lbl = v>=1000000 ? currency.symbol+(v/1000000).toFixed(1)+'M' : v>=1000 ? currency.symbol+Math.round(v/1000)+'k' : currency.symbol+Math.round(v);
+    return '<text x="'+(PL-4)+'" y="'+(PT+IH-f*IH+4).toFixed(1)+'" text-anchor="end" font-size="9" fill="var(--text3)" font-family="monospace">'+lbl+'</text>';
   }).join('');
+
+  const xLabels = [0,3,6,9,11].map(i =>
+    '<text x="'+toX(i).toFixed(1)+'" y="'+(H-4)+'" text-anchor="middle" font-size="9" fill="var(--text3)" font-family="monospace">'+months[i]+'</text>'
+  ).join('');
+
+  // Insight text
+  const lastS = sensitivity[11];
+  const lastC = controlled[11];
+  const diff = lastC > 0 ? Math.round((lastS-lastC)/lastC*100) : 0;
+  const crossover = baseCapacity > 0 ? sensitivity.findIndex((s,i) => s > capacity[i]) : -1;
+  let insight = '';
+  if (diff > 0) {
+    insight = 'At month 12, current sensitivity parameters produce +'+diff+'% higher cost — '+cx(lastS)+' vs '+cx(lastC)+'/mo without sensitivity. ';
+  }
+  if (crossover > 0) {
+    insight += 'AI cost exceeds modelled capacity value at month '+(crossover+1)+'.';
+  } else if (baseCapacity > 0) {
+    insight += 'AI operating cost remains below modelled capacity value throughout.';
+  }
+
+  el.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block;overflow:visible;">'
+    + '<line x1="'+PL+'" y1="'+PT+'" x2="'+PL+'" y2="'+(PT+IH)+'" stroke="var(--border)" stroke-width="0.5"/>'
+    + grid + yLabels + xLabels
+    + polyline(controlled, 'var(--accent2)')
+    + polyline(sensitivity, '#f87171')
+    + (baseCapacity > 0 ? polyline(capacity, 'var(--green)', '4 3') : '')
+    + '</svg>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:12px;font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:8px;">'
+    + '<span style="color:var(--accent2);">— Controlled (no sensitivity)</span>'
+    + '<span style="color:#f87171;">— With sensitivity parameters</span>'
+    + (baseCapacity > 0 ? '<span style="color:var(--green);">╌ Capacity value</span>' : '')
+    + '</div>'
+    + (insight ? '<div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:8px;line-height:1.6;">'+insight+'</div>' : '');
 }
 
 function updateSmartCTA(monthlyCost,activeTasks) {
