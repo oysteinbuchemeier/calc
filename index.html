@@ -870,12 +870,6 @@ footer a:hover{color:var(--text2)}
         <div id="variance-body"></div>
       </div>
 
-      <!-- ARCHITECTURE SENSITIVITY -->
-      <div class="panel" id="arch-sensitivity-panel" style="display:none;">
-        <div class="panel-title">Architecture sensitivity</div>
-        <p style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.5;">Shows how cost changes as retry rate, orchestration depth and context growth increase. Each parameter is evaluated in isolation against the current baseline.</p>
-        <div id="arch-sensitivity-body"></div>
-      </div>
 
             <div class="chart-panel">
         <div class="chart-panel-title">Cost over time</div>
@@ -983,6 +977,18 @@ footer a:hover{color:var(--text2)}
       <div style="display:flex;justify-content:space-between;align-items:center;" id="m-cache-row">
         <span style="font-size:12px;color:var(--text3);">Cache</span>
         <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-cache-label">off</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;" id="m-retry-row">
+        <span style="font-size:12px;color:var(--text3);">Retry rate</span>
+        <span style="font-size:12px;font-family:var(--mono);" id="m-retry-label">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;" id="m-orch-row">
+        <span style="font-size:12px;color:var(--text3);">Orchestration depth</span>
+        <span style="font-size:12px;font-family:var(--mono);" id="m-orch-label">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;" id="m-ctx-row">
+        <span style="font-size:12px;color:var(--text3);">Context growth</span>
+        <span style="font-size:12px;font-family:var(--mono);" id="m-ctx-label">—</span>
       </div>
     </div>
 
@@ -1092,7 +1098,7 @@ function goToStep(n) {
     document.getElementById('step-num-'+i).textContent = i<n ? '✓' : i;
   });
   if (n===2) { updateHybridRouting(); }
-  if (n===3) { updateConclusion(); updateROI(); updateSavings(); updateChart(); updateBridge(); updateVariance(); updateSystemSummary(); updateInterpretation(); updateTopDrivers(); updateArchSensitivity(); updateScenarioPanel(); }
+  if (n===3) { updateConclusion(); updateROI(); updateSavings(); updateChart(); updateBridge(); updateVariance(); updateSystemSummary(); updateInterpretation(); updateTopDrivers(); updateScenarioPanel(); }
   updateConfigSummary();
   window.scrollTo({top:0, behavior:'smooth'});
 }
@@ -1343,7 +1349,7 @@ function setSensitivity(key, val, badgeId, formatter) {
   sel[key] = val;
   const badge = document.getElementById(badgeId);
   if (badge) badge.textContent = formatter(val);
-  update(); updateCompare(); updateArchSensitivity();
+  update(); updateCompare();
 }
 
 function setCacheLevel(val) {
@@ -2669,9 +2675,80 @@ function update() {
   const daysLabel = document.getElementById('m-days-label');
   if (daysLabel) daysLabel.textContent = sel.days;
   const batchStatusEl = document.getElementById('m-batch-label');
-  if (batchStatusEl) { batchStatusEl.textContent = sel.batch ? 'on' : 'off'; batchStatusEl.style.color = sel.batch ? 'var(--green)' : 'var(--text3)'; }
   const cacheStatusEl = document.getElementById('m-cache-label');
-  if (cacheStatusEl) { cacheStatusEl.textContent = sel.cachePct > 0 ? sel.cachePct+'%' : 'off'; cacheStatusEl.style.color = sel.cachePct > 0 ? 'var(--green)' : 'var(--text3)'; }
+  const retryLabelEl = document.getElementById('m-retry-label');
+  const orchLabelEl = document.getElementById('m-orch-label');
+  const ctxLabelEl = document.getElementById('m-ctx-label');
+
+  if (model) {
+    function calcBase(batch, cache, retry, orch, ctx) {
+      return TASKS.reduce((s,t) => {
+        const r=taskRuns[t.id]||0; if(!r) return s;
+        return s+calcCost(t,model,sel.ctx,batch,cache,retry,orch,ctx).runCost*r*sel.days;
+      },0);
+    }
+    const pureBase = calcBase(false,0,0,1,1);
+
+    // Batch
+    if (batchStatusEl) {
+      if (sel.batch) {
+        const saving = pureBase - calcBase(true,0,0,1,1);
+        batchStatusEl.textContent = 'on  −'+cx(Math.abs(saving));
+        batchStatusEl.style.color = 'var(--green)';
+      } else {
+        batchStatusEl.textContent = 'off';
+        batchStatusEl.style.color = 'var(--text3)';
+      }
+    }
+
+    // Cache
+    if (cacheStatusEl) {
+      if (sel.cachePct > 0) {
+        const saving = pureBase - calcBase(false,sel.cachePct,0,1,1);
+        cacheStatusEl.textContent = sel.cachePct+'%  −'+cx(Math.abs(saving));
+        cacheStatusEl.style.color = 'var(--green)';
+      } else {
+        cacheStatusEl.textContent = 'off';
+        cacheStatusEl.style.color = 'var(--text3)';
+      }
+    }
+
+    // Retry
+    if (retryLabelEl) {
+      if ((sel.retryRate||0) > 0) {
+        const add = calcBase(false,0,sel.retryRate,1,1) - pureBase;
+        retryLabelEl.textContent = Math.round(sel.retryRate*100)+'%  +'+cx(add);
+        retryLabelEl.style.color = '#f87171';
+      } else {
+        retryLabelEl.textContent = 'off';
+        retryLabelEl.style.color = 'var(--text3)';
+      }
+    }
+
+    // Orchestration
+    if (orchLabelEl) {
+      if ((sel.orchDepth||1) > 1) {
+        const add = calcBase(false,0,0,sel.orchDepth,1) - pureBase;
+        orchLabelEl.textContent = sel.orchDepth+'×  +'+cx(add);
+        orchLabelEl.style.color = '#f87171';
+      } else {
+        orchLabelEl.textContent = '1×';
+        orchLabelEl.style.color = 'var(--text3)';
+      }
+    }
+
+    // Context growth
+    if (ctxLabelEl) {
+      if ((sel.ctxGrowth||1) > 1) {
+        const add = calcBase(false,0,0,1,sel.ctxGrowth) - pureBase;
+        ctxLabelEl.textContent = sel.ctxGrowth+'×  +'+cx(add);
+        ctxLabelEl.style.color = '#f87171';
+      } else {
+        ctxLabelEl.textContent = '1×';
+        ctxLabelEl.style.color = 'var(--text3)';
+      }
+    }
+  }
   document.getElementById('m-run').textContent=tRuns>0?cx(daily/tRuns):'—';
   document.getElementById('m-daily').textContent=tRuns>0?cx(daily):'—';
   const tt=tIn+tOut, inPct=tt>0?Math.round(tIn/tt*100):0;
@@ -2717,7 +2794,7 @@ function update() {
   updateSystemSummary();
   updateInterpretation();
   updateTopDrivers();
-  updateArchSensitivity();
+ 
 }
 
 function updateCompare() {
