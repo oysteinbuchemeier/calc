@@ -2397,7 +2397,7 @@ function updateChart() {
   const active = TASKS.filter(t => (taskRuns[t.id]||0) > 0);
 
   if (!active.length || !model) {
-    el.innerHTML = '<div style="width:100%;text-align:center;font-size:12px;color:var(--text3);padding:2rem 0;font-family:var(--mono);">Add tasks and select a model to see the projection. (active:'+active.length+' model:'+(sel.model||'none')+')</div>';
+    el.innerHTML = '<div style="width:100%;text-align:center;font-size:12px;color:var(--text3);padding:2rem 0;font-family:var(--mono);">Add tasks and select a model to see the projection.</div>';
     return;
   }
 
@@ -2414,10 +2414,17 @@ function updateChart() {
   // Controlled: baseline + volume growth only
   const controlled = Array.from({length:N}, (_,i) => baseMonthly * Math.pow(1+growthPct, i));
 
-  // With sensitivity: baseline + volume + user sensitivity on agent portion
-  const sensitivityMult = (sel.orchDepth||1) * (sel.ctxGrowth||1) * (1 + (sel.retryRate||0));
+  // With sensitivity: exponential compounding — each month adds orchestration/context complexity
+  const orch = sel.orchDepth||1;
+  const ctx = sel.ctxGrowth||1;
+  const retry = sel.retryRate||0;
   const sensitivity = Array.from({length:N}, (_,i) => {
     const vol = Math.pow(1+growthPct, i);
+    const exponent = 1 + i*0.1; // complexity compounds monthly
+    const monthlyOrch = Math.pow(orch, exponent);
+    const monthlyCtx = Math.pow(ctx, exponent);
+    const monthlyRetry = 1 + retry * (1 + i*0.1);
+    const sensitivityMult = monthlyOrch * monthlyCtx * monthlyRetry;
     const agentCost = baseMonthly * agentShare * sensitivityMult * vol;
     const everydayCost = baseMonthly * (1-agentShare) * vol;
     return agentCost + everydayCost;
