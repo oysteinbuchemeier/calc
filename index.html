@@ -2404,12 +2404,12 @@ function updateChart() {
   const N = 12;
   const months = ['Now','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'];
 
+  // Baseline: no sensitivity, with batch/cache
+  const baseMonthly = active.reduce((s,t) => s + calcCost(t, model, sel.ctx, sel.batch, sel.cachePct, 0, 1, 1).runCost * taskRuns[t.id] * sel.days, 0);
+
   // Cost-weighted agent share — agent tasks are much more expensive per run
   const agentCostTotal = active.filter(t=>t.id.startsWith('agent')).reduce((s,t) => s + calcCost(t, model, sel.ctx, sel.batch, sel.cachePct, 0, 1, 1).runCost * taskRuns[t.id] * sel.days, 0);
   const agentShare = baseMonthly > 0 ? agentCostTotal / baseMonthly : 0;
-
-  // Baseline: no sensitivity, with batch/cache
-  const baseMonthly = active.reduce((s,t) => s + calcCost(t, model, sel.ctx, sel.batch, sel.cachePct, 0, 1, 1).runCost * taskRuns[t.id] * sel.days, 0);
 
   // Controlled: baseline + volume growth only
   const controlled = Array.from({length:N}, (_,i) => baseMonthly * Math.pow(1+growthPct, i));
