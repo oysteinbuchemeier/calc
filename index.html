@@ -2420,7 +2420,7 @@ function updateChart() {
   const retry = sel.retryRate||0;
   const sensitivity = Array.from({length:N}, (_,i) => {
     const vol = Math.pow(1+growthPct, i);
-    const exponent = 1 + i*0.1; // complexity compounds monthly
+    const exponent = 1 + i*0.02; // complexity compounds monthly
     const monthlyOrch = Math.pow(orch, exponent);
     const monthlyCtx = Math.pow(ctx, exponent);
     const monthlyRetry = 1 + retry * (1 + i*0.1);
