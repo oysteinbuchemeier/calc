@@ -947,6 +947,7 @@ footer a:hover{color:var(--text2)}
         <span style="font-size:12px;color:var(--text3);font-family:var(--mono);" id="m-per-run"></span>
         <span style="font-size:12px;color:var(--text3);font-family:var(--mono);" id="m-per-day"></span>
       </div>
+      <div style="margin-top:6px;font-size:11px;font-family:var(--mono);color:var(--text3);" id="m-baseline-label"></div>
     </div>
 
     <!-- LIVE SNAPSHOT: CONFIG -->
@@ -1322,7 +1323,7 @@ function setSensitivity(key, val, badgeId, formatter) {
       function calcWith(retry, orch, ctx) {
         return TASKS.reduce((s,t) => {
           const r = taskRuns[t.id]||0; if(!r) return s;
-          return s + calcCost(t, model, sel.ctx, sel.batch, sel.cachePct, retry, orch, ctx).runCost * r * sel.days;
+          return s + calcCost(t, model, sel.ctx, false, 0, retry, orch, ctx).runCost * r * sel.days;
         }, 0);
       }
       const baseline = calcWith(0, 1, 1);
@@ -2164,7 +2165,7 @@ function updateArchSensitivity() {
   const model = MODELS.find(m=>m.id===sel.model);
 
   function calcWith(retryRate, orchDepth, ctxGrowth) {
-    return active.reduce((s,t) => s + calcCost(t, model, sel.ctx, sel.batch, sel.cachePct, retryRate, orchDepth, ctxGrowth).runCost * taskRuns[t.id] * sel.days, 0);
+    return active.reduce((s,t) => s + calcCost(t, model, sel.ctx, false, 0, retryRate, orchDepth, ctxGrowth).runCost * taskRuns[t.id] * sel.days, 0);
   }
 
   const baseline = calcWith(0, 1, 1);
@@ -2628,6 +2629,20 @@ function update() {
   const perDayEl = document.getElementById('m-per-day');
   if (perRunEl) perRunEl.textContent = tRuns>0 ? cx(monthly/(tRuns*sel.days))+' / run' : '';
   if (perDayEl) perDayEl.textContent = tRuns>0 ? cx(monthly/sel.days)+' / day' : '';
+  // Baseline without sensitivity
+  const baselineEl = document.getElementById('m-baseline-label');
+  if (baselineEl) {
+    const hasSensitivity = (sel.retryRate||0) > 0 || (sel.orchDepth||1) > 1 || (sel.ctxGrowth||1) > 1;
+    if (hasSensitivity) {
+      const baselineMonthly = TASKS.reduce((s,t) => {
+        const r=taskRuns[t.id]||0; if(!r) return s;
+        return s+calcCost(t,model,sel.ctx,false,0,0,1,1).runCost*r*sel.days;
+      },0);
+      baselineEl.textContent = 'Baseline without sensitivity: ' + cx(baselineMonthly);
+    } else {
+      baselineEl.textContent = '';
+    }
+  }
   const modelLabel = document.getElementById('m-model-label');
   if (modelLabel) modelLabel.textContent = model.full;
   const runsDay = document.getElementById('m-runs-day');
