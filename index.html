@@ -1316,27 +1316,29 @@ function setSensitivity(key, val, badgeId, formatter) {
   const impactLabels = {retryRate:'retry-impact-label', orchDepth:'orch-impact-label', ctxGrowth:'ctx-impact-label'};
   const labelEl = document.getElementById(impactLabels[key]);
 
-  if (labelEl) {
-    // Save all current values before any changes
-    const origRetry = sel.retryRate, origOrch = sel.orchDepth, origCtx = sel.ctxGrowth;
-    // Baseline: no sensitivity
-    sel.retryRate = 0; sel.orchDepth = 1; sel.ctxGrowth = 1;
-    const baseline = totalMonthly();
-    // With only this parameter at new value
-    sel[key] = val;
-    const withThis = totalMonthly();
-    // Restore all original values
-    sel.retryRate = origRetry; sel.orchDepth = origOrch; sel.ctxGrowth = origCtx;
-    const diff = withThis - baseline;
-    if (baseline > 0 && Math.abs(diff) > 0.001) {
-      labelEl.textContent = diff > 0 ? `+${cx(diff)}/mo` : `${cx(diff)}/mo`;
-      labelEl.style.color = diff > 0 ? '#f87171' : 'var(--green)';
-    } else {
-      labelEl.textContent = '';
+  if (labelEl && sel.model) {
+    const model = MODELS.find(m=>m.id===sel.model);
+    if (model) {
+      function calcWith(retry, orch, ctx) {
+        return TASKS.reduce((s,t) => {
+          const r = taskRuns[t.id]||0; if(!r) return s;
+          return s + calcCost(t, model, sel.ctx, sel.batch, sel.cachePct, retry, orch, ctx).runCost * r * sel.days;
+        }, 0);
+      }
+      const baseline = calcWith(0, 1, 1);
+      const withThis = key==='retryRate' ? calcWith(val, 1, 1) : key==='orchDepth' ? calcWith(0, val, 1) : calcWith(0, 1, val);
+      const diff = withThis - baseline;
+      if (baseline > 0 && Math.abs(diff) > 0.001) {
+        labelEl.textContent = diff > 0 ? `+${cx(diff)}/mo` : `${cx(diff)}/mo`;
+        labelEl.style.color = diff > 0 ? '#f87171' : 'var(--green)';
+      } else {
+        labelEl.textContent = '';
+      }
     }
+  } else if (labelEl) {
+    labelEl.textContent = '';
   }
 
-  // Now actually set the new value
   sel[key] = val;
   const badge = document.getElementById(badgeId);
   if (badge) badge.textContent = formatter(val);
