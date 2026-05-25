@@ -2000,116 +2000,111 @@ function printReport() {
     win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
 <title>AI Operating Cost Simulator — Büchemeier Consulting</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:10pt;color:#111;background:white;padding:2cm}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:10pt;color:#1A2332;background:white;padding:2cm;line-height:1.5}
   @page{margin:2cm;size:A4}
-  h1{font-size:18pt;color:#1A2332;margin-bottom:4pt}
-  h2{font-size:11pt;color:#1A2332;margin:0 0 8pt 0;padding-bottom:4pt;border-bottom:1px solid #eee}
-  .eyebrow{font-size:8pt;font-weight:600;color:#4a8a91;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6pt}
-  .sub{font-size:9pt;color:#555;margin-bottom:4pt}
-  .disclaimer{font-size:8pt;color:#888;font-style:italic;margin-top:4pt}
-  header{padding-bottom:0.5cm;border-bottom:3px solid #1A2332;margin-bottom:0.5cm}
-  section{margin-bottom:0.5cm;padding:0.3cm 0.4cm;border:1px solid #ddd;border-radius:4px;page-break-inside:avoid}
-  .big-val{font-size:22pt;font-weight:600;color:#1a7a5e;font-family:'DM Mono',monospace}
-  .big-sub{font-size:9pt;color:#555;margin-top:2pt;font-family:'DM Mono',monospace}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-  .card{background:#f8f8f8;border:1px solid #eee;border-radius:3px;padding:6px 10px}
-  .card-label{font-size:8pt;color:#888;margin-bottom:2px}
-  .card-val{font-size:10pt;font-weight:500;font-family:'DM Mono',monospace;color:#1A2332}
-  .card-val.green{color:#1a7a5e}
-  .card-val.teal{color:#4a8a91}
-  .task-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f0f0;font-size:9pt}
-  .task-name{color:#333}
-  .task-runs{font-family:'DM Mono',monospace;color:#4a8a91}
-  .highlight{background:#f0f9f5;border:1px solid #b2dfdb;border-radius:4px;padding:10px 14px;margin-top:8px}
-  .highlight-label{font-size:9pt;color:#555;margin-bottom:4px}
-  .highlight-val{font-size:16pt;font-weight:600;color:#1a7a5e;font-family:'DM Mono',monospace}
-  .ratio-box{background:rgba(45,212,160,0.08);border:1px solid rgba(45,212,160,0.3);border-radius:4px;padding:10px 14px;margin-top:8px}
-  .ratio-val{font-size:14pt;font-weight:500;color:#1a7a5e;font-family:'DM Mono',monospace;margin-bottom:4px}
-  .ratio-label{font-size:9pt;color:#555}
-  footer{margin-top:0.5cm;padding-top:0.3cm;border-top:1px solid #ddd;font-size:7pt;color:#aaa}
+  h1{font-size:24pt;font-weight:300;color:#1A2332;margin-bottom:4pt;letter-spacing:-0.02em}
+  h2{font-size:11pt;font-weight:600;color:#1A2332;margin:0 0 10pt 0;padding-bottom:5pt;border-bottom:2px solid #1A2332}
+  .eyebrow{font-size:8pt;font-weight:600;color:#4a8a91;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6pt}
+  header{padding-bottom:0.6cm;border-bottom:1px solid #ddd;margin-bottom:0.6cm;display:flex;justify-content:space-between;align-items:flex-end}
+  .header-right{text-align:right;font-size:8pt;color:#888;font-family:monospace;line-height:1.8}
+  section{margin-bottom:0.6cm;page-break-inside:avoid}
+  .cost-hero{display:flex;align-items:baseline;gap:16px;margin:12pt 0 6pt 0}
+  .cost-big{font-size:36pt;font-weight:600;color:#1a7a5e;font-family:monospace;letter-spacing:-0.02em}
+  .cost-meta{font-size:10pt;color:#888;font-family:monospace}
+  .cost-baseline{font-size:9pt;color:#888;margin-bottom:14pt;font-family:monospace}
+  .config-table{width:100%;border-collapse:collapse;margin-bottom:4pt}
+  .config-table td{padding:5pt 8pt;border-bottom:1px solid #f0f0f0;font-size:9pt}
+  .config-table td:first-child{color:#888;width:45%}
+  .config-table td:last-child{font-family:monospace;color:#1A2332;font-weight:500}
+  .config-table tr.section-head td{color:#4a8a91;font-weight:600;font-size:8pt;text-transform:uppercase;letter-spacing:0.06em;padding-top:10pt;border-bottom:none;background:none}
+  .positive{color:#e53e3e}
+  .negative{color:#1a7a5e}
+  .capacity-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8pt}
+  .capacity-card{padding:10px 14px;background:#f8fffe;border:1px solid #b2dfdb;border-radius:4px}
+  .capacity-card-label{font-size:8pt;color:#888;margin-bottom:3px}
+  .capacity-card-val{font-size:13pt;font-weight:600;color:#1a7a5e;font-family:monospace}
+  .ratio-statement{margin-top:10pt;padding:10pt 14pt;background:#f0f9f5;border-left:3px solid #1a7a5e;font-size:11pt;font-family:monospace;color:#1a7a5e}
   .driver-row{padding:6px 0;border-bottom:1px solid #f0f0f0}
   .driver-top{display:flex;justify-content:space-between;font-size:9pt;margin-bottom:3px}
   .driver-bar-track{height:3px;background:#eee;border-radius:2px;flex:1;margin:0 8px}
   .driver-bar{height:100%;background:#4a8a91;border-radius:2px}
-  .driver-tokens{font-size:8pt;color:#aaa;font-family:'DM Mono',monospace}
+  .driver-tokens{font-size:8pt;color:#aaa;font-family:monospace}
   .var-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:9pt}
+  .scenario-table{width:100%;border-collapse:collapse;margin-bottom:10pt}
+  .scenario-table th{text-align:left;padding:5pt 8pt;font-size:8pt;font-weight:600;color:#4a8a91;border-bottom:2px solid #ddd}
+  .scenario-table td{padding:5pt 8pt;border-bottom:1px solid #f0f0f0;font-size:9pt;font-family:monospace}
+  .scenario-table td:first-child{font-family:-apple-system,sans-serif;color:#888;font-size:8pt}
+  .diff-box{padding:12pt 14pt;background:#f0f9f5;border:1px solid #b2dfdb;border-radius:4px;margin:8pt 0}
+  .diff-amount{font-size:18pt;font-weight:600;font-family:monospace;color:#1a7a5e}
+  footer{margin-top:0.8cm;padding-top:0.4cm;border-top:1px solid #eee;font-size:7pt;color:#aaa;display:flex;justify-content:space-between}
 </style>
 </head><body>
+
 <header>
-  <div class="eyebrow">AI Operating Cost Simulator</div>
-  <h1>Simulate AI operating cost at scale.</h1>
-  <p class="sub">Simplified inference-based simulation using configurable assumptions.</p>
+  <div>
+    <div class="eyebrow">AI Operating Cost Simulator</div>
+    <h1>Büchemeier Consulting</h1>
+  </div>
+  <div class="header-right">
+    www.buchemeier.no<br>
+    ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}<br>
+    Inference costs only — designed to explore, not predict
+  </div>
 </header>
 
 <section>
   <h2>Monthly cost estimate</h2>
-  <div class="big-val">${cx(monthly)}</div>
-  <div class="big-sub">${cx(monthly/sel.days)} / day &nbsp;·&nbsp; ${cx(totalRuns>0?monthly/(totalRuns*sel.days):0)} / run</div>
-  <div class="grid2" style="margin-top:12px">
-    <div class="card"><div class="card-label">Model</div><div class="card-val teal">${model?model.full:'Not selected'}</div></div>
-    <div class="card"><div class="card-label">Active AI users</div><div class="card-val">${maxUsers||'—'}</div></div>
-    <div class="card"><div class="card-label">Total runs / day</div><div class="card-val">${totalRuns.toLocaleString()}</div></div>
-    <div class="card"><div class="card-label">Simple workflows / day</div><div class="card-val">${taskRuns['agent-simple']||'—'}</div></div>
-    <div class="card"><div class="card-label">Complex workflows / day</div><div class="card-val">${taskRuns['agent-complex']||'—'}</div></div>
-    <div class="card"><div class="card-label">Working days</div><div class="card-val">${sel.days}</div></div>
-    <div class="card"><div class="card-label">Batch</div><div class="card-val">${sel.batch ? 'On &nbsp;−'+cx(pureBase-calcBase(true,0,0,1,1)) : 'Off'}</div></div>
-    <div class="card"><div class="card-label">Cache</div><div class="card-val">${sel.cachePct>0 ? sel.cachePct+'% &nbsp;−'+cx(pureBase-calcBase(false,sel.cachePct,0,1,1)) : 'Off'}</div></div>
-    <div class="card"><div class="card-label">Retry rate</div><div class="card-val">${(sel.retryRate||0)>0 ? Math.round(sel.retryRate*100)+'% &nbsp;+'+cx(calcBase(false,0,sel.retryRate,1,1)-pureBase) : '0%'}</div></div>
-    <div class="card"><div class="card-label">Orchestration depth</div><div class="card-val">${(sel.orchDepth||1)>1 ? sel.orchDepth+'× &nbsp;+'+cx(calcBase(false,0,0,sel.orchDepth,1)-pureBase) : '1×'}</div></div>
-    <div class="card"><div class="card-label">Context growth</div><div class="card-val">${(sel.ctxGrowth||1)>1 ? sel.ctxGrowth+'× &nbsp;+'+cx(calcBase(false,0,0,1,sel.ctxGrowth)-pureBase) : '1×'}</div></div>
+  <div class="cost-hero">
+    <div class="cost-big">${cx(monthly)}</div>
+    <div class="cost-meta">${cx(monthly/sel.days)} / day &nbsp;·&nbsp; ${cx(totalRuns>0?monthly/(totalRuns*sel.days):0)} / run</div>
   </div>
-</section>
+  ${pureBase !== monthly ? `<div class="cost-baseline">Baseline without optimisation or sensitivity: ${cx(pureBase)}/mo</div>` : ''}
 
-<section>
-  <h2>Configured workflows</h2>
-  ${active.map(t=>{
-    const vol = taskVol[t.id]||{employees:0,usesPerDay:1};
-    const isAgent = t.id.startsWith('agent');
-    const isTech = ['code','sql','rag','apidoc'].includes(t.id);
-    const label = isAgent ? `${vol.employees} triggers × ${vol.usesPerDay}/day` : isTech ? `${vol.employees} devs × ${vol.usesPerDay}/day` : `${vol.employees} users × ${vol.usesPerDay}/day`;
-    return `<div class="task-row"><span class="task-name">${t.name}</span><span class="task-runs">${label} = ${taskRuns[t.id]}/day</span></div>`;
-  }).join('')}
-  <div style="margin-top:6px;font-size:8pt;color:#888">Architecture: ${archClass}</div>
+  <table class="config-table">
+    <tr class="section-head"><td colspan="2">Model & volume</td></tr>
+    <tr><td>Model</td><td style="color:#4a8a91">${model?model.full:'Not selected'}</td></tr>
+    <tr><td>Organisation size</td><td>${activeSize ? SIZE_PRESETS[activeSize].label : '—'}</td></tr>
+    <tr><td>Active AI users</td><td>${maxUsers||'—'}</td></tr>
+    <tr><td>Total runs / day</td><td>${totalRuns.toLocaleString()}</td></tr>
+    <tr><td>Simple workflows / day</td><td>${taskRuns['agent-simple']||'—'}</td></tr>
+    <tr><td>Complex workflows / day</td><td>${taskRuns['agent-complex']||'—'}</td></tr>
+    <tr><td>Working days / month</td><td>${sel.days}</td></tr>
+    <tr class="section-head"><td colspan="2">Optimisations</td></tr>
+    <tr><td>Batch processing</td><td class="${sel.batch?'negative':''}">${sel.batch ? 'On &nbsp;−'+cx(pureBase-calcBase(true,0,0,1,1)) : 'Off'}</td></tr>
+    <tr><td>Prompt caching</td><td class="${sel.cachePct>0?'negative':''}">${sel.cachePct>0 ? sel.cachePct+'% &nbsp;−'+cx(pureBase-calcBase(false,sel.cachePct,0,1,1)) : 'Off'}</td></tr>
+    <tr class="section-head"><td colspan="2">Sensitivity parameters</td></tr>
+    <tr><td>Retry rate</td><td class="${(sel.retryRate||0)>0?'positive':''}">${(sel.retryRate||0)>0 ? Math.round(sel.retryRate*100)+'% &nbsp;+'+cx(calcBase(false,0,sel.retryRate,1,1)-pureBase) : '0%'}</td></tr>
+    <tr><td>Orchestration depth</td><td class="${(sel.orchDepth||1)>1?'positive':''}">${(sel.orchDepth||1)>1 ? sel.orchDepth+'× &nbsp;+'+cx(calcBase(false,0,0,sel.orchDepth,1)-pureBase) : '1×'}</td></tr>
+    <tr><td>Context growth</td><td class="${(sel.ctxGrowth||1)>1?'positive':''}">${(sel.ctxGrowth||1)>1 ? sel.ctxGrowth+'× &nbsp;+'+cx(calcBase(false,0,0,1,sel.ctxGrowth)-pureBase) : '1×'}</td></tr>
+  </table>
 </section>
-
-${annualCapacity>0?`<section>
-  <h2>Estimated annual capacity impact</h2>
-  <div class="highlight">
-    <div class="highlight-val green">${cx(annualCapacity)}</div>
-  </div>
-  <div class="grid2">
-    <div class="card"><div class="card-label">Equivalent operational capacity</div><div class="card-val green">~${fteLow}–${fteHigh} FTE</div></div>
-    <div class="card"><div class="card-label">Efficiency assumption</div><div class="card-val">${pct}%</div></div>
-  </div>
-  <div style="margin-top:8px;font-size:8pt;color:#888;line-height:1.6;">Assumes ${pct}% efficiency improvement across ${maxUsers} employees at ${cx(annualCostPerPerson)}/yr fully-loaded cost. Excludes implementation cost, integration work, governance, process redesign and organisational adoption effort.</div>
-</section>
-
-<section>
-  <h2>Capacity-to-cost ratio</h2>
-  <div class="grid2">
-    <div class="card"><div class="card-label">Modelled AI operating cost</div><div class="card-val">${cx(monthly)}/mo</div></div>
-    <div class="card"><div class="card-label">Modelled annual capacity value</div><div class="card-val green">${cx(annualCapacity)}/yr</div></div>
-    <div class="card"><div class="card-label">AI cost as % of capacity value</div><div class="card-val">${aiAsPct}%</div></div>
-    <div class="card"><div class="card-label">Capacity multiplier</div><div class="card-val green">~${ratio}×</div></div>
-  </div>
-  <div class="ratio-box">
-    <div class="ratio-val">1 ${currency.symbol} AI cost → ~${ratio} ${currency.symbol} capacity value</div>
-    <div class="ratio-label">AI operating cost represents ${aiAsPct}% of modelled annual capacity value</div>
-  </div>
-</section>`:''}
 
 ${driversHTML?`<section>
   <h2>Top cost drivers</h2>
   ${driversHTML}
 </section>`:''}
 
+${annualCapacity>0?`<section>
+  <h2>Capacity impact</h2>
+  <div class="capacity-grid">
+    <div class="capacity-card">
+      <div class="capacity-card-label">Estimated annual capacity impact</div>
+      <div class="capacity-card-val">${cx(annualCapacity)}</div>
+    </div>
+    <div class="capacity-card">
+      <div class="capacity-card-label">Equivalent operational capacity</div>
+      <div class="capacity-card-val">~${fteLow}–${fteHigh} FTE</div>
+    </div>
+  </div>
+  ${ratio?`<div class="ratio-statement">1 ${currency.symbol} AI cost → ~${ratio} ${currency.symbol} capacity value</div>`:''}
+  <div style="margin-top:8pt;font-size:8pt;color:#888;line-height:1.6;">Assumes ${pct}% efficiency improvement across ${maxUsers} employees at ${cx(annualCostPerPerson)}/yr fully-loaded cost. Excludes implementation cost, integration work, governance and organisational adoption effort.</div>
+</section>`:''}
+
 ${varHTML?`<section>
   <h2>Cost range — optimised to unoptimised</h2>
   ${varHTML}
 </section>`:''}
-
 ${(()=>{
   const a = localStorage.getItem('scenarioA') ? JSON.parse(localStorage.getItem('scenarioA')) : null;
   const b = localStorage.getItem('scenarioB') ? JSON.parse(localStorage.getItem('scenarioB')) : null;
