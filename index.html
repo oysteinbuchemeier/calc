@@ -477,6 +477,10 @@ footer a:hover{color:var(--text2)}
   <div class="hero-eyebrow">AI Operating Cost Simulator</div>
   <h1>Simulate AI operating cost at scale.</h1>
   <p style="font-size:12px;color:var(--text3);margin-top:10px;font-family:var(--mono);">Simplified inference-based simulation<br>using configurable assumptions.</p>
+  <p style="font-size:12px;color:var(--text3);margin-top:8px;font-family:var(--mono);">Simulation methodology based on <a href="AI_as_Operational_Infrastructure.pdf" target="_blank" style="color:var(--accent2);text-decoration:none;">AI as Operational Infrastructure →</a></p>
+  <div style="margin-top:16px;">
+    <button onclick="loadExampleComparison()" style="background:rgba(108,164,171,0.10);border:1px solid var(--accent2);border-radius:var(--radius);padding:10px 18px;font-size:13px;font-family:var(--mono);color:var(--accent2);cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(108,164,171,0.2)'" onmouseout="this.style.background='rgba(108,164,171,0.10)'">⚡ Try a live example — same workload, different architecture →</button>
+  </div>
 </div>
 
 <div class="steps-wrap">
@@ -911,9 +915,6 @@ footer a:hover{color:var(--text2)}
           <span id="scenario-status-A" style="flex:1;font-size:11px;font-family:var(--mono);color:var(--text3);padding:2px 0;"></span>
           <span id="scenario-status-B" style="flex:1;font-size:11px;font-family:var(--mono);color:var(--text3);padding:2px 0;"></span>
           <button onclick="localStorage.removeItem('scenarioA');localStorage.removeItem('scenarioB');updateScenarioPanel()" style="background:none;border:1px solid var(--border);border-radius:var(--radius);padding:4px 8px;font-size:11px;font-family:var(--mono);color:var(--text3);cursor:pointer;white-space:nowrap;">✕ Clear</button>
-        </div>
-        <div style="margin-top:8px;">
-          <button onclick="loadExampleComparison()" style="width:100%;background:rgba(108,164,171,0.08);border:1px dashed var(--accent2);border-radius:var(--radius);padding:8px 12px;font-size:12px;font-family:var(--mono);color:var(--accent2);cursor:pointer;transition:all 0.12s;" onmouseover="this.style.background='rgba(108,164,171,0.15)'" onmouseout="this.style.background='rgba(108,164,171,0.08)'">⚡ Load example — same workload, different architecture</button>
         </div>
         <div id="scenario-compare-body"></div>
       </div>
@@ -3119,37 +3120,50 @@ function updateScenarioPanel() {
 }
 
 function loadExampleComparison() {
-  // Scenario A — optimised: GPT-5.5, 100–500, all maturities, batch+cache, no sensitivity
-  const modelName = 'OpenAI GPT-5.5';
-  const sizeLabel = '100–500 people';
-  const mat = 'Assistive + Workflow + Agentic';
-
-  // Calculate monthly for A: GPT-5.5, batch on, cache 45%, no sensitivity
   const modelA = MODELS.find(m=>m.id==='gpt55');
-  if (!modelA) { alert('GPT-5.5 not available'); return; }
+  if (!modelA) return;
 
-  // Set up example tasks for 100–500 + all maturities
+  // Set up example tasks: 100–500 + all maturities
   const exTasks = {};
   TASKS.forEach(t => {
     if (t.id === 'agent-complex') exTasks[t.id] = 600;
     else if (t.id === 'agent-simple') exTasks[t.id] = 300;
-    else if (!['code','sql','rag','apidoc'].includes(t.id)) exTasks[t.id] = 200 * 6; // 200 users × 6 uses/day
+    else if (!['code','sql','rag','apidoc'].includes(t.id)) exTasks[t.id] = 200 * 6;
     else exTasks[t.id] = 0;
   });
 
-  function calcMonthly(model, batch, cachePct, retry, orch, ctx) {
-    return TASKS.reduce((s,t) => {
-      const r = exTasks[t.id]||0; if(!r) return s;
-      return s + calcCost(t, model, 1.0, batch, cachePct, retry, orch, ctx).runCost * r * 22;
-    }, 0);
-  }
+  // Set active configuration to Scenario B (uncontrolled)
+  TASKS.forEach(t => {
+    taskRuns[t.id] = exTasks[t.id]||0;
+    taskVol[t.id] = { employees: ['agent-complex','agent-simple'].includes(t.id) ? exTasks[t.id] : 200, usesPerDay: 6 };
+  });
 
-  const monthlyA = calcMonthly(modelA, true,  45, 0,    1, 1);
-  const monthlyB = calcMonthly(modelA, false,  0, 0.20, 2, 2);
+  // Set size and maturity
+  activeSize = 'large';
+  activeMaturities = new Set(['assistive','workflow','agentic']);
+  document.querySelectorAll('.preset-btn').forEach(b => {
+    const id = b.dataset.size || b.dataset.mat;
+    b.classList.toggle('active', activeSize === b.dataset.size || activeMaturities.has(b.dataset.mat));
+  });
 
-  // Auto-generate labels matching saveScenario logic
-  function makeLabel(model, batch, cachePct, retry, orch, ctx) {
-    const parts = [model.name];
+  // Set model and Scenario B settings
+  sel.model = 'gpt55';
+  sel.batch = false;
+  sel.cachePct = 0;
+  sel.retryRate = 0.20;
+  sel.orchDepth = 2;
+  sel.ctxGrowth = 2;
+
+  // Update UI sliders
+  const sr = document.getElementById('sl-retry'); if(sr) sr.value = 20;
+  const so = document.getElementById('sl-orch');  if(so) so.value = 2;
+  const sg = document.getElementById('sl-ctx-growth'); if(sg) sg.value = 2;
+  document.getElementById('retry-badge').textContent = '20%';
+  document.getElementById('orch-badge').textContent = '2×';
+  document.getElementById('ctx-badge').textContent = '2×';
+
+  // Auto-generate labels
+  function makeLabel(batch, cachePct, retry, orch, ctx) {
     const opts = [];
     if (batch) opts.push('batch');
     if (cachePct > 0) opts.push(cachePct + '% cache');
@@ -3157,40 +3171,29 @@ function loadExampleComparison() {
     if (orch > 1) opts.push('orch ' + orch + '×');
     if (ctx > 1) opts.push('ctx ' + ctx + '×');
     if (opts.length === 0) opts.push('no optimisation');
-    return parts.concat(opts).join(' — ');
+    return modelA.name + ' — ' + opts.join(' — ');
   }
 
-  const scenarioA = {
-    label: makeLabel(modelA, true, 45, 0, 1, 1),
-    model: modelName, monthly: monthlyA, monthlyFmt: cx(monthlyA),
-    tasks: 10, totalRuns: 10500, users: 200,
-    sizeKey: 'large', sizeLabel, mat,
-    complexRuns: 600, simpleRuns: 300,
-    batch: true, cachePct: 45,
-    retryRate: 0, orchDepth: 1, ctxGrowth: 1,
-    routing: 'Single-model',
-  };
+  function calcMonthly(batch, cachePct, retry, orch, ctx) {
+    return TASKS.reduce((s,t) => {
+      const r = exTasks[t.id]||0; if(!r) return s;
+      return s + calcCost(t, modelA, 1.0, batch, cachePct, retry, orch, ctx).runCost * r * 22;
+    }, 0);
+  }
 
-  const scenarioB = {
-    label: makeLabel(modelA, false, 0, 0.20, 2, 2),
-    model: modelName, monthly: monthlyB, monthlyFmt: cx(monthlyB),
-    tasks: 10, totalRuns: 10500, users: 200,
-    sizeKey: 'large', sizeLabel, mat,
-    complexRuns: 600, simpleRuns: 300,
-    batch: false, cachePct: 0,
-    retryRate: 0.20, orchDepth: 2, ctxGrowth: 2,
-    routing: 'Single-model',
-  };
+  const monthlyA = calcMonthly(true, 45, 0, 1, 1);
+  const monthlyB = calcMonthly(false, 0, 0.20, 2, 2);
+  const sizeLabel = SIZE_PRESETS['large'].label;
+  const mat = 'Assistive + Workflow + Agentic';
+  const totalRuns = Object.values(exTasks).reduce((s,v)=>s+v,0);
 
-  localStorage.setItem('scenarioA', JSON.stringify(scenarioA));
-  localStorage.setItem('scenarioB', JSON.stringify(scenarioB));
+  const base = { model: modelA.name, tasks: 10, totalRuns, users: 200, sizeKey: 'large', sizeLabel, mat, complexRuns: 600, simpleRuns: 300, routing: 'Single-model' };
 
-  const statusA = document.getElementById('scenario-status-A');
-  const statusB = document.getElementById('scenario-status-B');
-  if (statusA) statusA.textContent = '✓ Scenario A: ' + scenarioA.label;
-  if (statusB) statusB.textContent = '✓ Scenario B: ' + scenarioB.label;
+  localStorage.setItem('scenarioA', JSON.stringify({...base, label: makeLabel(true,45,0,1,1), monthly: monthlyA, monthlyFmt: cx(monthlyA), batch: true, cachePct: 45, retryRate: 0, orchDepth: 1, ctxGrowth: 1}));
+  localStorage.setItem('scenarioB', JSON.stringify({...base, label: makeLabel(false,0,0.20,2,2), monthly: monthlyB, monthlyFmt: cx(monthlyB), batch: false, cachePct: 0, retryRate: 0.20, orchDepth: 2, ctxGrowth: 2}));
 
-  updateScenarioPanel();
+  renderTasks(); renderModels(); update(); updateCompare(); updateROI(); updateModelSuitabilityNote(); updateScenarioPanel();
+  goToStep(3);
 }
 
 function shareURL() {
