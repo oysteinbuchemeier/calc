@@ -477,7 +477,6 @@ footer a:hover{color:var(--text2)}
   <div class="hero-eyebrow">AI Operating Cost Simulator</div>
   <h1>Simulate AI operating cost at scale.</h1>
   <p style="font-size:12px;color:var(--text3);margin-top:10px;font-family:var(--mono);">Simplified inference-based simulation<br>using configurable assumptions.</p>
-  <p style="font-size:12px;color:var(--text3);margin-top:8px;font-family:var(--mono);">Simulation methodology based on <a href="AI_as_Operational_Infrastructure.pdf" target="_blank" style="color:var(--accent2);text-decoration:none;">AI as Operational Infrastructure →</a></p>
   <div style="margin-top:16px;">
     <button onclick="loadExampleComparison()" style="background:rgba(108,164,171,0.10);border:1px solid var(--accent2);border-radius:var(--radius);padding:10px 18px;font-size:13px;font-family:var(--mono);color:var(--accent2);cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(108,164,171,0.2)'" onmouseout="this.style.background='rgba(108,164,171,0.10)'">⚡ Try a live example — same workload, different architecture →</button>
   </div>
@@ -912,8 +911,8 @@ footer a:hover{color:var(--text2)}
           <button onclick="saveScenario('B')" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-size:12px;font-family:var(--mono);color:var(--text2);cursor:pointer;transition:all 0.12s;" onmouseover="this.style.borderColor='var(--accent2)'" onmouseout="this.style.borderColor='var(--border)'">Save current as Scenario B <span id="scenario-saved-B" style="color:var(--green)"></span></button>
         </div>
         <div style="display:flex;gap:8px;margin-top:6px;align-items:center;">
-          <span id="scenario-status-A" style="flex:1;font-size:11px;font-family:var(--mono);color:var(--text3);padding:2px 0;"></span>
-          <span id="scenario-status-B" style="flex:1;font-size:11px;font-family:var(--mono);color:var(--text3);padding:2px 0;"></span>
+          <span style="flex:1;font-size:11px;font-family:var(--mono);text-align:center;" id="scenario-status-A"></span>
+          <span style="flex:1;font-size:11px;font-family:var(--mono);text-align:center;" id="scenario-status-B"></span>
           <button onclick="localStorage.removeItem('scenarioA');localStorage.removeItem('scenarioB');updateScenarioPanel()" style="background:none;border:1px solid var(--border);border-radius:var(--radius);padding:4px 8px;font-size:11px;font-family:var(--mono);color:var(--text3);cursor:pointer;white-space:nowrap;">✕ Clear</button>
         </div>
         <div id="scenario-compare-body"></div>
@@ -2994,7 +2993,7 @@ function saveScenario(slot) {
   const el = document.getElementById('scenario-saved-'+slot);
   if (el) { el.textContent = ' ✓'; setTimeout(()=>el.textContent='', 2500); }
   const statusEl = document.getElementById('scenario-status-'+slot);
-  if (statusEl) statusEl.textContent = '✓ Scenario '+slot+' saved: '+data.label;
+  if (statusEl) { statusEl.innerHTML = '<span style="color:var(--green);">● saved</span>'; }
 }
 
 function updateScenarioPanel() {
@@ -3007,23 +3006,23 @@ function updateScenarioPanel() {
     body.innerHTML = '';
     const sA = document.getElementById('scenario-status-A');
     const sB = document.getElementById('scenario-status-B');
-    if (sA) sA.textContent = '';
-    if (sB) sB.textContent = '';
+    if (sA) sA.innerHTML = '';
+    if (sB) sB.innerHTML = '';
     return;
   }
   if (!a || !b) {
     const sA = document.getElementById('scenario-status-A');
     const sB = document.getElementById('scenario-status-B');
-    if (sA) sA.textContent = a ? '✓ Scenario A: '+a.label : '';
-    if (sB) sB.textContent = b ? '✓ Scenario B: '+b.label : '';
+    if (sA) sA.innerHTML = a ? '<span style="color:var(--green);">● saved</span>' : '';
+    if (sB) sB.innerHTML = b ? '<span style="color:var(--green);">● saved</span>' : '';
     body.innerHTML = `<div style="font-size:12px;color:var(--text3);font-family:var(--mono);padding:8px 0;">${a ? '✓ Scenario A saved. Reconfigure and save as B to compare.' : '✓ Scenario B saved. Reconfigure and save as A to compare.'}</div>`;
     return;
   }
   // Both saved — update status
   const sA = document.getElementById('scenario-status-A');
   const sB = document.getElementById('scenario-status-B');
-  if (sA) sA.textContent = '✓ Scenario A: '+a.label;
-  if (sB) sB.textContent = '✓ Scenario B: '+b.label;
+  if (sA) sA.innerHTML = '<span style="color:var(--green);">● saved</span>';
+  if (sB) sB.innerHTML = '<span style="color:var(--green);">● saved</span>';
 
   const diff = b.monthly - a.monthly;
   const diffPct = a.monthly > 0 ? Math.round(Math.abs(diff)/a.monthly*100) : 0;
@@ -3138,12 +3137,20 @@ function loadExampleComparison() {
     taskVol[t.id] = { employees: ['agent-complex','agent-simple'].includes(t.id) ? exTasks[t.id] : 200, usesPerDay: 6 };
   });
 
-  // Set size and maturity
+  // Set size and maturity — activate correct buttons
   activeSize = 'large';
   activeMaturities = new Set(['assistive','workflow','agentic']);
-  document.querySelectorAll('.preset-btn').forEach(b => {
-    const id = b.dataset.size || b.dataset.mat;
-    b.classList.toggle('active', activeSize === b.dataset.size || activeMaturities.has(b.dataset.mat));
+
+  // Activate size buttons
+  document.querySelectorAll('[onclick*="selectSize"]').forEach(b => {
+    const match = b.getAttribute('onclick').match(/'([^']+)'/);
+    if (match) b.classList.toggle('active', match[1] === 'large');
+  });
+
+  // Activate maturity buttons
+  document.querySelectorAll('[onclick*="toggleMaturity"]').forEach(b => {
+    const match = b.getAttribute('onclick').match(/'([^']+)'/);
+    if (match) b.classList.toggle('active', activeMaturities.has(match[1]));
   });
 
   // Set model and Scenario B settings
