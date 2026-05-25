@@ -2512,8 +2512,8 @@ function updateChart() {
   }
   if (baseCapacity > 0) {
     insight += ' Modelled capacity value at month 12: '+cx(lastCap)+'.';
-    if (crossover > 0) insight += ' Under the current assumptions, AI operating cost exceeds modelled capacity value at month '+(crossover+1)+'.';
-    else if (crossover === 0) insight += ' Under the current assumptions, AI operating cost exceeds modelled capacity value from month 1.';
+    if (crossover > 0) insight += ' Under escalating orchestration dynamics, projected operating cost growth may outpace the modelled operational value generated (month '+(crossover+1)+').';
+    else if (crossover === 0) insight += ' Under escalating orchestration dynamics, projected operating cost growth may outpace the modelled operational value generated from the outset.';
     else insight += ' Under the current assumptions, AI operating cost remains below modelled capacity value throughout.';
   }
 
