@@ -890,6 +890,12 @@ footer a:hover{color:var(--text2)}
       </div>
 
 
+      <!-- ARCHITECTURE SENSITIVITY -->
+      <div class="panel" id="arch-sensitivity-panel" style="display:none;">
+        <div class="panel-title">Sensitivity impact</div>
+        <div id="arch-sensitivity-body"></div>
+      </div>
+
       <!-- TOP COST DRIVERS -->
       <div class="panel" id="top-drivers-panel" style="display:none;">
         <div class="panel-title">Top cost drivers</div>
@@ -997,12 +1003,6 @@ footer a:hover{color:var(--text2)}
       <div style="display:flex;justify-content:space-between;align-items:center;" id="m-ctx-row">
         <span style="font-size:12px;color:var(--text3);">Context growth</span>
         <span style="font-size:12px;font-family:var(--mono);" id="m-ctx-label">—</span>
-      </div>
-      <div id="m-sensitivity-combined" style="display:none;margin-top:4px;padding:6px 8px;background:rgba(248,113,113,0.06);border-radius:var(--radius);border:1px solid rgba(248,113,113,0.15);">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-size:11px;color:var(--text3);font-family:var(--mono);">Sensitivity combined</span>
-          <span style="font-size:12px;font-family:var(--mono);color:#f87171;" id="m-sensitivity-combined-val"></span>
-        </div>
       </div>
     </div>
 
@@ -1112,7 +1112,7 @@ function goToStep(n) {
     document.getElementById('step-num-'+i).textContent = i<n ? '✓' : i;
   });
   if (n===2) { updateHybridRouting(); }
-  if (n===3) { updateConclusion(); updateROI(); updateSavings(); updateChart(); updateBridge(); updateVariance(); updateSystemSummary(); updateInterpretation(); updateTopDrivers(); updateScenarioPanel(); }
+  if (n===3) { updateConclusion(); updateROI(); updateSavings(); updateChart(); updateBridge(); updateVariance(); updateSystemSummary(); updateInterpretation(); updateTopDrivers(); updateArchSensitivity(); updateScenarioPanel(); }
   updateConfigSummary();
   window.scrollTo({top:0, behavior:'smooth'});
 }
@@ -2171,59 +2171,46 @@ function updateArchSensitivity() {
   const body  = document.getElementById('arch-sensitivity-body');
   if (!panel || !body) return;
   const active = TASKS.filter(t => (taskRuns[t.id]||0) > 0);
-  if (!active.length || !sel.model) { panel.style.display='none'; return; }
-  panel.style.display='block';
+  const hasSensitivity = (sel.retryRate||0) > 0 || (sel.orchDepth||1) > 1 || (sel.ctxGrowth||1) > 1;
+
+  if (!active.length || !sel.model || !hasSensitivity) {
+    panel.style.display = 'none';
+    return;
+  }
+  panel.style.display = 'block';
 
   const model = MODELS.find(m=>m.id===sel.model);
 
-  function calcWith(retryRate, orchDepth, ctxGrowth) {
-    return active.reduce((s,t) => s + calcCost(t, model, sel.ctx, false, 0, retryRate, orchDepth, ctxGrowth).runCost * taskRuns[t.id] * sel.days, 0);
+  function calcWith(retry, orch, ctx) {
+    return active.reduce((s,t) => s + calcCost(t, model, sel.ctx, false, 0, retry, orch, ctx).runCost * taskRuns[t.id] * sel.days, 0);
   }
 
   const baseline = calcWith(0, 1, 1);
-
-  const params = [
-    { label: 'Retry rate',          value: sel.retryRate, fmt: Math.round(sel.retryRate*100) + '%', val: calcWith(sel.retryRate, 1, 1) },
-    { label: 'Orchestration depth', value: sel.orchDepth,  fmt: sel.orchDepth + '×',              val: calcWith(0, sel.orchDepth, 1) },
-    { label: 'Context growth',      value: sel.ctxGrowth,  fmt: sel.ctxGrowth + '×',              val: calcWith(0, 1, sel.ctxGrowth) },
-  ];
-
-  let rows = '';
-  params.forEach(function(p) {
-    const delta = p.val - baseline;
-    const deltaPct = baseline > 0 ? Math.round(Math.abs(delta)/baseline*100) : 0;
-    const isDefault = delta === 0 || Math.abs(delta) < 0.001;
-    const deltaFmt = isDefault ? '—' : (delta > 0 ? '+' + deltaPct + '%' : '−' + deltaPct + '%');
-    const deltaColor = isDefault ? 'var(--text3)' : (delta > 0 ? '#f87171' : 'var(--green)');
-    const active2 = !isDefault;
-    rows += '<tr style="border-bottom:1px solid var(--border);' + (active2 ? 'background:rgba(108,164,171,0.05);' : '') + '">'
-      + '<td style="padding:8px 10px;font-size:12px;color:var(--text3);">' + p.label + '</td>'
-      + '<td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:' + (active2 ? 'var(--accent2)' : 'var(--text3)') + ';font-weight:' + (active2 ? '500' : '400') + ';">' + p.fmt + '</td>'
-      + '<td style="text-align:right;padding:8px 10px;font-family:var(--mono);font-size:12px;color:' + (active2 ? 'var(--text2)' : 'var(--text3)') + ';">' + cx(p.val) + '</td>'
-      + '<td style="text-align:right;padding:8px 10px;font-family:var(--mono);font-size:12px;color:' + deltaColor + ';">' + deltaFmt + '</td>'
-      + '</tr>';
-  });
-
   const combined = calcWith(sel.retryRate, sel.orchDepth, sel.ctxGrowth);
   const combinedDelta = combined - baseline;
-  const combinedPct = baseline > 0 ? Math.round(Math.abs(combinedDelta)/baseline*100) : 0;
-  const combinedFmt = combinedDelta === 0 ? 'No sensitivity parameters active' : (combinedDelta > 0 ? '+' + combinedPct + '% cost increase' : '\u2212' + combinedPct + '% cost reduction') + ' when all parameters combined';
-  const combinedColor = combinedDelta === 0 ? 'var(--text3)' : (combinedDelta > 0 ? '#f87171' : 'var(--green)');
+  const combinedPct = baseline > 0 ? Math.round(combinedDelta/baseline*100) : 0;
 
-  body.innerHTML = '<table style="width:100%;border-collapse:collapse;">'
-    + '<thead><tr style="border-bottom:2px solid var(--border);">'
-    + '<th style="text-align:left;padding:7px 10px;color:var(--text3);font-weight:500;font-size:11px;">Parameter</th>'
-    + '<th style="text-align:left;padding:7px 10px;color:var(--text3);font-weight:500;font-size:11px;">Current value</th>'
-    + '<th style="text-align:right;padding:7px 10px;color:var(--text3);font-weight:500;font-size:11px;">Monthly cost</th>'
-    + '<th style="text-align:right;padding:7px 10px;color:var(--text3);font-weight:500;font-size:11px;">Δ vs baseline</th>'
-    + '</tr></thead>'
-    + '<tbody>' + rows + '</tbody>'
-    + '</table>'
-    + '<div style="margin-top:10px;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:var(--radius);border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">'
-    + '<span style="font-size:12px;color:var(--text3);font-family:var(--mono);">Combined effect at current settings</span>'
-    + '<span style="font-size:13px;font-weight:500;font-family:var(--mono);color:' + combinedColor + ';">' + combinedFmt.split(' when')[0] + '</span>'
-    + '</div>'
-    + '<div style="margin-top:8px;font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.6;">Baseline: no sensitivity parameters. Each row shows the isolated effect of one parameter at its current slider value. Adjust sliders in step 2 to explore.</div>';
+  const rows = [
+    {label:'Retry rate',           val: Math.round((sel.retryRate||0)*100)+'%'},
+    {label:'Orchestration depth',  val: (sel.orchDepth||1)+'×'},
+    {label:'Context growth',       val: (sel.ctxGrowth||1)+'×'},
+  ].map(p => `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
+    <span style="font-size:12px;color:var(--text3);">${p.label}</span>
+    <span style="font-size:12px;font-family:var(--mono);color:var(--accent2);">${p.val}</span>
+  </div>`).join('');
+
+  body.innerHTML = rows
+    + `<div style="margin-top:10px;padding:10px 12px;background:rgba(248,113,113,0.06);border-radius:var(--radius);border:1px solid rgba(248,113,113,0.2);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-size:12px;color:var(--text3);font-family:var(--mono);">Baseline (model × volume)</span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2);">${cx(baseline)}/mo</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:#f87171;font-family:var(--mono);">Combined sensitivity effect</span>
+        <span style="font-size:13px;font-weight:500;font-family:var(--mono);color:#f87171;">+${cx(combinedDelta)} (+${combinedPct}%)</span>
+      </div>
+    </div>
+    <div style="margin-top:6px;font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.6;">Parameters multiply — combined effect exceeds the sum of individual effects.</div>`;
 }
 
 function updateBridge() {
