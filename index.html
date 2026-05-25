@@ -1733,29 +1733,11 @@ function updateTopDrivers() {
   if (!model) { body.innerHTML='<div style="font-size:13px;color:var(--text3);">Select a model in step 2 to see cost drivers.</div>'; return; }
   const taskCosts = active.map(t => ({
     name: t.name,
-    cost: calcCost(t, model, sel.ctx, sel.batch, sel.cachePct).runCost * taskRuns[t.id] * sel.days,
+    cost: calcCost(t, model, sel.ctx, sel.batch, sel.cachePct, sel.retryRate, sel.orchDepth, sel.ctxGrowth).runCost * taskRuns[t.id] * sel.days,
     runs: taskRuns[t.id]
   })).sort((a,b) => b.cost - a.cost);
 
   const total = taskCosts.reduce((s,t) => s+t.cost, 0);
-
-  // Cost optimisation opportunities
-  const savings = [];
-  if (!sel.batch) {
-    const batchSave = total - taskCosts.reduce((s,t) => {
-      const tc = TASKS.find(x=>x.name===t.name);
-      return s + calcCost(tc, model, sel.ctx, true, sel.cachePct).runCost * t.runs * sel.days;
-    }, 0);
-    if (batchSave > 0) savings.push({label:'Enable batch processing', save: batchSave, pct: Math.round(batchSave/total*100)});
-  }
-  if (sel.cachePct < 50) {
-    const cacheSave = total - taskCosts.reduce((s,t) => {
-      const tc = TASKS.find(x=>x.name===t.name);
-      return s + calcCost(tc, model, sel.ctx, sel.batch, 60).runCost * t.runs * sel.days;
-    }, 0);
-    if (cacheSave > 0) savings.push({label:'Increase caching to 60%', save: cacheSave, pct: Math.round(cacheSave/total*100)});
-  }
-  // Model routing optimisation shown in Hybrid model routing (step 2)
 
   const top3 = taskCosts.slice(0,3);
   const rest = taskCosts.slice(3);
@@ -2031,6 +2013,9 @@ function printReport() {
   .driver-bar{height:100%;background:#4a8a91;border-radius:2px}
   .driver-tokens{font-size:8pt;color:#aaa;font-family:monospace}
   .var-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:9pt}
+  /* PDF: show all collapsed content, hide toggle buttons */
+  div[style*="display:none"]{display:block !important}
+  button{display:none !important}
   .scenario-table{width:100%;border-collapse:collapse;margin-bottom:10pt}
   .scenario-table th{text-align:left;padding:5pt 8pt;font-size:8pt;font-weight:600;color:#4a8a91;border-bottom:2px solid #ddd}
   .scenario-table td{padding:5pt 8pt;border-bottom:1px solid #f0f0f0;font-size:9pt;font-family:monospace}
