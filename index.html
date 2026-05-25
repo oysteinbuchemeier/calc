@@ -998,6 +998,12 @@ footer a:hover{color:var(--text2)}
         <span style="font-size:12px;color:var(--text3);">Context growth</span>
         <span style="font-size:12px;font-family:var(--mono);" id="m-ctx-label">—</span>
       </div>
+      <div id="m-sensitivity-combined" style="display:none;margin-top:4px;padding:6px 8px;background:rgba(248,113,113,0.06);border-radius:var(--radius);border:1px solid rgba(248,113,113,0.15);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:11px;color:var(--text3);font-family:var(--mono);">Sensitivity combined</span>
+          <span style="font-size:12px;font-family:var(--mono);color:#f87171;" id="m-sensitivity-combined-val"></span>
+        </div>
+      </div>
     </div>
 
     <!-- DETAILS FOLD -->
@@ -2059,9 +2065,14 @@ function printReport() {
     <tr><td>Batch processing</td><td class="${sel.batch?'negative':''}">${sel.batch ? 'On &nbsp;−'+cx(pureBase-calcBase(true,0,0,1,1)) : 'Off'}</td></tr>
     <tr><td>Prompt caching</td><td class="${sel.cachePct>0?'negative':''}">${sel.cachePct>0 ? sel.cachePct+'% &nbsp;−'+cx(pureBase-calcBase(false,sel.cachePct,0,1,1)) : 'Off'}</td></tr>
     <tr class="section-head"><td colspan="2">Sensitivity parameters</td></tr>
-    <tr><td>Retry rate</td><td class="${(sel.retryRate||0)>0?'positive':''}">${(sel.retryRate||0)>0 ? Math.round(sel.retryRate*100)+'% &nbsp;+'+cx(calcBase(false,0,sel.retryRate,1,1)-pureBase) : '0%'}</td></tr>
-    <tr><td>Orchestration depth</td><td class="${(sel.orchDepth||1)>1?'positive':''}">${(sel.orchDepth||1)>1 ? sel.orchDepth+'× &nbsp;+'+cx(calcBase(false,0,0,sel.orchDepth,1)-pureBase) : '1×'}</td></tr>
-    <tr><td>Context growth</td><td class="${(sel.ctxGrowth||1)>1?'positive':''}">${(sel.ctxGrowth||1)>1 ? sel.ctxGrowth+'× &nbsp;+'+cx(calcBase(false,0,0,1,sel.ctxGrowth)-pureBase) : '1×'}</td></tr>
+    <tr><td>Retry rate</td><td class="${(sel.retryRate||0)>0?'positive':''}">${Math.round((sel.retryRate||0)*100)}%</td></tr>
+    <tr><td>Orchestration depth</td><td class="${(sel.orchDepth||1)>1?'positive':''}">${sel.orchDepth||1}×</td></tr>
+    <tr><td>Context growth</td><td class="${(sel.ctxGrowth||1)>1?'positive':''}">${sel.ctxGrowth||1}×</td></tr>
+    ${((sel.retryRate||0)>0||(sel.orchDepth||1)>1||(sel.ctxGrowth||1)>1)?`
+    <tr><td style="color:#888;padding-top:6pt;">Baseline (model × volume)</td><td style="font-family:monospace;font-weight:500;">${cx(pureBase)}/mo</td></tr>
+    <tr><td style="color:#e53e3e;padding-bottom:6pt;">Combined sensitivity effect</td><td style="font-family:monospace;font-weight:600;color:#e53e3e;">+${cx(monthly-pureBase)}</td></tr>
+    <tr><td style="font-size:8pt;color:#aaa;" colspan="2">Parameters multiply — combined effect exceeds the sum of individual effects</td></tr>
+    `:''}
   </table>
 </section>
 
@@ -2710,37 +2721,33 @@ function update() {
 
     // Retry
     if (retryLabelEl) {
-      if ((sel.retryRate||0) > 0) {
-        const add = calcBase(false,0,sel.retryRate,1,1) - pureBase;
-        retryLabelEl.textContent = Math.round(sel.retryRate*100)+'%  +'+cx(add);
-        retryLabelEl.style.color = '#f87171';
-      } else {
-        retryLabelEl.textContent = 'off';
-        retryLabelEl.style.color = 'var(--text3)';
-      }
+      retryLabelEl.textContent = (sel.retryRate||0) > 0 ? Math.round(sel.retryRate*100)+'%' : 'off';
+      retryLabelEl.style.color = (sel.retryRate||0) > 0 ? '#f87171' : 'var(--text3)';
     }
 
     // Orchestration
     if (orchLabelEl) {
-      if ((sel.orchDepth||1) > 1) {
-        const add = calcBase(false,0,0,sel.orchDepth,1) - pureBase;
-        orchLabelEl.textContent = sel.orchDepth+'×  +'+cx(add);
-        orchLabelEl.style.color = '#f87171';
-      } else {
-        orchLabelEl.textContent = '1×';
-        orchLabelEl.style.color = 'var(--text3)';
-      }
+      orchLabelEl.textContent = (sel.orchDepth||1) > 1 ? sel.orchDepth+'×' : '1×';
+      orchLabelEl.style.color = (sel.orchDepth||1) > 1 ? '#f87171' : 'var(--text3)';
     }
 
     // Context growth
     if (ctxLabelEl) {
-      if ((sel.ctxGrowth||1) > 1) {
-        const add = calcBase(false,0,0,1,sel.ctxGrowth) - pureBase;
-        ctxLabelEl.textContent = sel.ctxGrowth+'×  +'+cx(add);
-        ctxLabelEl.style.color = '#f87171';
+      ctxLabelEl.textContent = (sel.ctxGrowth||1) > 1 ? sel.ctxGrowth+'×' : '1×';
+      ctxLabelEl.style.color = (sel.ctxGrowth||1) > 1 ? '#f87171' : 'var(--text3)';
+    }
+
+    // Combined sensitivity effect
+    const hasSensitivity = (sel.retryRate||0) > 0 || (sel.orchDepth||1) > 1 || (sel.ctxGrowth||1) > 1;
+    const combinedEl = document.getElementById('m-sensitivity-combined');
+    const combinedValEl = document.getElementById('m-sensitivity-combined-val');
+    if (combinedEl && combinedValEl) {
+      if (hasSensitivity) {
+        const combinedAdd = monthly - pureBase;
+        combinedValEl.textContent = '+'+cx(combinedAdd);
+        combinedEl.style.display = 'block';
       } else {
-        ctxLabelEl.textContent = '1×';
-        ctxLabelEl.style.color = 'var(--text3)';
+        combinedEl.style.display = 'none';
       }
     }
   }
