@@ -3179,7 +3179,7 @@ function loadExampleComparison() {
   localStorage.setItem('scenarioA', JSON.stringify({...base, label: makeLabel(true,45,0,1,1), monthly: monthlyA, monthlyFmt: cx(monthlyA), batch: true, cachePct: 45, retryRate: 0, orchDepth: 1, ctxGrowth: 1}));
   localStorage.setItem('scenarioB', JSON.stringify({...base, label: makeLabel(false,0,0.20,2,2), monthly: monthlyB, monthlyFmt: cx(monthlyB), batch: false, cachePct: 0, retryRate: 0.20, orchDepth: 2, ctxGrowth: 2}));
 
-  renderTasks(); renderModels(); update(); updateCompare(); updateROI(); updateModelSuitabilityNote(); updateScenarioPanel();
+  renderTasks(); renderModels(); applyPreset(); update(); updateCompare(); updateROI(); updateModelSuitabilityNote(); updateScenarioPanel();
   goToStep(3);
 }
 
