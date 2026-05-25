@@ -906,6 +906,14 @@ footer a:hover{color:var(--text2)}
         <div style="display:flex;gap:8px;margin-bottom:16px;">
           <button onclick="saveScenario('A')" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-size:12px;font-family:var(--mono);color:var(--text2);cursor:pointer;transition:all 0.12s;" onmouseover="this.style.borderColor='var(--accent2)'" onmouseout="this.style.borderColor='var(--border)'">Save current as Scenario A <span id="scenario-saved-A" style="color:var(--green)"></span></button>
           <button onclick="saveScenario('B')" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-size:12px;font-family:var(--mono);color:var(--text2);cursor:pointer;transition:all 0.12s;" onmouseover="this.style.borderColor='var(--accent2)'" onmouseout="this.style.borderColor='var(--border)'">Save current as Scenario B <span id="scenario-saved-B" style="color:var(--green)"></span></button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:6px;font-size:11px;font-family:var(--mono);">
+          <span id="scenario-status-A" style="flex:1;color:var(--text3);padding:2px 0;"></span>
+          <span id="scenario-status-B" style="flex:1;color:var(--text3);padding:2px 0;"></span>
+        </div>
+        <div style="margin-top:8px;">
+          <button onclick="loadExampleComparison()" style="width:100%;background:rgba(108,164,171,0.08);border:1px dashed var(--accent2);border-radius:var(--radius);padding:8px 12px;font-size:12px;font-family:var(--mono);color:var(--accent2);cursor:pointer;transition:all 0.12s;" onmouseover="this.style.background='rgba(108,164,171,0.15)'" onmouseout="this.style.background='rgba(108,164,171,0.08)'">⚡ Load example — same workload, different architecture</button>
+        </div>
           <button onclick="localStorage.removeItem('scenarioA');localStorage.removeItem('scenarioB');updateScenarioPanel()" style="background:none;border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:11px;font-family:var(--mono);color:var(--text3);cursor:pointer;">✕ Clear</button>
         </div>
         <div id="scenario-compare-body"></div>
@@ -2522,7 +2530,7 @@ function updateChart() {
     + '<span style="color:#f87171;">— Escalating orchestration dynamics</span>'
     + (baseCapacity > 0 ? '<span style="color:var(--green);">╌ Modelled capacity value</span>' : '')
     + '</div>'
-    + (insight ? '<div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:8px;line-height:1.6;">'+insight+'</div>' : '');
+    + (insight ? '<div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:12px;line-height:1.8;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:var(--radius);border:1px solid var(--border);">'+insight+'</div>' : '');
 }
 
 function updateSmartCTA(monthlyCost,activeTasks) {
@@ -2985,6 +2993,8 @@ function saveScenario(slot) {
   updateScenarioPanel();
   const el = document.getElementById('scenario-saved-'+slot);
   if (el) { el.textContent = ' ✓'; setTimeout(()=>el.textContent='', 2500); }
+  const statusEl = document.getElementById('scenario-status-'+slot);
+  if (statusEl) statusEl.textContent = '✓ Scenario '+slot+' saved: '+data.label;
 }
 
 function updateScenarioPanel() {
@@ -2993,11 +3003,27 @@ function updateScenarioPanel() {
   const a = localStorage.getItem('scenarioA') ? JSON.parse(localStorage.getItem('scenarioA')) : null;
   const b = localStorage.getItem('scenarioB') ? JSON.parse(localStorage.getItem('scenarioB')) : null;
 
-  if (!a && !b) { body.innerHTML = ''; return; }
+  if (!a && !b) {
+    body.innerHTML = '';
+    const sA = document.getElementById('scenario-status-A');
+    const sB = document.getElementById('scenario-status-B');
+    if (sA) sA.textContent = '';
+    if (sB) sB.textContent = '';
+    return;
+  }
   if (!a || !b) {
+    const sA = document.getElementById('scenario-status-A');
+    const sB = document.getElementById('scenario-status-B');
+    if (sA) sA.textContent = a ? '✓ Scenario A: '+a.label : '';
+    if (sB) sB.textContent = b ? '✓ Scenario B: '+b.label : '';
     body.innerHTML = `<div style="font-size:12px;color:var(--text3);font-family:var(--mono);padding:8px 0;">${a ? '✓ Scenario A saved. Reconfigure and save as B to compare.' : '✓ Scenario B saved. Reconfigure and save as A to compare.'}</div>`;
     return;
   }
+  // Both saved — update status
+  const sA = document.getElementById('scenario-status-A');
+  const sB = document.getElementById('scenario-status-B');
+  if (sA) sA.textContent = '✓ Scenario A: '+a.label;
+  if (sB) sB.textContent = '✓ Scenario B: '+b.label;
 
   const diff = b.monthly - a.monthly;
   const diffPct = a.monthly > 0 ? Math.round(Math.abs(diff)/a.monthly*100) : 0;
@@ -3091,6 +3117,81 @@ function updateScenarioPanel() {
     <div style="display:flex;justify-content:flex-end;">
       <button onclick="localStorage.removeItem('scenarioA');localStorage.removeItem('scenarioB');updateScenarioPanel()" style="background:none;border:none;font-size:11px;color:var(--text3);cursor:pointer;font-family:var(--mono);">✕ Clear both</button>
     </div>`;
+}
+
+function loadExampleComparison() {
+  // Scenario A — optimised: GPT-5.5, 100–500, all maturities, batch+cache, no sensitivity
+  const modelName = 'OpenAI GPT-5.5';
+  const sizeLabel = '100–500 people';
+  const mat = 'Assistive + Workflow + Agentic';
+
+  // Calculate monthly for A: GPT-5.5, batch on, cache 45%, no sensitivity
+  const modelA = MODELS.find(m=>m.id==='gpt55');
+  if (!modelA) { alert('GPT-5.5 not available'); return; }
+
+  // Set up example tasks for 100–500 + all maturities
+  const exTasks = {};
+  TASKS.forEach(t => {
+    if (t.id === 'agent-complex') exTasks[t.id] = 600;
+    else if (t.id === 'agent-simple') exTasks[t.id] = 300;
+    else if (!['code','sql','rag','apidoc'].includes(t.id)) exTasks[t.id] = 200 * 6; // 200 users × 6 uses/day
+    else exTasks[t.id] = 0;
+  });
+
+  function calcMonthly(model, batch, cachePct, retry, orch, ctx) {
+    return TASKS.reduce((s,t) => {
+      const r = exTasks[t.id]||0; if(!r) return s;
+      return s + calcCost(t, model, 1.0, batch, cachePct, retry, orch, ctx).runCost * r * 22;
+    }, 0);
+  }
+
+  const monthlyA = calcMonthly(modelA, true,  45, 0,    1, 1);
+  const monthlyB = calcMonthly(modelA, false,  0, 0.20, 2, 2);
+
+  // Auto-generate labels matching saveScenario logic
+  function makeLabel(model, batch, cachePct, retry, orch, ctx) {
+    const parts = [model.name];
+    const opts = [];
+    if (batch) opts.push('batch');
+    if (cachePct > 0) opts.push(cachePct + '% cache');
+    if (retry > 0) opts.push(Math.round(retry*100) + '% retry');
+    if (orch > 1) opts.push('orch ' + orch + '×');
+    if (ctx > 1) opts.push('ctx ' + ctx + '×');
+    if (opts.length === 0) opts.push('no optimisation');
+    return parts.concat(opts).join(' — ');
+  }
+
+  const scenarioA = {
+    label: makeLabel(modelA, true, 45, 0, 1, 1),
+    model: modelName, monthly: monthlyA, monthlyFmt: cx(monthlyA),
+    tasks: 10, totalRuns: 10500, users: 200,
+    sizeKey: 'large', sizeLabel, mat,
+    complexRuns: 600, simpleRuns: 300,
+    batch: true, cachePct: 45,
+    retryRate: 0, orchDepth: 1, ctxGrowth: 1,
+    routing: 'Single-model',
+  };
+
+  const scenarioB = {
+    label: makeLabel(modelA, false, 0, 0.20, 2, 2),
+    model: modelName, monthly: monthlyB, monthlyFmt: cx(monthlyB),
+    tasks: 10, totalRuns: 10500, users: 200,
+    sizeKey: 'large', sizeLabel, mat,
+    complexRuns: 600, simpleRuns: 300,
+    batch: false, cachePct: 0,
+    retryRate: 0.20, orchDepth: 2, ctxGrowth: 2,
+    routing: 'Single-model',
+  };
+
+  localStorage.setItem('scenarioA', JSON.stringify(scenarioA));
+  localStorage.setItem('scenarioB', JSON.stringify(scenarioB));
+
+  const statusA = document.getElementById('scenario-status-A');
+  const statusB = document.getElementById('scenario-status-B');
+  if (statusA) statusA.textContent = '✓ Scenario A: ' + scenarioA.label;
+  if (statusB) statusB.textContent = '✓ Scenario B: ' + scenarioB.label;
+
+  updateScenarioPanel();
 }
 
 function shareURL() {
