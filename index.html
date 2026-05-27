@@ -2089,8 +2089,8 @@ ${annualCapacity>0?`<section>
       <div class="capacity-card-val">${cx(annualCapacity)}</div>
     </div>
     <div class="capacity-card">
-      <div class="capacity-card-label">Equivalent operational capacity</div>
-      <div class="capacity-card-val">~${fteLow}–${fteHigh} FTE</div>
+      <div class="capacity-card-label">Modelled digital capacity</div>
+      <div class="capacity-card-val">~${fteLow}–${fteHigh} dFTE</div>
     </div>
   </div>
   ${ratio?`<div class="ratio-statement">1 ${currency.symbol} AI cost → ~${ratio} ${currency.symbol} capacity value</div>`:''}
@@ -2580,8 +2580,9 @@ function updateROI() {
     </div>
     <div class="roi-sub-grid">
       <div class="roi-sub-card" style="grid-column:1/-1">
-        <div class="roi-sub-label">Equivalent operational capacity</div>
-        <div class="roi-sub-val" style="color:var(--green)">~${(fteCap*0.7).toFixed(1)}–${(fteCap*1.0).toFixed(1)} FTE</div>
+        <div class="roi-sub-label">Modelled digital capacity</div>
+        <div class="roi-sub-val" style="color:var(--green)">~${(fteCap*0.7).toFixed(1)}–${(fteCap*1.0).toFixed(1)} dFTE</div>
+        <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:4px;line-height:1.5;">Digital FTE (dFTE) represents operational capacity generated through AI execution — not headcount reduction.</div>
       </div>
     </div>
     <div style="margin-top:10px;padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:6px;font-size:12px;color:var(--text3);line-height:1.7;">
@@ -3323,7 +3324,7 @@ function buildEstimateParams(toEmail) {
     // Capacity
     efficiency_assumption:pct+'%',
     annual_capacity:annualCapacity>0?cx(annualCapacity)+'/yr':'Not configured',
-    fte_equivalent:annualCapacity>0?`~${fteLow}–${fteHigh} FTE`:'Not configured',
+    fte_equivalent:annualCapacity>0?`~${fteLow}–${fteHigh} dFTE`:'Not configured',
     capacity_ratio:ratio?`${ratio}×`:'Not configured',
     ai_as_pct_capacity:aiAsPct?aiAsPct+'%':'Not configured',
   };
