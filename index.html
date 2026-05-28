@@ -2089,7 +2089,7 @@ ${annualCapacity>0?`<section>
       <div class="capacity-card-val">${cx(annualCapacity)}</div>
     </div>
     <div class="capacity-card">
-      <div class="capacity-card-label">Modelled digital capacity</div>
+      <div class="capacity-card-label">Modelled digital capacity (dFTE)</div>
       <div class="capacity-card-val">~${fteLow}–${fteHigh} dFTE</div>
     </div>
   </div>
@@ -2580,7 +2580,7 @@ function updateROI() {
     </div>
     <div class="roi-sub-grid">
       <div class="roi-sub-card" style="grid-column:1/-1">
-        <div class="roi-sub-label">Modelled digital capacity</div>
+        <div class="roi-sub-label">Modelled digital capacity (dFTE)</div>
         <div class="roi-sub-val" style="color:var(--green)">~${(fteCap*0.7).toFixed(1)}–${(fteCap*1.0).toFixed(1)} dFTE</div>
         <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:4px;line-height:1.5;">Digital FTE (dFTE) represents operational capacity generated through AI execution — not headcount reduction.</div>
       </div>
