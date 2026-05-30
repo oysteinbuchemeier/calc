@@ -968,7 +968,7 @@ footer a:hover{color:var(--text2)}
         <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-users">—</span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:12px;color:var(--text3);">Total runs / day</span>
+        <span style="font-size:12px;color:var(--text3);">Everyday tasks / day</span>
         <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-everyday-runs">—</span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -978,6 +978,10 @@ footer a:hover{color:var(--text2)}
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:12px;color:var(--text3);">Complex workflows / day</span>
         <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-complex-runs">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:var(--text3);">Total runs / day</span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-total-runs">—</span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:12px;color:var(--text3);">Working days</span>
@@ -2057,9 +2061,10 @@ function printReport() {
     <tr><td>Model</td><td style="color:#4a8a91">${model?model.full:'Not selected'}</td></tr>
     <tr><td>Organisation size</td><td>${activeSize ? SIZE_PRESETS[activeSize].label : '—'}</td></tr>
     <tr><td>Active AI users</td><td>${maxUsers||'—'}</td></tr>
-    <tr><td>Total runs / day</td><td>${totalRuns.toLocaleString()}</td></tr>
+    <tr><td>Everyday tasks / day</td><td>${TASKS.filter(t=>!t.id.startsWith('agent')&&!['code','sql','rag','apidoc'].includes(t.id)).reduce((s,t)=>s+(taskRuns[t.id]||0),0).toLocaleString()||'—'}</td></tr>
     <tr><td>Simple workflows / day</td><td>${taskRuns['agent-simple']||'—'}</td></tr>
     <tr><td>Complex workflows / day</td><td>${taskRuns['agent-complex']||'—'}</td></tr>
+    <tr><td>Total runs / day</td><td>${totalRuns.toLocaleString()}</td></tr>
     <tr><td>Working days / month</td><td>${sel.days}</td></tr>
     <tr class="section-head"><td colspan="2">Optimisations</td></tr>
     <tr><td>Batch processing</td><td class="${sel.batch?'negative':''}">${sel.batch ? 'On &nbsp;−'+cx(pureBase-calcBase(true,0,0,1,1)) : 'Off'}</td></tr>
@@ -2138,9 +2143,9 @@ ${(()=>{
       ${row('Organisation size', a.sizeLabel||a.size, b.sizeLabel||b.size)}
       ${row('AI maturity', a.mat, b.mat)}
       ${row('Active AI users', a.users||'—', b.users||'—')}
-      ${row('Active workflows', a.tasks, b.tasks)}
-      ${row('Simple workflows/day', a.simpleRuns||'—', b.simpleRuns||'—')}
-      ${row('Complex workflows/day', a.complexRuns, b.complexRuns)}
+      ${row('Everyday tasks / day', a.everydayRuns||'—', b.everydayRuns||'—')}
+      ${row('Simple workflows / day', a.simpleRuns||'—', b.simpleRuns||'—')}
+      ${row('Complex workflows / day', a.complexRuns||'—', b.complexRuns||'—')}
       ${row('Total runs / day', a.totalRuns.toLocaleString(), b.totalRuns.toLocaleString())}
       ${row('Cache', a.cachePct+'%', b.cachePct+'%')}
       ${row('Batch processing', a.batch?'On':'Off', b.batch?'On':'Off')}
@@ -2661,7 +2666,11 @@ function update() {
   }
   // New consistent fields
   const everydayRunsEl = document.getElementById('m-everyday-runs');
-  if (everydayRunsEl) everydayRunsEl.textContent = tRuns > 0 ? tRuns : '—';
+  const totalRunsEl = document.getElementById('m-total-runs');
+  const everydayTasks = TASKS.filter(t => !t.id.startsWith('agent') && !['code','sql','rag','apidoc'].includes(t.id));
+  const everydayRunsCount = everydayTasks.reduce((s,t) => s + (taskRuns[t.id]||0), 0);
+  if (everydayRunsEl) everydayRunsEl.textContent = everydayRunsCount > 0 ? everydayRunsCount.toLocaleString() : '—';
+  if (totalRunsEl) totalRunsEl.textContent = tRuns > 0 ? tRuns.toLocaleString() : '—';
   const simpleRunsEl = document.getElementById('m-simple-runs');
   if (simpleRunsEl) simpleRunsEl.textContent = (taskRuns['agent-simple']||0) > 0 ? taskRuns['agent-simple'] : '—';
   const complexRunsEl = document.getElementById('m-complex-runs');
@@ -2943,6 +2952,9 @@ function saveScenario(slot) {
   if (sel.ctxGrowth>1) optParts.push(`ctx ${sel.ctxGrowth}×`);
   const label = slot === 'A' ? 'Scenario A' : 'Scenario B';
 
+  const everydayTasks = TASKS.filter(t=>!t.id.startsWith('agent')&&!['code','sql','rag','apidoc'].includes(t.id));
+  const everydayRuns = everydayTasks.reduce((s,t)=>s+(taskRuns[t.id]||0),0);
+
   const data = {
     label,
     model: model ? model.name : '—',
@@ -2950,6 +2962,7 @@ function saveScenario(slot) {
     tasks: active.length,
     totalRuns,
     users: maxUsers,
+    everydayRuns,
     sizeKey: activeSize||'—',
     sizeLabel,
     mat: matLabel,
@@ -3057,9 +3070,9 @@ function updateScenarioPanel() {
         ${row('Organisation size', a.sizeLabel||a.size, b.sizeLabel||b.size)}
         ${row('AI maturity', a.mat, b.mat)}
         ${row('Active AI users', a.users||'—', b.users||'—')}
-        ${row('Active workflows', a.tasks, b.tasks)}
-        ${row('Simple workflows/day', a.simpleRuns||'—', b.simpleRuns||'—')}
-        ${row('Complex workflows/day', a.complexRuns, b.complexRuns)}
+        ${row('Everyday tasks / day', a.everydayRuns||'—', b.everydayRuns||'—')}
+        ${row('Simple workflows / day', a.simpleRuns||'—', b.simpleRuns||'—')}
+        ${row('Complex workflows / day', a.complexRuns||'—', b.complexRuns||'—')}
         ${row('Total runs / day', a.totalRuns.toLocaleString(), b.totalRuns.toLocaleString())}
         ${row('Cache', a.cachePct+'%', b.cachePct+'%')}
         ${row('Batch processing', a.batch?'On':'Off', b.batch?'On':'Off')}
@@ -3175,7 +3188,8 @@ function loadExampleComparison() {
   const mat = 'Assistive + Workflow + Agentic';
   const totalRuns = Object.values(exTasks).reduce((s,v)=>s+v,0);
 
-  const base = { model: modelA.name, tasks: 10, totalRuns, users: 200, sizeKey: 'large', sizeLabel, mat, complexRuns: 600, simpleRuns: 300, routing: 'Single-model' };
+  const everydayRunsCount = TASKS.filter(t=>!t.id.startsWith('agent')&&!['code','sql','rag','apidoc'].includes(t.id)).reduce((s,t)=>s+(exTasks[t.id]||0),0);
+  const base = { model: modelA.name, tasks: 10, totalRuns, users: 200, everydayRuns: everydayRunsCount, sizeKey: 'large', sizeLabel, mat, complexRuns: 600, simpleRuns: 300, routing: 'Single-model' };
 
   localStorage.setItem('scenarioA', JSON.stringify({...base, label: makeLabel(true,45,0,1,1), monthly: monthlyA, monthlyFmt: cx(monthlyA), batch: true, cachePct: 45, retryRate: 0, orchDepth: 1, ctxGrowth: 1}));
   localStorage.setItem('scenarioB', JSON.stringify({...base, label: makeLabel(false,0,0.20,2,2), monthly: monthlyB, monthlyFmt: cx(monthlyB), batch: false, cachePct: 0, retryRate: 0.20, orchDepth: 2, ctxGrowth: 2}));
