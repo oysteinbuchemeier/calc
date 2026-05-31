@@ -979,6 +979,10 @@ footer a:hover{color:var(--text2)}
         <span style="font-size:12px;color:var(--text3);">Complex workflows / day</span>
         <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-complex-runs">—</span>
       </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;" id="m-dev-row">
+        <span style="font-size:12px;color:var(--text3);">Developer tasks / day</span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-dev-runs">—</span>
+      </div>
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:12px;color:var(--text3);">Total runs / day</span>
         <span style="font-size:12px;font-family:var(--mono);color:var(--text2);" id="m-total-runs">—</span>
@@ -2671,6 +2675,19 @@ function update() {
   const everydayRunsCount = everydayTasks.reduce((s,t) => s + (taskRuns[t.id]||0), 0);
   if (everydayRunsEl) everydayRunsEl.textContent = everydayRunsCount > 0 ? everydayRunsCount.toLocaleString() : '—';
   if (totalRunsEl) totalRunsEl.textContent = tRuns > 0 ? tRuns.toLocaleString() : '—';
+  // Developer tasks — only show row if any dev task has runs
+  const devTasks = ['code','sql','rag','apidoc'];
+  const devRunsCount = devTasks.reduce((s,id) => s + (taskRuns[id]||0), 0);
+  const devRow = document.getElementById('m-dev-row');
+  const devRunsEl = document.getElementById('m-dev-runs');
+  if (devRow && devRunsEl) {
+    if (devRunsCount > 0) {
+      devRow.style.display = 'flex';
+      devRunsEl.textContent = devRunsCount.toLocaleString();
+    } else {
+      devRow.style.display = 'none';
+    }
+  }
   const simpleRunsEl = document.getElementById('m-simple-runs');
   if (simpleRunsEl) simpleRunsEl.textContent = (taskRuns['agent-simple']||0) > 0 ? taskRuns['agent-simple'] : '—';
   const complexRunsEl = document.getElementById('m-complex-runs');
@@ -3122,7 +3139,9 @@ function loadExampleComparison() {
   // Set active configuration to Scenario B (uncontrolled)
   TASKS.forEach(t => {
     taskRuns[t.id] = exTasks[t.id]||0;
-    taskVol[t.id] = { employees: ['agent-complex','agent-simple'].includes(t.id) ? exTasks[t.id] : 200, usesPerDay: 6 };
+    const isAgent = ['agent-complex','agent-simple'].includes(t.id);
+    const isDev = ['code','sql','rag','apidoc'].includes(t.id);
+    taskVol[t.id] = { employees: isAgent ? exTasks[t.id] : isDev ? 0 : 200, usesPerDay: 6 };
   });
 
   // Set size and maturity — activate correct buttons
