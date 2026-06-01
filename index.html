@@ -2901,8 +2901,6 @@ function setTaskVol(id,field,val) {
   taskVol[id][field]=parseFloat(val)||0;
   const runs=Math.round(taskVol[id].employees*taskVol[id].usesPerDay);
   taskRuns[id]=runs;
-  activeSize=null; activeMaturities=new Set();
-  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
   const v=document.getElementById('rv-'+id);
   const isAgent=id.startsWith('agent');
   if(v){v.closest('.task-btn').classList.toggle('active',runs>0);v.textContent=runs===0?'off':runs+(isAgent?' triggers/day':'/day');}
