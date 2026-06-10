@@ -2111,7 +2111,20 @@ ${annualCapacity>0?`<section>
       <div class="capacity-card-val">~${fteLow}–${fteHigh} dFTE</div>
     </div>
   </div>
-  ${(()=>{ const fr = fmtRatio(annualCapacity, monthly); if(!fr) return ''; const aiPct = Math.round((monthly*12)/annualCapacity*100); const warn = aiPct >= 50; return `<div class="ratio-statement"${warn?' style="background:#fff5f5;border-left-color:#e53e3e;color:#c53030;"':''}>1 ${currency.symbol} AI cost → ~${fr} ${currency.symbol} capacity value${warn?` &nbsp;·&nbsp; AI cost consumes ${aiPct}% of modelled capacity value — architecture review recommended`:''}</div>`; })()}
+  ${(()=>{
+    const fr = fmtRatio(annualCapacity, monthly);
+    if(!fr) return '';
+    const aiPct = Math.round((monthly*12)/annualCapacity*100);
+    const warn = aiPct >= 50;
+    return `<table class="config-table" style="margin-top:10pt;">
+      <tr><td>Modelled AI operating cost</td><td>${cx(monthly)}/mo</td></tr>
+      <tr><td>Modelled annual capacity value</td><td>${cx(annualCapacity)}/yr</td></tr>
+      <tr><td>AI operating cost as % of capacity value</td><td class="${warn?'positive':''}">${aiPct}%</td></tr>
+      <tr><td>Capacity multiplier</td><td class="${warn?'positive':'negative'}">~${fr}×</td></tr>
+    </table>
+    <div class="ratio-statement"${warn?' style="background:#fff5f5;border-left-color:#e53e3e;color:#c53030;"':''}>1 ${currency.symbol} AI cost → ~${fr} ${currency.symbol} capacity value</div>
+    ${warn?`<div style="margin-top:6pt;font-size:9pt;color:#c53030;line-height:1.6;">AI operating cost consumes ~${aiPct}% of the modelled capacity value. At this level, architecture and orchestration choices materially affect whether the system creates or consumes value.</div>`:''}`;
+  })()}
   <div style="margin-top:8pt;font-size:8pt;color:#888;line-height:1.6;">Assumes ${pct}% efficiency improvement across ${maxUsers} employees at ${cx(annualCostPerPerson)}/yr fully-loaded cost. Excludes implementation cost, integration work, governance and organisational adoption effort.</div>
 </section>`:''}
 
