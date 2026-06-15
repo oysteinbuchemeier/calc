@@ -1263,22 +1263,27 @@ function updateModelSuitabilityNote() {
   const hasWorkflow = activeMaturities.has('workflow') || (taskRuns['agent-simple']||0) > 0;
   if (!sel.model || (!hasAgentic && !hasWorkflow)) {
     el.style.display = 'none';
-    const dn = document.getElementById('data-residency-note');
-    if (dn) dn.style.display = 'none';
-    // Still show dataresidency for DeepSeek even without workflow/agentic
+    // Show data residency note for any selected model
     if (sel.model) {
       const m = MODELS.find(m=>m.id===sel.model);
-      if (m && (m.id==='deepseek'||m.id==='deepseek-pro')) {
-        let dnEl = document.getElementById('data-residency-note');
-        if (!dnEl) {
-          dnEl = document.createElement('div');
-          dnEl.id = 'data-residency-note';
-          dnEl.style.cssText = 'margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--amber);background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;';
-          el.parentNode.insertBefore(dnEl, el.nextSibling);
-        }
-        dnEl.style.display = 'block';
-        dnEl.textContent = 'ℹ Data processed outside EU/EEA. Verify compliance requirements before production use.';
+      let dnEl = document.getElementById('data-residency-note');
+      if (!dnEl) {
+        dnEl = document.createElement('div');
+        dnEl.id = 'data-residency-note';
+        el.parentNode.insertBefore(dnEl, el.nextSibling);
       }
+      dnEl.style.display = 'block';
+      const isDS = m && (m.id==='deepseek'||m.id==='deepseek-pro');
+      const isMis = m && (m.id==='mistral-large'||m.id==='mistral-medium');
+      const generic = '<div style="margin-top:8px;font-size:11px;font-family:var(--mono);color:var(--text3);line-height:1.6;">Data residency depends on deployment and provider region, not model choice. EU/EEA residency and local/on-prem options are available for several models — verify with the provider before production use.</div>';
+      dnEl.innerHTML = isDS
+        ? '<div style="margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--amber);background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;">ℹ DeepSeek is a China-based provider — data residency is a known compliance consideration. Verify requirements before production use.</div>' + generic
+        : isMis
+        ? '<div style="margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--green);background:rgba(45,212,160,0.06);border:1px solid rgba(45,212,160,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;">ℹ Mistral is an EU-based provider offering EU/EEA data residency and open-weight models for local or on-prem deployment.</div>' + generic
+        : generic;
+    } else {
+      const dn = document.getElementById('data-residency-note');
+      if (dn) dn.style.display = 'none';
     }
     return;
   }
@@ -1289,12 +1294,15 @@ function updateModelSuitabilityNote() {
   // Classify model by price tier
   const tier = model.inP < 0.5 && model.id !== 'deepseek-pro' ? 'small' : 'frontier';
 
-  // Dataresidency note for DeepSeek models
+  // Dataresidency note
   const isDeepSeek = model.id === 'deepseek' || model.id === 'deepseek-pro';
   const isMistral = model.id === 'mistral-large' || model.id === 'mistral-medium';
-  const dataNote = isDeepSeek ? '<div style="margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--amber);background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;">ℹ Data processed outside EU/EEA. Verify compliance requirements before production use.</div>'
-    : isMistral ? '<div style="margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--green);background:rgba(45,212,160,0.06);border:1px solid rgba(45,212,160,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;">ℹ EU-based provider with GDPR-compliant data residency in the EU/EEA.</div>'
-    : '';
+  const genericResidency = '<div style="margin-top:8px;font-size:11px;font-family:var(--mono);color:var(--text3);line-height:1.6;">Data residency depends on deployment and provider region, not model choice. EU/EEA residency and local/on-prem options are available for several models — verify with the provider before production use.</div>';
+  const dataNote = isDeepSeek
+    ? '<div style="margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--amber);background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;">ℹ DeepSeek is a China-based provider — data residency is a known compliance consideration. Verify requirements before production use.</div>' + genericResidency
+    : isMistral
+    ? '<div style="margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--green);background:rgba(45,212,160,0.06);border:1px solid rgba(45,212,160,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;">ℹ Mistral is an EU-based provider offering EU/EEA data residency and open-weight models for local or on-prem deployment.</div>' + genericResidency
+    : genericResidency;
 
   let note = '', bg = '', color = '';
 
@@ -1308,31 +1316,27 @@ function updateModelSuitabilityNote() {
     color = 'var(--amber)';
   } else {
     el.style.display = 'none';
-    // Still show dataresidency note for DeepSeek even if no capability warning
     let dnEl = document.getElementById('data-residency-note');
     if (!dnEl) {
       dnEl = document.createElement('div');
       dnEl.id = 'data-residency-note';
-      dnEl.style.cssText = 'margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--amber);background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;';
       el.parentNode.insertBefore(dnEl, el.nextSibling);
     }
-    dnEl.style.display = isDeepSeek ? 'block' : 'none';
-    if (isDeepSeek) dnEl.textContent = 'ℹ Data processed outside EU/EEA. Verify compliance requirements before production use.';
+    dnEl.style.display = 'block';
+    dnEl.innerHTML = dataNote;
     return;
   }
 
   if (!note) {
     el.style.display = 'none';
-    // Still show dataresidency note if DeepSeek
     let dnEl = document.getElementById('data-residency-note');
     if (!dnEl) {
       dnEl = document.createElement('div');
       dnEl.id = 'data-residency-note';
-      dnEl.style.cssText = 'margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--amber);background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;';
       el.parentNode.insertBefore(dnEl, el.nextSibling);
     }
-    dnEl.style.display = isDeepSeek ? 'block' : 'none';
-    if (isDeepSeek) dnEl.textContent = 'ℹ Data processed outside EU/EEA. Verify compliance requirements before production use.';
+    dnEl.style.display = 'block';
+    dnEl.innerHTML = dataNote;
     return;
   }
 
@@ -1343,16 +1347,15 @@ function updateModelSuitabilityNote() {
   el.style.border = `1px solid ${color === '#f87171' ? 'rgba(248,113,113,0.2)' : 'rgba(245,158,11,0.2)'}`;
   el.textContent = note;
 
-  // Show/hide dataresidency note
+  // Show data residency note
   let dnEl = document.getElementById('data-residency-note');
   if (!dnEl) {
     dnEl = document.createElement('div');
     dnEl.id = 'data-residency-note';
-    dnEl.style.cssText = 'margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--amber);background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;';
     el.parentNode.insertBefore(dnEl, el.nextSibling);
   }
-  dnEl.style.display = isDeepSeek ? 'block' : 'none';
-  if (isDeepSeek) dnEl.textContent = 'ℹ Data processed outside EU/EEA. Verify compliance requirements before production use.';
+  dnEl.style.display = 'block';
+  dnEl.innerHTML = dataNote;
 }
 
 function setSensitivity(key, val, badgeId, formatter) {
@@ -1929,12 +1932,15 @@ function updateDataStatus() {
   const p = window._priceStatus;
   const r = window._rateStatus;
   const lines = [];
+  let updatedDate = '';
 
   if (p) {
     if (p.live === p.total) {
-      lines.push(`🟢 ${p.live} model prices live · Updated ${p.date}`);
+      lines.push(`🟢 ${p.live} model prices live`);
+      updatedDate = p.date;
     } else if (p.live > 0) {
-      lines.push(`🟡 ${p.live}/${p.total} model prices live · Updated ${p.date}`);
+      lines.push(`🟡 ${p.live}/${p.total} model prices live`);
+      updatedDate = p.date;
       if (p.unmatched && p.unmatched.length) {
         const names = p.unmatched.map(u => u.split(' (')[0]).join(', ');
         lines.push(`<span style="color:var(--amber);">Unavailable: ${names} — using static values</span>`);
@@ -1958,6 +1964,10 @@ function updateDataStatus() {
     }
   } else {
     lines.push('⏳ Loading exchange rates…');
+  }
+
+  if (updatedDate) {
+    lines.push(`<span style="color:var(--text3);opacity:0.7;">Updated ${updatedDate}</span>`);
   }
 
   // Update footer
