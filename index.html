@@ -1153,6 +1153,8 @@ const MODELS = [
   {id:'g-pro',    name:'Gemini Pro',    full:'Google Gemini 3.1 Pro',   inP:2.00,  outP:12.00, note:'$2.00 / $12.00 per 1M tokens',  badge:null,       orId:'google/gemini-3.1-pro-preview'},
   {id:'deepseek', name:'DeepSeek V4 Flash', full:'DeepSeek V4 Flash', inP:0.14, outP:0.28, note:'$0.14 / $0.28 per 1M tokens', badge:null, orId:'deepseek/deepseek-v4-flash'},
   {id:'deepseek-pro', name:'DeepSeek V4 Pro', full:'DeepSeek V4 Pro', inP:0.435, outP:0.87, note:'$0.435 / $0.87 per 1M tokens', badge:null, orId:'deepseek/deepseek-v4-pro'},
+  {id:'mistral-large', name:'Mistral Large 3', full:'Mistral Large 3', inP:2.00, outP:6.00, note:'$2.00 / $6.00 per 1M tokens · EU/EEA data residency', badge:'EU', orId:'mistralai/mistral-large-3'},
+  {id:'mistral-medium', name:'Mistral Medium 3', full:'Mistral Medium 3', inP:1.00, outP:3.00, note:'$1.00 / $3.00 per 1M tokens · EU/EEA data residency', badge:'EU', orId:'mistralai/mistral-medium-3'},
 ];
 
 async function fetchModelPrices() {
@@ -1289,7 +1291,10 @@ function updateModelSuitabilityNote() {
 
   // Dataresidency note for DeepSeek models
   const isDeepSeek = model.id === 'deepseek' || model.id === 'deepseek-pro';
-  const dataNote = isDeepSeek ? '<div style="margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--amber);background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;">ℹ Data processed outside EU/EEA. Verify compliance requirements before production use.</div>' : '';
+  const isMistral = model.id === 'mistral-large' || model.id === 'mistral-medium';
+  const dataNote = isDeepSeek ? '<div style="margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--amber);background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;">ℹ Data processed outside EU/EEA. Verify compliance requirements before production use.</div>'
+    : isMistral ? '<div style="margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--green);background:rgba(45,212,160,0.06);border:1px solid rgba(45,212,160,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;">ℹ EU-based provider with GDPR-compliant data residency in the EU/EEA.</div>'
+    : '';
 
   let note = '', bg = '', color = '';
 
@@ -2634,7 +2639,7 @@ function totalMonthly() {
 function update() {
   const model=sel.model ? MODELS.find(m=>m.id===sel.model) : null;
   if (!model) {
-    // No model selected yet — show placeholder
+    // No model selected yet — show placeholder and clear all sticky fields
     document.getElementById('m-monthly').textContent = cx(0);
     const perRunEl = document.getElementById('m-per-run');
     const perDayEl = document.getElementById('m-per-day');
@@ -2643,6 +2648,14 @@ function update() {
     const modelLabel = document.getElementById('m-model-label');
     if (modelLabel) modelLabel.textContent = 'Select a model in step 2';
     document.getElementById('m-monthly-sub') && (document.getElementById('m-monthly-sub').textContent = '');
+    // Clear remaining sticky fields so stale values don't persist after reset
+    const clearIds = ['m-users','m-everyday-runs','m-simple-runs','m-complex-runs','m-total-runs','m-baseline-label'];
+    clearIds.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '—'; });
+    const baselineEl0 = document.getElementById('m-baseline-label'); if (baselineEl0) baselineEl0.textContent = '';
+    ['m-retry-label','m-orch-label','m-ctx-label'].forEach(id => { const el = document.getElementById(id); if (el) { el.textContent = id==='m-retry-label'?'off':'1×'; el.style.color='var(--text3)'; } });
+    const batchEl0 = document.getElementById('m-batch-label'); if (batchEl0) { batchEl0.textContent='off'; batchEl0.style.color='var(--text3)'; }
+    const cacheEl0 = document.getElementById('m-cache-label'); if (cacheEl0) { cacheEl0.textContent='off'; cacheEl0.style.color='var(--text3)'; }
+    const devRow0 = document.getElementById('m-dev-row'); if (devRow0) devRow0.style.display='none';
     return;
   }
   let tIn=0,tOut=0,tInC=0,tOutC=0,tRuns=0,active=0,tTotal=0;
