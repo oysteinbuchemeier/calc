@@ -1275,8 +1275,11 @@ function updateModelSuitabilityNote() {
       dnEl.style.display = 'block';
       const isDS = m && (m.id==='deepseek'||m.id==='deepseek-pro');
       const isMis = m && (m.id==='mistral-large'||m.id==='mistral-medium');
+      const isFab = m && m.id==='fable';
       const generic = '<div style="margin-top:8px;font-size:11px;font-family:var(--mono);color:var(--text3);line-height:1.6;">Data residency depends on deployment and provider region, not model choice. EU/EEA residency and local/on-prem options are available for several models — verify with the provider before production use.</div>';
-      dnEl.innerHTML = isDS
+      dnEl.innerHTML = isFab
+        ? '<div style="margin-top:8px;font-size:12px;font-family:var(--mono);color:#f87171;background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;">⚠ Restricted to US customers under a US export-control directive (June 2026). Not available for use in Norway, the EU/EEA or for non-US nationals. Shown for cost modelling only.</div>' + generic
+        : isDS
         ? '<div style="margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--amber);background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;">ℹ DeepSeek is a China-based provider — data residency is a known compliance consideration. Verify requirements before production use.</div>' + generic
         : isMis
         ? '<div style="margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--green);background:rgba(45,212,160,0.06);border:1px solid rgba(45,212,160,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;">ℹ Mistral is an EU-based provider offering EU/EEA data residency and open-weight models for local or on-prem deployment.</div>' + generic
@@ -1297,8 +1300,12 @@ function updateModelSuitabilityNote() {
   // Dataresidency note
   const isDeepSeek = model.id === 'deepseek' || model.id === 'deepseek-pro';
   const isMistral = model.id === 'mistral-large' || model.id === 'mistral-medium';
+  const isFable = model.id === 'fable';
   const genericResidency = '<div style="margin-top:8px;font-size:11px;font-family:var(--mono);color:var(--text3);line-height:1.6;">Data residency depends on deployment and provider region, not model choice. EU/EEA residency and local/on-prem options are available for several models — verify with the provider before production use.</div>';
-  const dataNote = isDeepSeek
+  const fableRestriction = '<div style="margin-top:8px;font-size:12px;font-family:var(--mono);color:#f87171;background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;">⚠ Restricted to US customers under a US export-control directive (June 2026). Not available for use in Norway, the EU/EEA or for non-US nationals. Shown for cost modelling only.</div>';
+  const dataNote = isFable
+    ? fableRestriction + genericResidency
+    : isDeepSeek
     ? '<div style="margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--amber);background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;">ℹ DeepSeek is a China-based provider — data residency is a known compliance consideration. Verify requirements before production use.</div>' + genericResidency
     : isMistral
     ? '<div style="margin-top:8px;font-size:12px;font-family:var(--mono);color:var(--green);background:rgba(45,212,160,0.06);border:1px solid rgba(45,212,160,0.2);border-radius:6px;padding:8px 12px;line-height:1.6;">ℹ Mistral is an EU-based provider offering EU/EEA data residency and open-weight models for local or on-prem deployment.</div>' + genericResidency
