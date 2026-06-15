@@ -1410,9 +1410,9 @@ function setCacheLevel(val) {
     label.textContent='0% static';
   } else {
     const saving=Math.round(pct*0.9);
-    badge.textContent=`−${saving}% input cost`;
+    badge.textContent=`${pct}% static → −${saving}% input`;
     badge.style.background='rgba(45,212,160,0.15)'; badge.style.color='var(--green)';
-    desc.textContent=pct>=80?`${pct}% static — typical for RAG and document Q&A pipelines. Highly effective.`:pct>=40?`${pct}% static — moderate benefit. Common with a fixed system prompt.`:`${pct}% static — limited benefit at this level.`;
+    desc.textContent=pct>=80?`${pct}% static — typical for RAG and document Q&A pipelines. Cached input is priced at 10% of standard rate.`:pct>=40?`${pct}% static — moderate benefit. Common with a fixed system prompt. Cached input is priced at 10% of standard rate.`:`${pct}% static — limited benefit at this level. Cached input is priced at 10% of standard rate.`;
     label.textContent=`${pct}% static`;
   }
   update(); updateCompare();
