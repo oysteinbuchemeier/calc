@@ -890,6 +890,13 @@ footer a:hover{color:var(--text2)}
       </div>
 
 
+      <!-- GOVERNANCE & DEPLOYMENT -->
+      <div class="panel" id="governance-panel" style="display:none;">
+        <div class="panel-title">Governance & deployment</div>
+        <div style="font-size:12px;color:var(--text3);line-height:1.6;margin-bottom:12px;">Operating cost is only one dimension. A configuration can be cost-optimal while resting on a model that is regulatory exposed or outside EU jurisdiction — a cost that is visible, sitting on a governance constraint that is not.</div>
+        <div id="governance-body"></div>
+      </div>
+
       <!-- ARCHITECTURE SENSITIVITY -->
       <div class="panel" id="arch-sensitivity-panel" style="display:none;">
         <div class="panel-title">Sensitivity impact</div>
@@ -1120,7 +1127,7 @@ function goToStep(n) {
     document.getElementById('step-num-'+i).textContent = i<n ? '✓' : i;
   });
   if (n===2) { updateHybridRouting(); }
-  if (n===3) { updateConclusion(); updateROI(); updateSavings(); updateChart(); updateBridge(); updateVariance(); updateSystemSummary(); updateInterpretation(); updateTopDrivers(); updateArchSensitivity(); updateScenarioPanel(); }
+  if (n===3) { updateConclusion(); updateROI(); updateSavings(); updateChart(); updateBridge(); updateVariance(); updateSystemSummary(); updateInterpretation(); updateTopDrivers(); updateGovernance(); updateArchSensitivity(); updateScenarioPanel(); }
   updateConfigSummary();
   window.scrollTo({top:0, behavior:'smooth'});
 }
@@ -1143,18 +1150,18 @@ const TASKS = [
 ];
 
 const MODELS = [
-  {id:'haiku',    name:'Claude Haiku',  full:'Claude Haiku 4.5',        inP:1.00,  outP:5.00,  note:'$1.00 / $5.00 per 1M tokens', badge:null,     orId:'anthropic/claude-haiku-4.5'},
-  {id:'sonnet',   name:'Claude Sonnet', full:'Claude Sonnet 4.6',       inP:3.00,  outP:15.00, note:'$3.00 / $15.00 per 1M tokens', badge:null, orId:'anthropic/claude-sonnet-4.6'},
-  {id:'opus',     name:'Claude Opus',   full:'Claude Opus 4.8',         inP:5.00,  outP:25.00, note:'$5.00 / $25.00 per 1M tokens', badge:null, orId:'anthropic/claude-opus-4.8'},
-  {id:'fable',    name:'Claude Fable 5', full:'Claude Fable 5',         inP:10.00, outP:50.00, note:'$10.00 / $50.00 per 1M tokens', badge:'Mythos-class', orId:'anthropic/claude-fable-5'},
-  {id:'gpt55',    name:'GPT-5.5',       full:'OpenAI GPT-5.5',          inP:5.00,  outP:30.00, note:'$5.00 / $30.00 per 1M tokens',  badge:null,       orId:'openai/gpt-5.5'},
-  {id:'mini',     name:'GPT-4o mini',   full:'OpenAI GPT-4o mini',      inP:0.15,  outP:0.60,  note:'$0.15 / $0.60 per 1M tokens',   badge:null,       orId:'openai/gpt-4o-mini'},
-  {id:'g-flash',  name:'Gemini Flash',  full:'Google Gemini 2.5 Flash', inP:0.30,  outP:2.50,  note:'$0.30 / $2.50 per 1M tokens',   badge:null,       orId:'google/gemini-2.5-flash'},
-  {id:'g-pro',    name:'Gemini Pro',    full:'Google Gemini 3.1 Pro',   inP:2.00,  outP:12.00, note:'$2.00 / $12.00 per 1M tokens',  badge:null,       orId:'google/gemini-3.1-pro-preview'},
-  {id:'deepseek', name:'DeepSeek V4 Flash', full:'DeepSeek V4 Flash', inP:0.14, outP:0.28, note:'$0.14 / $0.28 per 1M tokens', badge:null, orId:'deepseek/deepseek-v4-flash'},
-  {id:'deepseek-pro', name:'DeepSeek V4 Pro', full:'DeepSeek V4 Pro', inP:0.435, outP:0.87, note:'$0.435 / $0.87 per 1M tokens', badge:null, orId:'deepseek/deepseek-v4-pro'},
-  {id:'mistral-large', name:'Mistral Large 3', full:'Mistral Large 3', inP:0.50, outP:1.50, note:'$0.50 / $1.50 per 1M tokens · EU/EEA data residency', badge:'EU', orId:'mistralai/mistral-large-2512'},
-  {id:'mistral-medium', name:'Mistral Medium 3.5', full:'Mistral Medium 3.5', inP:1.50, outP:7.50, note:'$1.50 / $7.50 per 1M tokens · EU/EEA data residency', badge:'EU', orId:'mistralai/mistral-medium-3-5'},
+  {id:'haiku',    name:'Claude Haiku',  full:'Claude Haiku 4.5',        inP:1.00,  outP:5.00,  note:'$1.00 / $5.00 per 1M tokens', badge:null,     orId:'anthropic/claude-haiku-4.5', gov:{jur:'United States', eu:'Available via cloud region', deploy:'API (AWS / Google Cloud EU regions)', exp:'None known'}},
+  {id:'sonnet',   name:'Claude Sonnet', full:'Claude Sonnet 4.6',       inP:3.00,  outP:15.00, note:'$3.00 / $15.00 per 1M tokens', badge:null, orId:'anthropic/claude-sonnet-4.6', gov:{jur:'United States', eu:'Available via cloud region', deploy:'API (AWS / Google Cloud EU regions)', exp:'None known'}},
+  {id:'opus',     name:'Claude Opus',   full:'Claude Opus 4.8',         inP:5.00,  outP:25.00, note:'$5.00 / $25.00 per 1M tokens', badge:null, orId:'anthropic/claude-opus-4.8', gov:{jur:'United States', eu:'Available via cloud region', deploy:'API (AWS / Google Cloud EU regions)', exp:'None known'}},
+  {id:'fable',    name:'Claude Fable 5', full:'Claude Fable 5',         inP:10.00, outP:50.00, note:'$10.00 / $50.00 per 1M tokens', badge:'Mythos-class', orId:'anthropic/claude-fable-5', gov:{jur:'United States', eu:'Not available', deploy:'API — US customers only', exp:'US export-controlled (June 2026)'}},
+  {id:'gpt55',    name:'GPT-5.5',       full:'OpenAI GPT-5.5',          inP:5.00,  outP:30.00, note:'$5.00 / $30.00 per 1M tokens',  badge:null,       orId:'openai/gpt-5.5', gov:{jur:'United States', eu:'Available via Azure EU region', deploy:'API only (no self-hosting)', exp:'None known'}},
+  {id:'mini',     name:'GPT-4o mini',   full:'OpenAI GPT-4o mini',      inP:0.15,  outP:0.60,  note:'$0.15 / $0.60 per 1M tokens',   badge:null,       orId:'openai/gpt-4o-mini', gov:{jur:'United States', eu:'Available via Azure EU region', deploy:'API only (no self-hosting)', exp:'None known'}},
+  {id:'g-flash',  name:'Gemini Flash',  full:'Google Gemini 2.5 Flash', inP:0.30,  outP:2.50,  note:'$0.30 / $2.50 per 1M tokens',   badge:null,       orId:'google/gemini-2.5-flash', gov:{jur:'United States', eu:'Available via Google Cloud EU region', deploy:'API only (no self-hosting)', exp:'None known'}},
+  {id:'g-pro',    name:'Gemini Pro',    full:'Google Gemini 3.1 Pro',   inP:2.00,  outP:12.00, note:'$2.00 / $12.00 per 1M tokens',  badge:null,       orId:'google/gemini-3.1-pro-preview', gov:{jur:'United States', eu:'Available via Google Cloud EU region', deploy:'API only (no self-hosting)', exp:'None known'}},
+  {id:'deepseek', name:'DeepSeek V4 Flash', full:'DeepSeek V4 Flash', inP:0.14, outP:0.28, note:'$0.14 / $0.28 per 1M tokens', badge:null, orId:'deepseek/deepseek-v4-flash', gov:{jur:'China', eu:'Self-hostable in EU (open-weight)', deploy:'API or self-hosted (open-weight)', exp:'Provider jurisdiction is a compliance consideration'}},
+  {id:'deepseek-pro', name:'DeepSeek V4 Pro', full:'DeepSeek V4 Pro', inP:0.435, outP:0.87, note:'$0.435 / $0.87 per 1M tokens', badge:null, orId:'deepseek/deepseek-v4-pro', gov:{jur:'China', eu:'Self-hostable in EU (open-weight)', deploy:'API or self-hosted (open-weight)', exp:'Provider jurisdiction is a compliance consideration'}},
+  {id:'mistral-large', name:'Mistral Large 3', full:'Mistral Large 3', inP:0.50, outP:1.50, note:'$0.50 / $1.50 per 1M tokens · EU/EEA data residency', badge:'EU', orId:'mistralai/mistral-large-2512', gov:{jur:'France (EU)', eu:'Available', deploy:'API or self-hosted (open-weight)', exp:'None known'}},
+  {id:'mistral-medium', name:'Mistral Medium 3.5', full:'Mistral Medium 3.5', inP:1.50, outP:7.50, note:'$1.50 / $7.50 per 1M tokens · EU/EEA data residency', badge:'EU', orId:'mistralai/mistral-medium-3-5', gov:{jur:'France (EU)', eu:'Available', deploy:'API or self-hosted (open-weight)', exp:'None known'}},
 ];
 
 async function fetchModelPrices() {
@@ -2154,6 +2161,26 @@ ${varHTML?`<section>
   <h2>Cost range — optimised to unoptimised</h2>
   ${varHTML}
 </section>`:''}
+
+${(()=>{
+  if(!model||!model.gov) return '';
+  const g = model.gov;
+  const exposed = g.exp !== 'None known';
+  const isExportControlled = g.exp.includes('export-control');
+  const euColor = g.eu==='Available'?'#1a7a5e':g.eu==='Not available'?'#e53e3e':'#1A2332';
+  const deployColor = g.deploy.includes('self-hosted')?'#1a7a5e':'#1A2332';
+  return `<section>
+  <h2>Governance & deployment</h2>
+  <div style="font-size:9pt;color:#888;line-height:1.6;margin-bottom:10pt;">Operating cost is only one dimension. A configuration can be cost-optimal while resting on a model that is regulatory exposed or outside EU jurisdiction — a cost that is visible, sitting on a governance constraint that is not.</div>
+  <table class="config-table">
+    <tr><td>Model</td><td style="color:#4a8a91">${model.full}</td></tr>
+    <tr><td>Provider jurisdiction</td><td>${g.jur}</td></tr>
+    <tr><td>EU/EEA data residency</td><td style="color:${euColor}">${g.eu}</td></tr>
+    <tr><td>Deployment</td><td style="color:${deployColor}">${g.deploy}</td></tr>
+  </table>
+  ${exposed?`<div style="margin-top:8pt;padding:10pt 14pt;background:${isExportControlled?'#fff5f5':'#fffbf0'};border:1px solid ${isExportControlled?'#e53e3e':'#f59e0b'};border-radius:4px;font-size:9pt;color:${isExportControlled?'#c53030':'#b45309'};line-height:1.6;">${isExportControlled?'⚠':'ℹ'} Regulatory exposure: ${g.exp}.</div>`:''}
+</section>`;
+})()}
 ${(()=>{
   const a = localStorage.getItem('scenarioA') ? JSON.parse(localStorage.getItem('scenarioA')) : null;
   const b = localStorage.getItem('scenarioB') ? JSON.parse(localStorage.getItem('scenarioB')) : null;
@@ -2198,6 +2225,8 @@ ${(()=>{
       ${row('Cache', a.cachePct+'%', b.cachePct+'%')}
       ${row('Batch processing', a.batch?'On':'Off', b.batch?'On':'Off')}
       ${row('Primary cost driver', driver(a), driver(b))}
+      ${(a.gov||b.gov)?row('Provider jurisdiction', a.gov?a.gov.jur:'—', b.gov?b.gov.jur:'—'):''}
+      ${(a.gov||b.gov)?row('EU/EEA data residency', a.gov?a.gov.eu:'—', b.gov?b.gov.eu:'—'):''}
     </tbody>
   </table>
   <div style="background:#f0f9f5;border:1px solid #b2dfdb;border-radius:4px;padding:10px 14px;margin-bottom:10px">
@@ -2217,6 +2246,41 @@ ${(()=>{
 </body></html>`);
     win.document.close();
   }, 400);
+}
+
+function updateGovernance() {
+  const panel = document.getElementById('governance-panel');
+  const body = document.getElementById('governance-body');
+  if (!panel || !body) return;
+  if (!sel.model) { panel.style.display = 'none'; return; }
+  const model = MODELS.find(m => m.id === sel.model);
+  if (!model || !model.gov) { panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+
+  const g = model.gov;
+  const exposed = g.exp !== 'None known';
+  const euAvail = g.eu === 'Available';
+  const selfHost = g.deploy.includes('self-hosted');
+
+  const rows = [
+    {label:'Provider jurisdiction', val:g.jur, warn:false},
+    {label:'EU/EEA data residency', val:g.eu, warn:g.eu==='Not available', good:euAvail},
+    {label:'Deployment', val:g.deploy, warn:false, good:selfHost},
+  ].map(r => {
+    const color = r.warn ? '#f87171' : r.good ? 'var(--green)' : 'var(--text2)';
+    return `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:7px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:12px;color:var(--text3);flex-shrink:0;">${r.label}</span>
+      <span style="font-size:12px;font-family:var(--mono);color:${color};text-align:right;">${r.val}</span>
+    </div>`;
+  }).join('');
+
+  // Regulatory exposure shown only when it actually exists
+  const isExportControlled = g.exp.includes('export-control');
+  const expWarning = exposed
+    ? `<div style="margin-top:10px;padding:10px 12px;background:${isExportControlled?'rgba(248,113,113,0.08)':'rgba(245,158,11,0.08)'};border:1px solid ${isExportControlled?'rgba(248,113,113,0.25)':'rgba(245,158,11,0.25)'};border-radius:var(--radius);font-size:12px;font-family:var(--mono);color:${isExportControlled?'#f87171':'var(--amber)'};line-height:1.6;">${isExportControlled?'⚠':'ℹ'} Regulatory exposure: ${g.exp}.</div>`
+    : '';
+
+  body.innerHTML = `<div style="font-size:13px;color:var(--accent2);font-family:var(--mono);margin-bottom:8px;">${model.full}</div>${rows}${expWarning}`;
 }
 
 function updateArchSensitivity() {
@@ -3042,6 +3106,7 @@ function saveScenario(slot) {
     retryRate: sel.retryRate||0,
     orchDepth: sel.orchDepth||1,
     ctxGrowth: sel.ctxGrowth||1,
+    gov: model && model.gov ? model.gov : null,
   };
   localStorage.setItem('scenario'+slot, JSON.stringify(data));
   updateScenarioPanel();
@@ -3144,6 +3209,8 @@ function updateScenarioPanel() {
         ${row('Cache', a.cachePct+'%', b.cachePct+'%')}
         ${row('Batch processing', a.batch?'On':'Off', b.batch?'On':'Off')}
         ${row('Primary cost driver', driver(a), driver(b))}
+        ${(a.gov||b.gov)?row('Provider jurisdiction', a.gov?a.gov.jur:'—', b.gov?b.gov.jur:'—'):''}
+        ${(a.gov||b.gov)?row('EU/EEA data residency', a.gov?a.gov.eu:'—', b.gov?b.gov.eu:'—'):''}
       </tbody>
     </table>
 
@@ -3258,7 +3325,7 @@ function loadExampleComparison() {
   const totalRuns = Object.values(exTasks).reduce((s,v)=>s+v,0);
 
   const everydayRunsCount = TASKS.filter(t=>!t.id.startsWith('agent')&&!['code','sql','rag','apidoc'].includes(t.id)).reduce((s,t)=>s+(exTasks[t.id]||0),0);
-  const base = { model: modelA.name, tasks: 10, totalRuns, users: 200, everydayRuns: everydayRunsCount, sizeKey: 'large', sizeLabel, mat, complexRuns: 600, simpleRuns: 300, routing: 'Single-model' };
+  const base = { model: modelA.name, tasks: 10, totalRuns, users: 200, everydayRuns: everydayRunsCount, sizeKey: 'large', sizeLabel, mat, complexRuns: 600, simpleRuns: 300, routing: 'Single-model', gov: modelA.gov||null };
 
   localStorage.setItem('scenarioA', JSON.stringify({...base, label: makeLabel(true,45,0,1,1), monthly: monthlyA, monthlyFmt: cx(monthlyA), batch: true, cachePct: 45, retryRate: 0, orchDepth: 1, ctxGrowth: 1}));
   localStorage.setItem('scenarioB', JSON.stringify({...base, label: makeLabel(false,0,0.20,2,2), monthly: monthlyB, monthlyFmt: cx(monthlyB), batch: false, cachePct: 0, retryRate: 0.20, orchDepth: 2, ctxGrowth: 2}));
