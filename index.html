@@ -1154,7 +1154,7 @@ const MODELS = [
   {id:'deepseek', name:'DeepSeek V4 Flash', full:'DeepSeek V4 Flash', inP:0.14, outP:0.28, note:'$0.14 / $0.28 per 1M tokens', badge:null, orId:'deepseek/deepseek-v4-flash'},
   {id:'deepseek-pro', name:'DeepSeek V4 Pro', full:'DeepSeek V4 Pro', inP:0.435, outP:0.87, note:'$0.435 / $0.87 per 1M tokens', badge:null, orId:'deepseek/deepseek-v4-pro'},
   {id:'mistral-large', name:'Mistral Large 3', full:'Mistral Large 3', inP:0.50, outP:1.50, note:'$0.50 / $1.50 per 1M tokens · EU/EEA data residency', badge:'EU', orId:'mistralai/mistral-large-2512'},
-  {id:'mistral-medium', name:'Mistral Medium 3.1', full:'Mistral Medium 3.1', inP:0.40, outP:2.00, note:'$0.40 / $2.00 per 1M tokens · EU/EEA data residency', badge:'EU', orId:'mistralai/mistral-medium-3.1'},
+  {id:'mistral-medium', name:'Mistral Medium 3.5', full:'Mistral Medium 3.5', inP:1.50, outP:7.50, note:'$1.50 / $7.50 per 1M tokens · EU/EEA data residency', badge:'EU', orId:'mistralai/mistral-medium-3-5'},
 ];
 
 async function fetchModelPrices() {
@@ -1295,7 +1295,9 @@ function updateModelSuitabilityNote() {
   if (!model) { el.style.display = 'none'; return; }
 
   // Classify model by price tier
-  const tier = model.inP < 0.5 && model.id !== 'deepseek-pro' ? 'small' : 'frontier';
+  // Small/fast models genuinely limited for agentic use — defined explicitly, not by price
+  const smallFastModels = ['mini', 'g-flash', 'deepseek'];
+  const tier = smallFastModels.includes(model.id) ? 'small' : 'frontier';
 
   // Dataresidency note
   const isDeepSeek = model.id === 'deepseek' || model.id === 'deepseek-pro';
