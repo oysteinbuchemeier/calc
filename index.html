@@ -1622,19 +1622,19 @@ function updateVariance() {
   // Low: batch=true, cache=80%
   const low = TASKS.reduce((s,t) => {
     const r = taskRuns[t.id]||0; if(!r) return s;
-    return s + calcCost(t, model, sel.ctx, true, 80).runCost * r * sel.days;
+    return s + calcCost(t, model, sel.ctx, true, 80, sel.retryRate, sel.orchDepth, sel.ctxGrowth).runCost * r * sel.days;
   }, 0);
 
-  // Mid: current batch+cache only, no sensitivity
+  // Mid: current settings incl. sensitivity (equals monthly total)
   const mid = TASKS.reduce((s,t) => {
     const r = taskRuns[t.id]||0; if(!r) return s;
-    return s + calcCost(t, model, sel.ctx, sel.batch, sel.cachePct, 0, 1, 1).runCost * r * sel.days;
+    return s + calcCost(t, model, sel.ctx, sel.batch, sel.cachePct, sel.retryRate, sel.orchDepth, sel.ctxGrowth).runCost * r * sel.days;
   }, 0);
 
   // High: batch=false, cache=0%
   const high = TASKS.reduce((s,t) => {
     const r = taskRuns[t.id]||0; if(!r) return s;
-    return s + calcCost(t, model, sel.ctx, false, 0).runCost * r * sel.days;
+    return s + calcCost(t, model, sel.ctx, false, 0, sel.retryRate, sel.orchDepth, sel.ctxGrowth).runCost * r * sel.days;
   }, 0);
 
   const barMax = high;
@@ -2161,7 +2161,7 @@ ${annualCapacity>0?`<section>
     <div class="ratio-statement"${warn?' style="background:#fff5f5;border-left-color:#e53e3e;color:#c53030;"':''}>1 ${currency.symbol} AI cost → ~${fr} ${currency.symbol} capacity value</div>
     ${warn?`<div style="margin-top:6pt;font-size:9pt;color:#c53030;line-height:1.6;">AI operating cost consumes ~${aiPct}% of the modelled capacity value. At this level, architecture and orchestration choices materially affect whether the system creates or consumes value.</div>`:''}`;
   })()}
-  <div style="margin-top:8pt;font-size:8pt;color:#888;line-height:1.6;">Assumes ${pct}% efficiency improvement across ${maxUsers} employees at ${cx(annualCostPerPerson)}/yr fully-loaded cost. Excludes implementation cost, integration work, governance and organisational adoption effort.</div>
+  <div style="margin-top:8pt;font-size:8pt;color:#888;line-height:1.6;">Assumes ${pct}% efficiency improvement across ${maxUsers} employees at ${cx(annualCostPerPerson)}/yr fully-loaded cost. The dFTE range reflects 70–100% realisation of the modelled capacity. Excludes implementation cost, integration work, governance and organisational adoption effort.</div>
 </section>`:''}
 
 ${varHTML?`<section>
@@ -2710,7 +2710,7 @@ function updateROI() {
       </div>
     </div>
     <div style="margin-top:10px;padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:6px;font-size:12px;color:var(--text3);line-height:1.7;">
-      Assumes <strong style="color:var(--text2)">${pct}% efficiency improvement</strong> across ${emp} affected employees at ${cx(annualCost/currency.rate)}/yr fully-loaded cost. Excludes implementation cost, integration work, governance, process redesign and organisational adoption effort.
+      Assumes <strong style="color:var(--text2)">${pct}% efficiency improvement</strong> across ${emp} affected employees at ${cx(annualCost/currency.rate)}/yr fully-loaded cost. The dFTE range reflects 70–100% realisation of the modelled capacity. Excludes implementation cost, integration work, governance, process redesign and organisational adoption effort.
     </div>`;
 }
 
