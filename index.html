@@ -1163,16 +1163,16 @@ const TASKS = [
 ];
 
 const MODELS = [
-  {id:'haiku',    name:'Claude Haiku',  full:'Claude Haiku 4.5',        inP:1.00,  outP:5.00,  note:'$1.00 / $5.00 per 1M tokens', badge:null,     orId:'anthropic/claude-haiku-4.5', gov:{jur:'United States', eu:'Available via cloud region', deploy:'API (AWS / Google Cloud EU regions)', exp:'None known'}},
-  {id:'sonnet',   name:'Claude Sonnet', full:'Claude Sonnet 4.6',       inP:3.00,  outP:15.00, note:'$3.00 / $15.00 per 1M tokens', badge:null, orId:'anthropic/claude-sonnet-4.6', gov:{jur:'United States', eu:'Available via cloud region', deploy:'API (AWS / Google Cloud EU regions)', exp:'None known'}},
-  {id:'sonnet5',  name:'Claude Sonnet 5', full:'Claude Sonnet 5',       inP:2.00,  outP:10.00, note:'$2.00 / $10.00 per 1M tokens', badge:null, orId:'anthropic/claude-sonnet-5', gov:{jur:'United States', eu:'Available via cloud region', deploy:'API (AWS / Google Cloud EU regions)', exp:'None known'}},
-  {id:'opus',     name:'Claude Opus',   full:'Claude Opus 4.8',         inP:5.00,  outP:25.00, note:'$5.00 / $25.00 per 1M tokens', badge:null, orId:'anthropic/claude-opus-4.8', gov:{jur:'United States', eu:'Available via cloud region', deploy:'API (AWS / Google Cloud EU regions)', exp:'None known'}},
-  {id:'fable',    name:'Claude Fable 5', full:'Claude Fable 5',         inP:10.00, outP:50.00, note:'$10.00 / $50.00 per 1M tokens', badge:'Mythos-class', orId:'anthropic/claude-fable-5', gov:{jur:'United States', eu:'Available via cloud region', deploy:'API (AWS / Google Cloud / Microsoft Foundry)', exp:'None known'}},
-  {id:'gpt55',    name:'GPT-5.5',       full:'OpenAI GPT-5.5',          inP:5.00,  outP:30.00, note:'$5.00 / $30.00 per 1M tokens',  badge:null,       orId:'openai/gpt-5.5', gov:{jur:'United States', eu:'Available via Azure EU region', deploy:'API only (no self-hosting)', exp:'None known'}},
-  {id:'mini',     name:'GPT-4o mini',   full:'OpenAI GPT-4o mini',      inP:0.15,  outP:0.60,  note:'$0.15 / $0.60 per 1M tokens',   badge:null,       orId:'openai/gpt-4o-mini', gov:{jur:'United States', eu:'Available via Azure EU region', deploy:'API only (no self-hosting)', exp:'None known'}},
-  {id:'g-flash',  name:'Gemini Flash',  full:'Google Gemini 2.5 Flash', inP:0.30,  outP:2.50,  note:'$0.30 / $2.50 per 1M tokens',   badge:null,       orId:'google/gemini-2.5-flash', gov:{jur:'United States', eu:'Available via Google Cloud EU region', deploy:'API only (no self-hosting)', exp:'None known'}},
-  {id:'g-pro',    name:'Gemini Pro',    full:'Google Gemini 3.1 Pro',   inP:2.00,  outP:12.00, note:'$2.00 / $12.00 per 1M tokens',  badge:null,       orId:'google/gemini-3.1-pro-preview', gov:{jur:'United States', eu:'Available via Google Cloud EU region', deploy:'API only (no self-hosting)', exp:'None known'}},
-  {id:'deepseek', name:'DeepSeek V4 Flash', full:'DeepSeek V4 Flash', inP:0.14, outP:0.28, note:'$0.14 / $0.28 per 1M tokens', badge:null, orId:'deepseek/deepseek-v4-flash', gov:{jur:'China', eu:'Self-hostable in EU (open-weight)', deploy:'API or self-hosted (open-weight)', exp:'Provider jurisdiction is a compliance consideration'}},
+  {id:'haiku', name:'Claude Haiku', full:'Claude Haiku 5.5', inP:0.1, outP:0.5, note:'$0.10 / $0.50 per 1M tokens', badge:null, orId:'anthropic/claude-haiku-5.5', gov:{jur:'United States', eu:'Available via cloud region', deploy:'API (AWS / Google Cloud EU regions)', exp:'None known'}},
+  {id:'sonnet', name:'Claude Sonnet', full:'Claude Sonnet 5.5', inP:2.0, outP:10.0, note:'$2.00 / $10.00 per 1M tokens', badge:null, orId:'anthropic/claude-sonnet-5.5', gov:{jur:'United States', eu:'Available via cloud region', deploy:'API (AWS / Google Cloud EU regions)', exp:'None known'}},
+  {id:'opus', name:'Claude Opus', full:'Claude Opus 5.5', inP:4.0, outP:20.0, note:'$4.00 / $20.00 per 1M tokens', badge:null, orId:'anthropic/claude-opus-5.5', gov:{jur:'United States', eu:'Available via cloud region', deploy:'API (AWS / Google Cloud EU regions)', exp:'None known'}},
+  {id:'fable', name:'Claude Fable', full:'Claude Fable 5.1', inP:10.0, outP:50.0, note:'$10.00 / $50.00 per 1M tokens', badge:'Mythos-class', orId:'anthropic/claude-fable-5.1', gov:{jur:'United States', eu:'Available via cloud region', deploy:'API (AWS / Google Cloud / Microsoft Foundry)', exp:'None known'}},
+  {id:'gpt6-astra', name:'GPT-6 Astra', full:'OpenAI GPT-6 Astra', inP:10.0, outP:50.0, note:'$10.00 / $50.00 per 1M tokens', badge:null, orId:'openai/gpt-6-astra', gov:{jur:'United States', eu:'Available via Azure EU region', deploy:'API only (no self-hosting)', exp:'None known'}},
+  {id:'gpt6-sol', name:'GPT-6.1 Sol', full:'OpenAI GPT-6.1 Sol', inP:2.0, outP:10.0, note:'$2.00 / $10.00 per 1M tokens', badge:null, orId:'openai/gpt-6.1-sol', gov:{jur:'United States', eu:'Available via Azure EU region', deploy:'API only (no self-hosting)', exp:'None known'}},
+  {id:'gpt6-luna', name:'GPT-6 Luna', full:'OpenAI GPT-6 Luna', inP:0.1, outP:0.5, note:'$0.10 / $0.50 per 1M tokens', badge:null, orId:'openai/gpt-6-luna', gov:{jur:'United States', eu:'Available via Azure EU region', deploy:'API only (no self-hosting)', exp:'None known'}},
+  {id:'g-argon', name:'Gemini Argon', full:'Google Gemini 4 Argon', inP:2.0, outP:10.0, note:'$2.00 / $10.00 per 1M tokens', badge:null, orId:'google/gemini-4-argon', gov:{jur:'United States', eu:'Available via Google Cloud EU region', deploy:'API only (no self-hosting)', exp:'None known'}},
+  {id:'g-flash', name:'Gemini Flash', full:'Google Gemini 3.8 Flash', inP:0.75, outP:3.75, note:'$0.75 / $3.75 per 1M tokens', badge:null, orId:'google/gemini-3.8-flash', gov:{jur:'United States', eu:'Available via Google Cloud EU region', deploy:'API only (no self-hosting)', exp:'None known'}},
+  {id:'deepseek', name:'DeepSeek V4.1 Flash', full:'DeepSeek V4.1 Flash', inP:0.15, outP:0.6, note:'$0.15 / $0.60 per 1M tokens', badge:null, orId:'deepseek/deepseek-v4.1-flash', gov:{jur:'China', eu:'Self-hostable in EU (open-weight)', deploy:'API or self-hosted (open-weight)', exp:'Provider jurisdiction is a compliance consideration'}},
   {id:'deepseek-pro', name:'DeepSeek V4 Pro', full:'DeepSeek V4 Pro', inP:0.435, outP:0.87, note:'$0.435 / $0.87 per 1M tokens', badge:null, orId:'deepseek/deepseek-v4-pro', gov:{jur:'China', eu:'Self-hostable in EU (open-weight)', deploy:'API or self-hosted (open-weight)', exp:'Provider jurisdiction is a compliance consideration'}},
   {id:'mistral-large', name:'Mistral Large 3', full:'Mistral Large 3', inP:0.50, outP:1.50, note:'$0.50 / $1.50 per 1M tokens · EU/EEA data residency', badge:'EU', orId:'mistralai/mistral-large-2512', gov:{jur:'France (EU)', eu:'Available', deploy:'API or self-hosted (open-weight)', exp:'None known'}},
   {id:'mistral-medium', name:'Mistral Medium 3.5', full:'Mistral Medium 3.5', inP:1.50, outP:7.50, note:'$1.50 / $7.50 per 1M tokens · EU/EEA data residency', badge:'EU', orId:'mistralai/mistral-medium-3-5', gov:{jur:'France (EU)', eu:'Available', deploy:'API or self-hosted (open-weight)', exp:'None known'}},
@@ -1314,7 +1314,7 @@ function updateModelSuitabilityNote() {
 
   // Classify model by price tier
   // Small/fast models genuinely limited for agentic use — defined explicitly, not by price
-  const smallFastModels = ['mini', 'g-flash', 'deepseek'];
+  const smallFastModels = ['gpt6-luna', 'g-flash', 'deepseek'];
   const tier = smallFastModels.includes(model.id) ? 'small' : 'frontier';
 
   // Dataresidency note
@@ -3248,7 +3248,7 @@ function updateScenarioPanel() {
 }
 
 function loadExampleComparison() {
-  const modelA = MODELS.find(m=>m.id==='gpt55');
+  const modelA = MODELS.find(m=>m.id==='gpt6-sol');
   if (!modelA) return;
 
   // Set up example tasks: 100–500 + all maturities
@@ -3285,7 +3285,7 @@ function loadExampleComparison() {
   });
 
   // Set model and Scenario B settings
-  sel.model = 'gpt55';
+  sel.model = 'gpt6-sol';
   sel.batch = false;
   sel.cachePct = 0;
   sel.retryRate = 0.20;
@@ -3296,7 +3296,7 @@ function loadExampleComparison() {
   const cmpA = document.getElementById('cmp-a');
   const cmpB = document.getElementById('cmp-b');
   if (cmpA) cmpA.value = 'sonnet';
-  if (cmpB) cmpB.value = 'mini';
+  if (cmpB) cmpB.value = 'gpt6-luna';
 
   // Update UI sliders
   const sr = document.getElementById('sl-retry'); if(sr) sr.value = 20;
