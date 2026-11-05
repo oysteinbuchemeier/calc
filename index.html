@@ -981,7 +981,7 @@ footer a:hover{color:var(--text2)}
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;display:flex;flex-direction:column;gap:6px;">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:12px;color:var(--text3);">Model</span>
-        <span style="font-size:12px;font-family:var(--mono);color:var(--accent2);" id="m-model-label">Claude Sonnet 4.6</span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--accent2);" id="m-model-label">Not selected</span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:12px;color:var(--text3);">Active AI users</span>
@@ -2173,7 +2173,6 @@ ${(()=>{
   if(!model||!model.gov) return '';
   const g = model.gov;
   const exposed = g.exp !== 'None known';
-  const isExportControlled = g.exp.includes('export-control');
   const euColor = g.eu==='Available'?'#1a7a5e':g.eu==='Not available'?'#e53e3e':'#1A2332';
   const deployColor = g.deploy.includes('self-hosted')?'#1a7a5e':'#1A2332';
   return `<section>
@@ -2185,7 +2184,7 @@ ${(()=>{
     <tr><td>EU/EEA data residency</td><td style="color:${euColor}">${g.eu}</td></tr>
     <tr><td>Deployment</td><td style="color:${deployColor}">${g.deploy}</td></tr>
   </table>
-  ${exposed?`<div style="margin-top:8pt;padding:10pt 14pt;background:${isExportControlled?'#fff5f5':'#fffbf0'};border:1px solid ${isExportControlled?'#e53e3e':'#f59e0b'};border-radius:4px;font-size:9pt;color:${isExportControlled?'#c53030':'#b45309'};line-height:1.6;">${isExportControlled?'⚠':'ℹ'} Regulatory exposure: ${g.exp}.</div>`:''}
+  ${exposed?`<div style="margin-top:8pt;padding:10pt 14pt;background:#fffbf0;border:1px solid #f59e0b;border-radius:4px;font-size:9pt;color:#b45309;line-height:1.6;">ℹ Regulatory exposure: ${g.exp}.</div>`:''}
 </section>`;
 })()}
 ${(()=>{
@@ -2282,9 +2281,8 @@ function updateGovernance() {
   }).join('');
 
   // Regulatory exposure shown only when it actually exists
-  const isExportControlled = g.exp.includes('export-control');
   const expWarning = exposed
-    ? `<div style="margin-top:10px;padding:10px 12px;background:${isExportControlled?'rgba(248,113,113,0.08)':'rgba(245,158,11,0.08)'};border:1px solid ${isExportControlled?'rgba(248,113,113,0.25)':'rgba(245,158,11,0.25)'};border-radius:var(--radius);font-size:12px;font-family:var(--mono);color:${isExportControlled?'#f87171':'var(--amber)'};line-height:1.6;">${isExportControlled?'⚠':'ℹ'} Regulatory exposure: ${g.exp}.</div>`
+    ? `<div style="margin-top:10px;padding:10px 12px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:var(--radius);font-size:12px;font-family:var(--mono);color:var(--amber);line-height:1.6;">ℹ Regulatory exposure: ${g.exp}.</div>`
     : '';
 
   body.innerHTML = `<div style="font-size:13px;color:var(--accent2);font-family:var(--mono);margin-bottom:8px;">${model.full}</div>${rows}${expWarning}`;
@@ -2544,27 +2542,25 @@ function updateChart() {
   // Baseline: no sensitivity, with batch/cache
   const baseMonthly = active.reduce((s,t) => s + calcCost(t, model, sel.ctx, sel.batch, sel.cachePct, 0, 1, 1).runCost * taskRuns[t.id] * sel.days, 0);
 
-  // Cost-weighted agent share — agent tasks are much more expensive per run
-  const agentCostTotal = active.filter(t=>t.id.startsWith('agent')).reduce((s,t) => s + calcCost(t, model, sel.ctx, sel.batch, sel.cachePct, 0, 1, 1).runCost * taskRuns[t.id] * sel.days, 0);
-  const agentShare = baseMonthly > 0 ? agentCostTotal / baseMonthly : 0;
+  // Month 1 = the same total as the sticky (full sensitivity via calcCost); split into agent / everyday
+  const costOf = t => calcCost(t, model, sel.ctx, sel.batch, sel.cachePct, sel.retryRate, sel.orchDepth, sel.ctxGrowth).runCost * taskRuns[t.id] * sel.days;
+  const agentNow = active.filter(t=>t.id.startsWith('agent')).reduce((s,t) => s + costOf(t), 0);
+  const everydayNow = active.filter(t=>!t.id.startsWith('agent')).reduce((s,t) => s + costOf(t), 0);
 
   // Controlled: baseline + volume growth only
   const controlled = Array.from({length:N}, (_,i) => baseMonthly * Math.pow(1+growthPct, i));
 
-  // With sensitivity: exponential compounding — each month adds orchestration/context complexity
+  // With sensitivity: starts at the sticky total; agent cost then compounds further each month
   const orch = sel.orchDepth||1;
   const ctx = sel.ctxGrowth||1;
   const retry = sel.retryRate||0;
+  const multAt = i => {
+    const exponent = 1 + i*0.02; // complexity compounds monthly
+    return Math.pow(orch, exponent) * Math.pow(ctx, exponent) * (1 + retry * (1 + i*0.1));
+  };
   const sensitivity = Array.from({length:N}, (_,i) => {
     const vol = Math.pow(1+growthPct, i);
-    const exponent = 1 + i*0.02; // complexity compounds monthly
-    const monthlyOrch = Math.pow(orch, exponent);
-    const monthlyCtx = Math.pow(ctx, exponent);
-    const monthlyRetry = 1 + retry * (1 + i*0.1);
-    const sensitivityMult = monthlyOrch * monthlyCtx * monthlyRetry;
-    const agentCost = baseMonthly * agentShare * sensitivityMult * vol;
-    const everydayCost = baseMonthly * (1-agentShare) * vol;
-    return agentCost + everydayCost;
+    return (agentNow * (multAt(i)/multAt(0)) + everydayNow) * vol;
   });
 
   // Capacity value
@@ -2572,7 +2568,7 @@ function updateChart() {
   const annualSalary = (parseFloat(document.getElementById('roi-rate')?.value)||0)/currency.rate;
   const effPct = (parseFloat(document.getElementById('roi-pct')?.value)||10)/100;
   const baseCapacity = annualSalary * maxUsers * effPct / 12;
-  const capacity = Array.from({length:N}, (_,i) => baseCapacity * (1 + i*0.08));
+  const capacity = Array.from({length:N}, (_,i) => baseCapacity * Math.pow(1+growthPct, i));
 
   // SVG
   const W = 540, H = 160, PL = 52, PR = 12, PT = 10, PB = 24;
@@ -2631,7 +2627,8 @@ function updateChart() {
     + '<span style="color:#f87171;">— Escalating orchestration dynamics</span>'
     + (baseCapacity > 0 ? '<span style="color:var(--green);">╌ Modelled capacity value</span>' : '')
     + '</div>'
-    + (insight ? '<div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:12px;line-height:1.8;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:var(--radius);border:1px solid var(--border);">'+insight+'</div>' : '');
+    + (insight ? '<div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:12px;line-height:1.8;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:var(--radius);border:1px solid var(--border);">'+insight+'</div>' : '')
+    + '<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:8px;line-height:1.6;">Month 1 equals the current monthly total. Volume and capacity grow at the selected rate. In the red line, agentic cost compounds a further 2% per month in orchestration and context, and retry exposure rises 10% per month.</div>';
 }
 
 function updateSmartCTA(monthlyCost,activeTasks) {
