@@ -479,10 +479,13 @@ footer a:hover{color:var(--text2)}
 
 <nav>
   <div class="nav-logo">BÜCHEMEIER <span>CONSULTING</span></div>
+  <div style="display:flex;align-items:center;gap:14px;">
+  <button class="currency-btn" onclick="openHowTo()" style="color:var(--accent2);border-color:var(--accent);">How to use</button>
   <div class="currency-row">
     <button class="currency-btn" onclick="setCurrency('USD','$')">USD</button>
     <button class="currency-btn" onclick="setCurrency('EUR','€')">EUR</button>
     <button class="currency-btn active" onclick="setCurrency('NOK','kr')">NOK</button>
+  </div>
   </div>
 </nav>
 
@@ -490,11 +493,6 @@ footer a:hover{color:var(--text2)}
   <div class="hero-eyebrow">AI Operating Cost Simulator</div>
   <h1>Simulate AI operating cost at scale.</h1>
   <p style="font-size:12px;color:var(--text3);margin-top:10px;font-family:var(--mono);">Simplified inference-based simulation<br>using configurable assumptions.</p>
-  <div style="margin:14px auto 0;font-size:12px;color:var(--text3);font-family:var(--mono);line-height:1.8;max-width:640px;text-align:center;">
-    <div><span style="color:var(--accent2);">1</span> &nbsp;Start from a preset: pick organisation size and AI maturity. Or reset and start blank.</div>
-    <div><span style="color:var(--accent2);">2</span> &nbsp;Adjust volumes, model and settings.</div>
-    <div><span style="color:var(--accent2);">3</span> &nbsp;Under Your estimate, save the current configuration as Scenario A or B. Change something and save again to compare.</div>
-  </div>
   <div style="margin-top:16px;">
     <button onclick="loadExampleComparison()" style="background:rgba(108,164,171,0.10);border:1px solid var(--accent2);border-radius:var(--radius);padding:10px 18px;font-size:13px;font-family:var(--mono);color:var(--accent2);cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(108,164,171,0.2)'" onmouseout="this.style.background='rgba(108,164,171,0.10)'">⚡ Try a predefined comparison — same workload, different architecture →</button>
   </div>
@@ -1093,6 +1091,30 @@ footer a:hover{color:var(--text2)}
 </footer>
 
 <!-- MODAL -->
+<div class="modal-overlay" id="howto-overlay" onclick="if(event.target===this)closeHowTo()">
+  <div class="modal" style="max-width:560px;">
+    <button class="modal-close" onclick="closeHowTo()">×</button>
+    <div class="modal-eyebrow">How to use</div>
+    <h2>Estimate what AI costs to <strong>operate</strong>.</h2>
+    <p class="modal-sub">Choose a starting point, adjust it to your situation, and compare architectures.</p>
+
+    <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Three ways to start</div>
+    <p class="modal-sub" style="margin-bottom:6px;"><strong style="color:var(--text);">Preset.</strong> In step 1, pick organisation size and AI maturity. Task volumes fill in automatically, and you can change any number afterwards.</p>
+    <p class="modal-sub" style="margin-bottom:6px;"><strong style="color:var(--text);">Predefined comparison.</strong> The ⚡ button on the front page loads the same workload under two architectures, so you can see what orchestration, retries and context growth do to cost.</p>
+    <p class="modal-sub" style="margin-bottom:1.25rem;"><strong style="color:var(--text);">Blank sheet.</strong> ↺ Reset in the right-hand panel clears everything.</p>
+
+    <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Then</div>
+    <p class="modal-sub" style="margin-bottom:6px;"><strong style="color:var(--text);">1 · Your use case.</strong> Set users and daily runs per task.</p>
+    <p class="modal-sub" style="margin-bottom:6px;"><strong style="color:var(--text);">2 · Choose a model.</strong> Prices are fetched live. Turn batch and prompt caching on or off, and set retry rate, orchestration depth and context growth.</p>
+    <p class="modal-sub" style="margin-bottom:1.25rem;"><strong style="color:var(--text);">3 · Your estimate.</strong> Monthly cost, modelled digital capacity (dFTE), and governance and deployment.</p>
+
+    <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Compare scenarios</div>
+    <p class="modal-sub" style="margin-bottom:1.25rem;">At the bottom of Your estimate, save the current configuration as Scenario A or B. Saving again overwrites that slot. Change the model, size or any setting, save the other slot, and the two are compared side by side.</p>
+
+    <p class="modal-sub" style="font-size:12px;color:var(--text3);margin-bottom:0;">A simplified, inference-based simulation using configurable assumptions. Not a quotation.</p>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">×</button>
@@ -3510,6 +3532,9 @@ function openModal() {
 }
 
 function closeModal(){document.getElementById('modal-overlay').classList.remove('open');document.body.style.overflow='';}
+function openHowTo(){document.getElementById('howto-overlay').classList.add('open');document.body.style.overflow='hidden';}
+function closeHowTo(){document.getElementById('howto-overlay').classList.remove('open');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeHowTo();});
 function closeModalOutside(e){if(e.target===document.getElementById('modal-overlay'))closeModal();}
 
 async function submitContact() {
