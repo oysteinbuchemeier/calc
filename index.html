@@ -3410,7 +3410,7 @@ fetchExchangeRates();
 fetchModelPrices();
 
 const EMAILJS_PUBLIC_KEY='w-kY387QsqMVyl64T';
-const EMAILJS_SERVICE_ID='service_m5irvcv';
+const EMAILJS_SERVICE_ID='service_373r0ks';
 const EMAILJS_TEMPLATE_ID='template_w2p05wi';
 const EMAILJS_CONTACT_TEMPLATE_ID='template_mryqvss';
 emailjs.init({publicKey:EMAILJS_PUBLIC_KEY});
@@ -3483,7 +3483,7 @@ async function sendEstimate() {
   try{
     await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,buildEstimateParams(email));
     fb.className='email-feedback ok';fb.textContent='✓ Estimate sent — check your inbox.';emailEl.value='';
-  }catch(err){fb.className='email-feedback err';fb.textContent='Could not send — check your EmailJS config.';}
+  }catch(err){fb.className='email-feedback err';console.error('EmailJS error',err);fb.textContent='Could not send'+(err&&(err.status||err.text)?' ('+[err.status,err.text].filter(Boolean).join(': ')+')':'')+' — check your EmailJS config.';}
   finally{btn.disabled=false;btn.textContent='Send ↗';}
 }
 
@@ -3514,7 +3514,7 @@ async function submitContact() {
     document.getElementById('modal-form-wrap').style.display='none';
     document.getElementById('modal-success').style.display='block';
   }catch(err){
-    fb.className='modal-feedback err';fb.textContent='Could not send — check your EmailJS config.';
+    console.error('EmailJS error',err);fb.className='modal-feedback err';fb.textContent='Could not send'+(err&&(err.status||err.text)?' ('+[err.status,err.text].filter(Boolean).join(': ')+')':'')+' — check your EmailJS config.';
     btn.disabled=false;btn.textContent='Send inquiry →';
   }
 }
