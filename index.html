@@ -2596,11 +2596,11 @@ function updateChart() {
   // Insight
   const lastS = sensitivity[11];
   const lastC = controlled[11];
-  const diff = lastC > 0 ? Math.round((lastS-lastC)/lastC*100) : 0;
+  const hasGap = lastC > 0 && Math.abs(lastS-lastC)/lastC > 0.005;
 
-  let insight = '';
-  if (diff > 0) {
-    insight += 'At month 12, uncontrolled workflow dynamics increase projected operating cost by +'+diff+'% — '+cx(lastS)+'/mo vs '+cx(lastC)+'/mo under controlled architectural conditions.';
+  let insight = 'Month 12: '+cx(lastS)+'/month.';
+  if (hasGap) {
+    insight += ' Without retries, orchestration and context growth: '+cx(lastC)+'/month.';
   }
   if (baseCapacity > 0) {
     const share = v => v < 0.1 ? (v*100).toFixed(1) : Math.round(v*100);
@@ -2610,16 +2610,17 @@ function updateChart() {
   el.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block;overflow:visible;">'
     + '<line x1="'+PL+'" y1="'+PT+'" x2="'+PL+'" y2="'+(PT+IH)+'" stroke="var(--border)" stroke-width="0.5"/>'
     + grid + yLabels + xLabels
-    + polyline(controlled, 'var(--accent2)')
-    + (diff > 0 ? polyline(sensitivity, '#f87171') : '')
+    + (hasGap ? polyline(controlled, 'var(--text3)', '4 3') : '')
+    + polyline(sensitivity, 'var(--accent2)')
     + '</svg>'
     + '<div style="display:flex;flex-wrap:wrap;gap:12px;font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:8px;">'
-    + '<span style="color:var(--accent2);">— Controlled architecture</span>'
-    + (diff > 0 ? '<span style="color:#f87171;">— Escalating orchestration dynamics</span>' : '')
+    + '<span style="color:var(--accent2);">— Expected cost</span>'
+    + (hasGap ? '<span>╌ Without retries, orchestration and context growth</span>' : '')
     + '</div>'
-    + (insight ? '<div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:12px;line-height:1.8;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:var(--radius);border:1px solid var(--border);">'+insight+'</div>' : '')
-    + '<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:8px;line-height:1.6;">Month 1 equals the current monthly total. Volume grows at the selected rate. In the red line, agentic cost compounds a further 2% per month in orchestration and context, and retry exposure rises 10% per month.</div>';
+    + '<div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:12px;line-height:1.8;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:var(--radius);border:1px solid var(--border);">'+insight+'</div>'
+    + '<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:8px;line-height:1.6;">Starts at your current monthly total and grows with usage at the selected rate.'+(hasGap ? ' With your sensitivity settings, agentic cost compounds a further 2% per month in orchestration and context, and retry exposure rises 10% per month.' : '')+'</div>';
 }
+
 
 function updateSmartCTA(monthlyCost,activeTasks) {
   // Smart CTA removed — Interpretation & next step panel handles closing
@@ -2644,8 +2645,8 @@ function updateReadiness() {
   if(hasAgents) signals.push({dot:'amber',text:'Agent workflows included. Multi-call cost pattern per trigger. Orchestration, error handling, observability not modelled.'});
   if(hasRAG) signals.push({dot:'accent',text:'RAG pattern included. Retrieval strategy and chunking: external cost and quality factors.'});
   if(avgInTok>10000) signals.push({dot:'accent',text:'High context volume (avg '+Math.round(avgInTok/1000)+'k tokens/run). Prompt caching: high leverage at this input size.'});
-  if(monthly>100000) signals.push({dot:'amber',text:'Cost sensitivity: high. Cost sensitivity: high — batch processing and caching are material levers.'});
-  else if(monthly>20000) signals.push({dot:'green',text:'Cost sensitivity: medium. Cost sensitivity: medium — optimisation levers available.'});
+  if(monthly>100000) signals.push({dot:'amber',text:'Cost sensitivity: high — batch processing and caching are material levers.'});
+  else if(monthly>20000) signals.push({dot:'green',text:'Cost sensitivity: medium — optimisation levers available.'});
   else signals.push({dot:'green',text:'Cost sensitivity: low — pilot-scale configuration.'});
   if(sel.cachePct>=50) signals.push({dot:'green',text:'Prompt caching: '+sel.cachePct+'% static context applied.'});
   if(sel.batch) signals.push({dot:'green',text:'Batch processing: enabled. 50% input cost reduction.'});
