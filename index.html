@@ -1540,7 +1540,7 @@ function applyPreset() {
     // Clear all tasks if no maturity selected
     if (activeSize && activeMaturities.size === 0) {
       TASKS.forEach(t => { taskVol[t.id]={employees:0,usesPerDay:1}; taskRuns[t.id]=0; });
-      renderTasks(); update(); updateCompare(); updateRecommendedModel();
+      renderTasks(); update(); updateCompare();
     }
     return;
   }
@@ -1588,42 +1588,11 @@ function applyPreset() {
       }
     }
   });
-  renderTasks(); update(); updateCompare(); updateRecommendedModel();
+  renderTasks(); update(); updateCompare();
 }
 
 function selectMaturity(id, e) { } // no-op — replaced by toggleMaturity
 function applySize(id, e) { selectSize(id, e); } // backwards compat
-
-function updateRecommendedModel() {
-  const panel=document.getElementById('rec-model-panel');
-  const active=TASKS.filter(t=>(taskRuns[t.id]||0)>0);
-  if(!active.length){panel.classList.remove('visible');return;}
-
-  // Price-only: find cheapest model by input price
-  const sorted = [...MODELS].sort((a,b) => a.inP - b.inP);
-  const cheapest = sorted[0];
-
-  const cheapestMonthly=TASKS.reduce((s,t)=>{const r=taskRuns[t.id]||0;if(!r)return s;return s+calcCost(t,cheapest,sel.ctx,sel.batch,sel.cachePct).runCost*r*sel.days;},0);
-  const curMonthly=totalMonthly();
-  const saving=curMonthly-cheapestMonthly;
-
-  document.getElementById('rec-model-name').textContent=cheapest.full;
-  document.getElementById('rec-model-reason').textContent='Lowest cost model available. Does not account for capability, quality or architectural fit.';
-
-  const savingEl=document.getElementById('rec-model-saving');
-  savingEl.style.color='var(--accent2)';
-  if (!sel.model) {
-    savingEl.textContent='';
-  } else if(cheapest.id===sel.model) {
-    savingEl.textContent='You\'re on the lowest cost model';
-    savingEl.style.color='var(--green)';
-  } else if(saving>0.01) {
-    savingEl.textContent=`Switching to ${cheapest.name} saves ${cx(saving)}/month`;
-  } else {
-    savingEl.textContent='Similar cost to current model';
-  }
-  panel.classList.add('visible');
-}
 
 function updateVariance() {
   const panel = document.getElementById('variance-panel');
@@ -2600,7 +2569,7 @@ function updateChart() {
   // SVG
   const W = 540, H = 160, PL = 52, PR = 12, PT = 10, PB = 24;
   const IW = W-PL-PR, IH = H-PT-PB;
-  const allVals = [...controlled, ...sensitivity, ...(baseCapacity>0 ? capacity : [])];
+  const allVals = [...controlled, ...sensitivity];
   const maxVal = Math.max(...allVals, 0.01);
 
   function toX(i) { return PL + (i/(N-1))*IW; }
@@ -2627,35 +2596,29 @@ function updateChart() {
   // Insight
   const lastS = sensitivity[11];
   const lastC = controlled[11];
-  const lastCap = baseCapacity > 0 ? capacity[11] : 0;
   const diff = lastC > 0 ? Math.round((lastS-lastC)/lastC*100) : 0;
-  const crossover = baseCapacity > 0 ? sensitivity.findIndex((s,i) => s > capacity[i]) : -1;
 
   let insight = '';
   if (diff > 0) {
     insight += 'At month 12, uncontrolled workflow dynamics increase projected operating cost by +'+diff+'% — '+cx(lastS)+'/mo vs '+cx(lastC)+'/mo under controlled architectural conditions.';
   }
   if (baseCapacity > 0) {
-    insight += ' Modelled capacity value at month 12: '+cx(lastCap)+'.';
-    if (crossover > 0) insight += ' Under escalating orchestration dynamics, projected operating cost growth may outpace the modelled operational value generated (month '+(crossover+1)+').';
-    else if (crossover === 0) insight += ' Under escalating orchestration dynamics, projected operating cost growth may outpace the modelled operational value generated from the outset.';
-    else insight += ' Under the current assumptions, AI operating cost remains below modelled capacity value throughout.';
+    const share = v => v < 0.1 ? (v*100).toFixed(1) : Math.round(v*100);
+    insight += ' AI operating cost as a share of modelled capacity value: '+share(sensitivity[0]/capacity[0])+'% in month 1 → '+share(sensitivity[11]/capacity[11])+'% in month 12.';
   }
 
   el.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block;overflow:visible;">'
     + '<line x1="'+PL+'" y1="'+PT+'" x2="'+PL+'" y2="'+(PT+IH)+'" stroke="var(--border)" stroke-width="0.5"/>'
     + grid + yLabels + xLabels
     + polyline(controlled, 'var(--accent2)')
-    + polyline(sensitivity, '#f87171')
-    + (baseCapacity > 0 ? polyline(capacity, 'var(--green)', '4 3') : '')
+    + (diff > 0 ? polyline(sensitivity, '#f87171') : '')
     + '</svg>'
     + '<div style="display:flex;flex-wrap:wrap;gap:12px;font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:8px;">'
     + '<span style="color:var(--accent2);">— Controlled architecture</span>'
-    + '<span style="color:#f87171;">— Escalating orchestration dynamics</span>'
-    + (baseCapacity > 0 ? '<span style="color:var(--green);">╌ Modelled capacity value</span>' : '')
+    + (diff > 0 ? '<span style="color:#f87171;">— Escalating orchestration dynamics</span>' : '')
     + '</div>'
     + (insight ? '<div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:12px;line-height:1.8;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:var(--radius);border:1px solid var(--border);">'+insight+'</div>' : '')
-    + '<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:8px;line-height:1.6;">Month 1 equals the current monthly total. Volume and capacity grow at the selected rate. In the red line, agentic cost compounds a further 2% per month in orchestration and context, and retry exposure rises 10% per month.</div>';
+    + '<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:8px;line-height:1.6;">Month 1 equals the current monthly total. Volume grows at the selected rate. In the red line, agentic cost compounds a further 2% per month in orchestration and context, and retry exposure rises 10% per month.</div>';
 }
 
 function updateSmartCTA(monthlyCost,activeTasks) {
@@ -2947,7 +2910,7 @@ function update() {
   updateROI();
   updateVariance();
   updateBridge();
-  updateRecommendedModel();
+ 
   updateChart();
   updateSmartCTA(monthly,active);
   updateReadiness();
