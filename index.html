@@ -1190,7 +1190,7 @@ const TASKS = [
 ];
 
 const MODELS = [
-  {id:'haiku', name:'Claude Haiku', full:'Claude Haiku 5.5', inP:0.1, outP:0.5, note:'$0.10 / $0.50 per 1M tokens', badge:null, orId:'anthropic/claude-haiku-5.5', gov:{jur:'United States', eu:'Available via cloud region', deploy:'API (AWS / Google Cloud EU regions)', exp:'None known'}},
+  {id:'haiku', priceNote:'Higher pricing above 100K input tokens per request is not modelled.', name:'Claude Haiku', full:'Claude Haiku 5.5', inP:0.1, outP:0.5, note:'$0.10 / $0.50 per 1M tokens', badge:null, orId:'anthropic/claude-haiku-5.5', gov:{jur:'United States', eu:'Available via cloud region', deploy:'API (AWS / Google Cloud EU regions)', exp:'None known'}},
   {id:'sonnet', name:'Claude Sonnet', full:'Claude Sonnet 5.5', inP:2.0, outP:10.0, note:'$2.00 / $10.00 per 1M tokens', badge:null, orId:'anthropic/claude-sonnet-5.5', gov:{jur:'United States', eu:'Available via cloud region', deploy:'API (AWS / Google Cloud EU regions)', exp:'None known'}},
   {id:'opus', name:'Claude Opus', full:'Claude Opus 5.5', inP:4.0, outP:20.0, note:'$4.00 / $20.00 per 1M tokens', badge:null, orId:'anthropic/claude-opus-5.5', gov:{jur:'United States', eu:'Available via cloud region', deploy:'API (AWS / Google Cloud EU regions)', exp:'None known'}},
   {id:'fable', name:'Claude Fable', full:'Claude Fable 5.1', inP:10.0, outP:50.0, note:'$10.00 / $50.00 per 1M tokens', badge:'Mythos-class', orId:'anthropic/claude-fable-5.1', gov:{jur:'United States', eu:'Available via cloud region', deploy:'API (AWS / Google Cloud / Microsoft Foundry)', exp:'None known'}},
@@ -3039,7 +3039,7 @@ function renderModels() {
     '<span style="color:#f87171;font-size:9px;">●</span> Highest cost &nbsp;·&nbsp; input price per 1M tokens';
 
   const m = sel.model ? MODELS.find(x=>x.id===sel.model) : null;
-  document.getElementById('model-desc').textContent = m ? m.full+' — '+m.note : 'Select a model above to see pricing details.';
+  document.getElementById('model-desc').textContent = m ? m.full+' — '+m.note+(m.priceNote ? ' · '+m.priceNote : '') : 'Select a model above to see pricing details.';
 }
 
 function buildScenarioURL() {
